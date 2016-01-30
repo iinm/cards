@@ -45,7 +45,7 @@
               <div class="nav-closer"><i class="fa fa-chevron-up"></i></div>
             </div>
             <div class="nav-annot-closer"><i class="fa fa-check"></i></div>
-            <div class="title">Title</div>
+            <div class="title">Cards</div>
             <input class="search-input" name="" type="text" placeholder="検索"/>
             <div class="annot-trigger-wrapper">
               <div class="annot-target-indicator">3</div>
@@ -94,12 +94,13 @@
       </div> <!-- .cards-editor -->
     </div> <!-- #cards -->
 
+    <!-- Templates -->
     <script id="tmpl-item" type="text/html">
       <div class="cards-item" id="{{_id}}">
         <div class="item-content">
-          <div class="item-title">{{title}}</div>
-          <div class="item-meta">{{meta}}</div>
-          <div class="item-body">{{body}}</div>
+          <p class="item-title">{{title}}</p>
+          <p class="item-meta">{{meta}}</p>
+          <p class="item-body">{{body}}</p>
         </div> <!-- .item-content -->
         <div class="item-check-trigger">
           <div class="item-checkbox"><i class="fa fa-square-o"></i></div>
@@ -108,6 +109,13 @@
           </div>
         </div> <!-- .item-check-trigger -->
         <div class="item-edit-trigger"><i class="fa fa-pencil"></i></div>
+      </div>
+    </script>
+
+    <script id="tmpl-nav-index" type="text/html">
+      <div class="nav-index">
+        <div class="nav-index-title">{{title}}</div>
+        <ul></ul>
       </div>
     </script>
 

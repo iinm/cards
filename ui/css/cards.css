@@ -40,7 +40,7 @@ strong {
 .cards-item {
   position: relative;
   margin: .5em auto;
-  height: 6em;
+  /*   height: 6em; */
   width: 100%;
   max-width: 45em;
   background: #F9F2E7;
@@ -50,26 +50,31 @@ strong {
 }
 
 .cards-item .item-content {
-  position: absolute;
-  top: .3em;
-  bottom: 0;
-  right: 2em;
-  left: .3em;
+  margin: .3em 2em .3em .4em;
 }
-
 .cards-item .item-content .item-title {
+  margin: 0;
   font-size: .95em;
   font-weight: bold;
+  white-space: nowrap;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .cards-item .item-content .item-meta {
+  margin: 0;
   font-size: .75em;
 }
 .cards-item .item-content .item-body {
-  font-size: .9em;
+  margin: 0;
+  font-size: .95em;
+  line-height: 1.3em;
+  max-height: calc(1.3em * 3);
+  overflow: hidden;
 }
 
 .cards-item.checked {
-  box-shadow: 0 0 .5em #40C0CB;
+  box-shadow: 0 0 .6em #40C0CB;
   /*   box-shadow: 0 0 .4em #00A8C6; */
 }
 
@@ -82,11 +87,9 @@ strong {
   background: inherit;
   cursor: pointer;
 }
-
 .cards-item .item-check-trigger {
   top: 0;
 }
-
 .cards-item .item-edit-trigger {
   bottom: 0;
   color: #999;

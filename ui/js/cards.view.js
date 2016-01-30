@@ -22,7 +22,7 @@ cards.view.item = (function() {
     var html, el, self = { state: { checked: false } }, toggleCheck;
 
     if (!config.tmpl) {
-      config.tmpl = document.getElementById(config.tmpl_id).innerText.trim();
+      config.tmpl = document.getElementById(config.tmpl_id).text.trim();
     }
 
     toggleCheck = function(event) {
