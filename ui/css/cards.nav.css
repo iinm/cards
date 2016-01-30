@@ -144,13 +144,15 @@
 
 .cards-nav-head .annot-trigger-wrapper {
   right: 0;
-  width: 0;
+  left: 100%;
+  width: 100%;
   overflow: hidden;
-  transition: width 250ms;
+  /*   transition: width 250ms; */
+  transition: left 250ms;
 }
 .cards-nav.annot-trigger-opened .cards-nav-head .annot-trigger-wrapper {
-  /*   width: calc(100% - 3em); */
-  width: 100%;
+  /*   width: 100%; */
+  left: 0;
 }
 
 .cards-nav-head .annot-target-indicator {
