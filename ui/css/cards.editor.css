@@ -1,0 +1,178 @@
+.cards-editor {
+  position: absolute;
+  bottom: 0;
+  left: .5em;
+  right: .5em;
+  height: 3em;
+  transition: height 250ms;
+  margin: 0 auto;
+  max-width: 45.5em;
+  background: #F9F2E7;
+  overflow-y: hidden;
+  z-index: 1;
+  box-shadow: 0 0 .3em #777;
+}
+
+.cards-editor-opened {
+  height: calc(100vh - 3.5em);  /* .cards-nav/height + a */
+}
+
+.cards-editor-head,
+.cards-editor-content,
+.cards-editor-control {
+  position: absolute;
+}
+
+.cards-editor-head {
+  top: 0;
+  right: 0;
+  /*   left: 0; */
+  width: 3em;
+  height: 3em;
+}
+
+.cards-editor-head .editor-trigger {
+  position: absolute;
+  right: 0;
+  height: 100%;
+  width: 3em;
+}
+
+.cards-editor-head .editor-opener,
+.cards-editor-head .editor-closer {
+  position: absolute;
+  width: 100%;
+  /*   border-radius: 50%; */
+  transition: height 250ms;
+  line-height: 3em;
+  text-align: center;
+  overflow: hidden;
+  color: #777;
+  /*   color: #aaa; */
+  cursor: pointer;
+}
+
+.cards-editor-head .editor-opener {
+  top: 0;
+  height: 100%;
+}
+.cards-editor-opened .cards-editor-head .editor-opener {
+  height: 0;
+}
+
+.cards-editor-head .editor-closer {
+  bottom: 0;
+  height: 0;
+}
+.cards-editor-opened .cards-editor-head .editor-closer {
+  height: 100%;
+}
+
+.cards-editor-content {
+  top: 1em;
+  left: 1em;
+  right: 1em;
+  bottom: none;
+  overflow-y: hidden;
+}
+
+.cards-editor-opened .cards-editor-content {
+  bottom: 3em;  /* control/height */
+  overflow-y: scroll;
+}
+
+.cards-editor-content .title-input,
+.cards-editor-content .body-input {
+  outline: none;
+  color: #555;
+}
+
+.cards-editor-content .title-input {
+  width: calc(100% - 2.5em);  /* trigger/width - content/margin - .5 */
+  min-height: 1.5em;  /* content/margin + ht/margin */
+  font-weight: bold;
+}
+
+.cards-editor-content .title-input[contentEditable]:empty:not(:focus):before{
+  content: attr(data-text);
+  color: #aaa;
+}
+
+.cards-editor-content .body-input {
+  width: 100%;
+  min-height: 2em;
+}
+
+.cards-editor-content hr {
+  margin: .1em 0 .3em;
+  border: .07em solid #888;
+  width: calc(100% - 2.5em);
+}
+
+.cards-editor-control {
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 0;
+  transition: height 250ms;
+  overflow: hidden;
+}
+
+.cards-editor-opened .cards-editor-control {
+  height: 3em;
+}
+
+.cards-editor-control .right-control {
+  position: absolute;
+  right: 0;
+  color: #777;
+}
+
+.cards-editor-control .left-control {
+  position: absolute;
+  left: 0;
+  margin-left: .5em;
+  color: #999;
+}
+
+.cards-editor-control li {
+  display: inline-block;
+  font-size: 1.2em;
+  width: calc(3em / 1.2);
+  height: calc(3em / 1.2);
+  text-align: center;
+  line-height: calc(3em / 1.2);
+  cursor: pointer;
+}
+/* 
+   .cards-editor-sub {
+   position: absolute;
+   top: 0;
+   bottom: 0;
+   left: 0;
+   width: 0;
+   transition: width 250ms;
+   background: #F9F2E7;
+   overflow: hidden;
+   box-shadow: 0 0 .3em #777;
+   }
+
+   .cards-editor-sub.opened {
+   width: 100%;
+   }
+
+   .cards-editor-sub .editor-sub-head {
+   position: absolute;
+   top: 0;
+   height: 3em;
+   width: 100%;
+   background: inherit;
+   }
+
+   .cards-editor-sub .editor-sub-content {
+   position: absolute;
+   top: 3em;
+   bottom: 0;
+   width: 100%;
+   background: inherit;
+   } */

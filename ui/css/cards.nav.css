@@ -1,0 +1,212 @@
+/* custom property Chrome 49+ (Feb 29th, 2016)
+:root {
+  --nav-head-color: #eee;
+}
+*/
+
+.cards-nav {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3em;
+  transition: height 250ms;
+  overflow: hidden;
+  background: #ccc;
+  z-index: 2;
+  box-shadow: 0 0 .3em #777;
+}
+
+.cards-nav.opened {
+  /* height: calc(100vh - 3em); */  /* .cards-editor/height */
+  height: 100vh;
+}
+
+.cards-nav-head-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3em;
+  background: #00A8C6;
+  z-index: 1;
+  box-shadow: 0 0 .3em #777;
+}
+
+.cards-nav-head,
+.cards-nav-content-wrapper
+{
+  position: absolute;
+  right: 0;
+  left: 0;
+  margin: 0 auto;
+  max-width: 45em;
+}
+
+.cards-nav-head {
+  height: 3em;  /* .cards-nav/height - margin-tb */
+  overflow: hidden;
+  background: inherit;
+}
+
+.cards-nav-head .nav-trigger,
+.cards-nav-head .title,
+.cards-nav-head .search-input,
+.cards-nav-head .nav-annot-closer,
+.cards-nav-head .annot-trigger-wrapper
+{
+  position: absolute;
+  height: 100%;
+  /*   background: #00A8C6; */
+  background: inherit;
+  color: #eee;
+}
+
+.cards-nav-head .search-input:placeholder-shown {
+  color: #ddd;
+}
+.cards-nav-head .search-input::-webkit-input-placeholder {
+  color: #ddd;
+}
+.cards-nav-head .search-input::-moz-placeholder {  /* firefox */
+  color: #ddd;
+  opacity: 1;
+}
+
+.cards-nav-head .nav-trigger,
+.cards-nav-head .nav-annot-closer {
+  left: 0;
+  width: 3em;
+  cursor: pointer;
+}
+
+.cards-nav-head .nav-opener,
+.cards-nav-head .nav-closer
+{
+  position: absolute;
+  width: 100%;
+  transition: height 250ms;
+  line-height: 3em;
+  text-align: center;
+  overflow: hidden;
+}
+.cards-nav-head .nav-opener {
+  bottom: 0;
+  height: 100%;
+}
+.cards-nav.opened .cards-nav-head .nav-opener {
+  height: 0;
+}
+.cards-nav-head .nav-closer {
+  top: 0;
+  height: 0;
+}
+.cards-nav.opened .cards-nav-head .nav-closer {
+  height: 100%;
+}
+
+.cards-nav-head .nav-annot-closer {
+  left: 0;
+  width: 0;
+  transition: width 250ms;
+  text-align: center;
+  line-height: 3em;
+  overflow: hidden;
+}
+.cards-nav.annot-opened .cards-nav-head .nav-annot-closer {
+  width: 3em;
+}
+
+.cards-nav-head .title {
+  left: 3em;  /* .index-trigger/width */
+  right: 0;
+  padding: 0 .5em;
+  font-size: 1em;
+  font-weight: bold;
+  line-height: 3em;
+  cursor: pointer;
+}
+
+.cards-nav-head .search-input {
+  transition: width 250ms;
+  right: 0;
+  width: 0;
+  border: 0;
+  padding: 0;
+  font-size: 1em;
+  outline: none;
+  /*   color: #444; */
+}
+.cards-nav.opened .cards-nav-head .search-input {
+  /*   padding: 0 .5em; */
+  width: calc(100% - 3.5em);
+}
+
+.cards-nav-head .annot-trigger-wrapper {
+  right: 0;
+  width: 0;
+  overflow: hidden;
+  transition: width 250ms;
+}
+.cards-nav.annot-trigger-opened .cards-nav-head .annot-trigger-wrapper {
+  /*   width: calc(100% - 3em); */
+  width: 100%;
+}
+
+.cards-nav-head .annot-target-indicator {
+  position: absolute;
+  top: .5em;
+  left: 1em;
+  min-width: 2em;
+  height: 2em;
+  /*   padding: 0 .5em; */
+  text-align: center;
+  line-height: 2.1em;
+  /*   border-radius: 50%; */
+  /*   background: rgba(238, 238, 238, 0.75); */
+  /*   color: #444; */
+  /*   box-shadow: 0 0 .5em #40c0cb; */
+  font-weight: bold;
+}
+
+.cards-nav-head .annot-trigger {
+  position: absolute;
+  right: .5em;
+  height: 100%;
+}
+
+.cards-nav-head .annot-trigger li {
+  display: inline-block;
+  font-size: 1.2em;
+  width: calc(3em / 1.2);
+  text-align: center;
+  line-height: calc(3em / 1.2);
+  cursor: pointer;
+}
+
+.cards-nav-content-wrapper {
+  top: 3em;  /* .cards-nav-head/height */
+  bottom: 0;
+  overflow-y: scroll;
+}
+
+.cards-nav-content,
+.cards-nav-annotator {
+  position: absolute;
+  left: 0;
+  height: 100%;
+  transition: width 250ms;
+}
+
+.cards-nav-content {
+  width: 100%; 
+  background: #bbb;
+}
+
+.cards-nav-annotator {
+  width: 0;
+  background: #aaa;
+}
+.cards-nav.annot-opened .cards-nav-annotator {
+  width: 100%;
+}

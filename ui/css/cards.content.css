@@ -1,0 +1,10 @@
+.cards-content {
+  position: absolute;
+  top: 3em;  /* .cards-nav/top */
+  bottom: 3em;
+  left: 0;
+  right: 0;
+  padding: 0 .6em;
+  /*   background: #ccc; */
+  overflow-y: scroll;
+}

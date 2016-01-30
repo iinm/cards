@@ -1,0 +1,95 @@
+/** Begin reset */
+* {
+  margin : 0;
+  padding : 0;
+  -webkit-box-sizing : border-box;
+  -moz-box-sizing    : border-box;
+  -box-sizing        : border-box;
+}
+h1,h2,h3,h4,h5,h6,p { margin-bottom : 6pt; }
+ol,ul,dl { list-style-position : inside; }
+/** End reset */    
+
+/** Begin standard selectors */
+body {
+  font : 16px Avenir, 'Helvetica neue', Helvetica, '游ゴシック', YuGothic, 'ヒラギノ角ゴ Pro W3', 'Hiragino Kaku Gothic Pro', メイリオ, Meiryo, 'ＭＳ Ｐゴシック', sans-serif;
+  color : #444;
+  background-color : #888;
+}
+a { text-decoration : none; }
+a:link, a:visited { color : inherit; }
+a:hover { text-decoration : underline; }
+
+strong {
+  font-weight : 800;
+  color       : #000;
+}
+/** End standard selectors */
+
+#cards {
+  font-size: 1.05em;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  overflow: hidden;
+  background: #ddd;
+}
+
+.cards-item {
+  position: relative;
+  margin: .5em auto;
+  padding: .5em;
+  height: 6em;
+  width: 100%;
+  max-width: 45em;
+  background: #F9F2E7;
+  box-shadow: 0 0 .1em #777;
+  transition: box-shadow 200ms;
+}
+
+.cards-item.checked {
+  box-shadow: 0 0 .5em #40C0CB;
+  /*   box-shadow: 0 0 .4em #00A8C6; */
+}
+
+.cards-item .item-check-trigger,
+.cards-item .item-edit-trigger {
+  position: absolute;
+  right: 0;
+  width: 2em;
+  height: 2em;
+  background: inherit;
+  cursor: pointer;
+}
+
+.cards-item .item-check-trigger {
+  top: 0;
+}
+
+.cards-item .item-edit-trigger {
+  bottom: 0;
+  color: #999;
+  line-height: 2em;
+  text-align: center;
+}
+
+.cards-item .item-checkbox,
+.cards-item .item-checkbox-checked {
+  position: absolute;
+  font-size: 1.3em;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  line-height: calc(2em / 1.3);
+  color: #999;
+  background: inherit;
+  overflow: hidden;
+}
+.cards-item .item-checkbox-checked {
+  height: 0;
+}
+.cards-item.checked .item-checkbox-checked {
+  height: 100%;
+}

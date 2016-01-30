@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Cards</title>
+
+    <!-- http://www.html5rocks.com/en/mobile/touch/ -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <!-- http://www.html5rocks.com/en/mobile/fullscreen/ -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/cards.css" type="text/css">
+    <link rel="stylesheet" href="css/cards.nav.css" type="text/css">
+    <link rel="stylesheet" href="css/cards.content.css" type="text/css">
+    <link rel="stylesheet" href="css/cards.editor.css" type="text/css">
+
+    <script type="text/javascript" src="js/cards.js"></script>
+    <script type="text/javascript" src="js/cards.view.js"></script>
+    <script type="text/javascript" src="js/cards.util.js"></script>
+    <script type="text/javascript" src="js/cards.shell.js"></script>
+    <script type="text/javascript" src="js/cards.nav.js"></script>
+    <script type="text/javascript" src="js/cards.content.js"></script>
+    <script type="text/javascript" src="js/cards.editor.js"></script>
+    <!-- for test -->
+    <script type="text/javascript" src="js/cards.test.js"></script>
+    <script type="text/javascript">
+     document.addEventListener('DOMContentLoaded', function(event) {
+       var container = document.getElementById('cards');
+       cards.init(container);
+     });
+    </script>
+
+  </head>
+
+  <body>
+    <div id="cards">
+      <div class="cards-nav">
+        <div class="cards-nav-head-wrapper">
+          <div class="cards-nav-head">
+            <div class="nav-trigger">
+              <div class="nav-opener"><i class="fa fa-bars"></i></div>
+              <div class="nav-closer"><i class="fa fa-chevron-up"></i></div>
+            </div>
+            <div class="nav-annot-closer"><i class="fa fa-check"></i></div>
+            <div class="title">Title</div>
+            <input class="search-input" name="" type="text" placeholder="検索"/>
+            <div class="annot-trigger-wrapper">
+              <div class="annot-target-indicator">3</div>
+              <ul class="annot-trigger">
+                <li><i class="fa fa-tag"></i></li>
+                <li><i class="fa fa-book"></i></li>
+                <li><i class="fa fa-random"></i></li>
+                <li><i class="fa fa-trash"></i></li>
+              </ul>
+            </div>
+          </div> <!-- .cards-nav-head -->
+        </div> <!-- .cards-nav-head-wrapper -->
+        <div class="cards-nav-content-wrapper">
+          <div class="cards-nav-content"></div>
+          <div class="cards-nav-annotator"></div>
+        </div>
+      </div> <!-- .cards-nav -->
+      <div class="cards-content"></div>
+      <div class="cards-editor">
+        <div class="cards-editor-content">
+          <div class="title-input" contenteditable="false" data-text="Title"></div>
+          <div class="cards-editor-meta"></div>
+          <hr/>
+          <div class="body-input" contenteditable="false"></div>
+        </div> <!-- .cards-editor-content -->
+        <div class="cards-editor-head">
+          <div class="editor-trigger">
+            <div class="editor-opener"><i class="fa fa-pencil"></i></div>
+            <div class="editor-closer"><i class="fa fa-chevron-down"></i></div>
+          </div>
+        </div> <!-- .cards-editor-head -->
+        <div class="cards-editor-control">
+          <ul class="left-control">
+            <li class="edit-tag"><i class="fa fa-tag"></i></li>
+            <li><i class="fa fa-book"></i></li>
+          </ul>
+          <ul class="right-control">
+            <!-- <li><i class="fa fa-floppy-o"></i></li> -->
+            <li><i class="fa fa-check"></i></li>
+          </ul>
+        </div> <!-- .cards-editor-control -->
+        <!-- <div class="cards-editor-sub">
+             <div class="editor-sub-head"></div>
+             <div class="editor-sub-content"></div>
+             </div> --> <!-- .cards-editor-sub -->
+      </div> <!-- .cards-editor -->
+    </div> <!-- #cards -->
+
+    <script id="tmpl-item" type="text/html">
+      <div class="cards-item">
+        <div class="item-check-trigger">
+          <div class="item-checkbox"><i class="fa fa-square-o"></i></div>
+          <div class="item-checkbox-checked">
+            <i class="fa fa-check-square-o"></i>
+          </div>
+        </div>
+        <div class="item-edit-trigger"><i class="fa fa-pencil"></i></div>
+      </div>
+    </script>
+
+  </body>
+
+</html>

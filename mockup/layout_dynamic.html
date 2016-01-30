@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+
+    <style>
+     /** Begin reset */
+     * {
+       margin : 0;
+       padding : 0;
+       -webkit-box-sizing : border-box;
+       -moz-box-sizing    : border-box;
+       -box-sizing        : border-box;
+     }
+     h1,h2,h3,h4,h5,h6,p { margin-bottom : 6pt; }
+     ol,ul,dl { list-style-position : inside; }
+     /** End reset */    
+
+     /** Begin standard selectors */
+     body {
+       font : 16px Avenir, 'Helvetica neue', Helvetica, '游ゴシック', YuGothic, 'ヒラギノ角ゴ Pro W3', 'Hiragino Kaku Gothic Pro', メイリオ, Meiryo, 'ＭＳ Ｐゴシック', sans-serif;
+       color : #444;
+       /*        background-color : #888; */
+       background-color : #ccc;
+     }
+     a { text-decoration : none; }
+     a:link, a:visited { color : inherit; }
+     a:hover { text-decoration : underline; }
+
+     strong {
+       font-weight : 800;
+       color       : #000;
+     }
+     /** End standard selectors */
+    </style>
+
+    <style>
+     .cards-head, .cards-head-namespace, .cards-head-trigger,
+     .cards-content, .cards-editor {
+       position: absolute;
+     }
+     .cards-head {
+       top: 0;
+       left: 0;
+       right: 0;
+       height: 3em;
+       padding: 0 .5em;
+       background: #774F38;
+       z-index: 2;
+       box-shadow: 0 0 .7em #777;
+     }
+     .cards-head-toolbar {
+       position: absolute;
+       right: .5em;
+       left: .5em;
+       margin: .5em auto;
+       max-width: 45em;
+       height: 2em;
+     }
+     .cards-head-toolbar .search-input {
+       position: absolute;
+       height: 100%;
+       left: 0;
+       right: 3em;
+     }
+     .cards-head-toolbar .search-input input {
+       height: 100%;
+       width: 100%;
+       font-size: 1em;
+       border: 0;
+       padding: 0 .5em;
+     }
+     .cards-head-toolbar .trigger {
+       position: absolute;
+       height: 100%;
+       right: 0;
+       width: 3em;
+       background: #ECE5CE;
+     }
+     .cards-content {
+       top: 3em;
+       bottom: 3em;
+       left: 0;
+       right: 0;
+       padding: 0 .6em;
+       /*        background: #ccc; */
+       overflow-y: scroll;
+     }
+     .cards-editor {
+       bottom: 0;
+       left: .5em;
+       right: .5em;
+       margin: auto;
+       height: 3em;
+       max-width: 50em;
+       background: #F1D4AF;
+       /*        background: #ECE5CE; */
+       overflow-y: hidden;
+       z-index: 1;
+       box-shadow: 0 0 .7em #777;
+     }
+
+     .cards-item {
+       margin: .6em auto;
+       padding: .6em;
+       height: 6em;
+       max-width: 45em;
+       background: #ECE5CE;
+       box-shadow: 0 0 .3em #777;
+     }
+
+    </style>
+
+  </head>
+
+  <body>
+    <div id="cards">
+      <div class="cards-head">
+        <div class="cards-head-toolbar" onclick="toggleHead();">
+          <div class="search-input">
+            <input name="" type="text" placeholder="検索"/>
+          </div>
+          <div class="trigger"></div>
+        </div>
+      </div>
+      <div class="cards-content" onclick="toggleEditor('closed');">
+        <!-- sample -->
+        <div class="cards-item"></div>
+        <div class="cards-item"></div>
+        <div class="cards-item"></div>
+        <div class="cards-item"></div>
+        <div class="cards-item"></div>
+        <div class="cards-item"></div>
+        <div class="cards-item"></div>
+        <div class="cards-item"></div>
+        <div class="cards-item"></div>
+        <div class="cards-item"></div>
+        <div class="cards-item"></div>
+        <div class="cards-item"></div>
+      </div>
+      <div class="cards-editor" contenteditable="true" onclick="toggleEditor();"></div>
+    </div>
+
+    <script type="text/javascript">
+     "use strict";
+     var container = document.getElementById('cards');
+
+     var dom = {
+       container: container,
+       head: container.getElementsByClassName('cards-head')[0],
+       content: container.getElementsByClassName('cards-content')[0],
+       editor: container.getElementsByClassName('cards-editor')[0]
+     };
+
+     var state = {
+       head: 'closed',
+       editor: 'closed',
+       px_per_em: 0
+     };
+     state.px_per_em = Number(getComputedStyle(container, "").fontSize.match(/(\d*(\.\d*)?)px/)[1]);
+
+     var toggleHead = function(head_state) {
+       if (head_state === state.head) {
+         return;
+       }
+       dom.head.style.transition = 'height 300ms';
+       dom.content.style.transition = 'top 300ms';
+       switch (state.head) {
+         case 'closed':
+           dom.head.style.height = '85vh';
+           state.head = 'opening';
+           setTimeout(function() {
+             state.head = 'opened';
+           }, 300);
+           break;
+
+         case 'opened':
+           dom.head.style.height = '3em';
+           state.head = 'closing';
+           setTimeout(function() {
+             state.head = 'closed';
+           }, 300);
+           break;
+
+         default:
+           //
+       }
+     };
+
+     var toggleEditor = function(editor_state) {
+       if (editor_state === state.editor) {
+         return;
+       }
+       dom.editor.style.transition = 'height 300ms';
+       dom.content.style.transition = 'bottom 300ms';
+       switch (state.editor) {
+         case 'closed':
+           if (state.head === 'opened') {
+             toggleHead('closed');
+           }
+           dom.editor.style.height = '70vh';
+           state.editor = 'opening';
+           setTimeout(function() {
+             state.editor = 'opened';
+           }, 300);
+           break;
+
+         case 'opened':
+           dom.editor.style.height = '3em';
+           state.editor = 'closing';
+           setTimeout(function() {
+             state.editor = 'closed';
+           }, 300);
+           break;
+
+         default:
+           //
+       }
+     };
+
+    </script>
+  </body>
+
+</html>
