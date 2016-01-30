@@ -95,13 +95,18 @@
     </div> <!-- #cards -->
 
     <script id="tmpl-item" type="text/html">
-      <div class="cards-item">
+      <div class="cards-item" id="{{_id}}">
+        <div class="item-content">
+          <div class="item-title">{{title}}</div>
+          <div class="item-meta">{{meta}}</div>
+          <div class="item-body">{{body}}</div>
+        </div> <!-- .item-content -->
         <div class="item-check-trigger">
           <div class="item-checkbox"><i class="fa fa-square-o"></i></div>
           <div class="item-checkbox-checked">
             <i class="fa fa-check-square-o"></i>
           </div>
-        </div>
+        </div> <!-- .item-check-trigger -->
         <div class="item-edit-trigger"><i class="fa fa-pencil"></i></div>
       </div>
     </script>

@@ -18,8 +18,8 @@ cards.view.item = (function() {
   create
   ;
 
-  create = function() {
-    var el, self = { state: { checked: false } }, toggleCheck;
+  create = function(params) {
+    var html, el, self = { state: { checked: false } }, toggleCheck;
 
     if (!config.tmpl) {
       config.tmpl = document.getElementById(config.tmpl_id).innerText.trim();
@@ -35,7 +35,8 @@ cards.view.item = (function() {
       }
     };
 
-    el = cards.util.createElement(config.tmpl);
+    html = cards.util.formatTmpl(config.tmpl, params.model);
+    el = cards.util.createElement(html);
     el.querySelector('.item-check-trigger').addEventListener(
       'click', toggleCheck, false
     );

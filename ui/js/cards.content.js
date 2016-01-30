@@ -13,14 +13,37 @@ cards.content = (function() {
     self_selector: '.cards-content'
   },
 
+  state = {
+    self: null
+  },
+
   dom = {},
 
-  init
+  init, render
   ;  // var
 
   init = function(container) {
     dom.self = container.querySelector(config.self_selector);
   }; 
 
-  return { init: init };
+  render = function(collection_id) {
+    var card_models;
+
+    if (collection_id === state.self) {
+      return;
+    }
+
+    card_models = cards.fake.getCards();
+    console.log('render');
+    dom.self.innerHTML = null;
+    card_models.forEach(function(model) {
+      dom.self.appendChild(cards.view.item.create({ model: model }));
+    });
+    state.self = collection_id;
+  };
+
+  return {
+    init: init,
+    render: render
+  };
 }());

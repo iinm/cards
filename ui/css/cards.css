@@ -40,13 +40,32 @@ strong {
 .cards-item {
   position: relative;
   margin: .5em auto;
-  padding: .5em;
   height: 6em;
   width: 100%;
   max-width: 45em;
   background: #F9F2E7;
   box-shadow: 0 0 .1em #777;
   transition: box-shadow 200ms;
+  overflow: hidden;
+}
+
+.cards-item .item-content {
+  position: absolute;
+  top: .3em;
+  bottom: 0;
+  right: 2em;
+  left: .3em;
+}
+
+.cards-item .item-content .item-title {
+  font-size: .95em;
+  font-weight: bold;
+}
+.cards-item .item-content .item-meta {
+  font-size: .75em;
+}
+.cards-item .item-content .item-body {
+  font-size: .9em;
 }
 
 .cards-item.checked {

@@ -48,6 +48,9 @@ cards.shell = (function() {
     console.log(anchor_map);
 
     // validate
+    if (!anchor_map.content) {
+      anchor_map.content = 'all';
+    }
     if (['opened', 'closed'].indexOf(anchor_map.nav) === -1) {
       valid = false;
       anchor_map.nav = 'closed';
@@ -63,6 +66,7 @@ cards.shell = (function() {
     }
 
     cards.nav.setNavState(anchor_map.nav);
+    cards.content.render();
     cards.editor.setEditorState(anchor_map.editor);
 
     // update

@@ -12,6 +12,7 @@ cards.util = (function() {
   cloneObj, updateObj, cloneUpdateObj,
   createElements, appendChildren, createElement,
   getPxPerEm,
+  formatTmpl,
   makeAnchorMap, setAnchor
   ;
 
@@ -60,6 +61,16 @@ cards.util = (function() {
     return getComputedStyle(el, "").fontSize.match(/(\d*(\.\d*)?)px/)[1];
   };
 
+  formatTmpl = function(tmpl, kvs) {
+    var key;
+    for (key in kvs) {
+      if (kvs.hasOwnProperty(key)) {
+        tmpl = tmpl.replace('{{' + key + '}}', kvs[key]);
+      }
+    }
+    return tmpl;
+  };
+
   makeAnchorMap = function() {
     var anchor_map = {};
     window.location.hash.substring(1).split('&').forEach(function(key_value) {
@@ -90,6 +101,7 @@ cards.util = (function() {
     appendChildren: appendChildren,
     createElement: createElement,
     getPxPerEm: getPxPerEm,
+    formatTmpl: formatTmpl,
 
     makeAnchorMap: makeAnchorMap,
     setAnchor: setAnchor
