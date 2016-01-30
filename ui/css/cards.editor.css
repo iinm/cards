@@ -103,10 +103,10 @@
   min-height: 2em;
 }
 
-.cards-editor-content hr {
-  margin: .1em 0 .3em;
-  border: .07em solid #888;
+.cards-editor-content .cards-editor-meta {
   width: calc(100% - 2.5em);
+  border-bottom: .1em solid #888;
+  margin-bottom: .5em;
 }
 
 .cards-editor-control {
