@@ -4,6 +4,7 @@
   regexp : true, sloppy  : true, vars     : false,
   white  : true
 */
+/*global cards */
 
 cards.test = (function () {
   "use strict";
