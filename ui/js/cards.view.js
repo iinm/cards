@@ -6,7 +6,7 @@
 */
 /*global cards */
 
-cards.view = {};
+cards.view = (function() { return {}; }());
 
 cards.view.item = (function() {
   "use strict";

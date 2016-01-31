@@ -8,7 +8,7 @@
 
 cards.test = (function () {
   "use strict";
-  var toggleAnnot;
+  var toggleAnnot, onModelChange;
 
   toggleAnnot = function(state) {
     var nav = document.querySelector('.cards-nav');
@@ -25,8 +25,25 @@ cards.test = (function () {
       //
     }
   };
+
+  onModelChange = function() {
+    var card = cards.model.card.create({ title: 'タイトル', _id: 'card_00' });
+    console.log('-- model created');
+    console.log('title: ' + card.get('title'));
+    console.log('id: ' + card.get('_id'));
+
+    card.on('change', function() { console.log('-- model changed!'); });
+    card.set({ title: '新しいタイトル' });
+    console.log('title: ' + card.get('title'));
+
+    card.on('body:change', function() { console.log('-- body changed!'); });
+    card.set({ body: '内容' });
+    console.log('body: ' + card.get('body'));
+    card.set({ body: '内容' });
+  };
  
   return {
-    toggleAnnot: toggleAnnot
+    toggleAnnot: toggleAnnot,
+    onModelChange: onModelChange
   };
 }());
