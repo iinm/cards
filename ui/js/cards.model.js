@@ -7,14 +7,14 @@
 /*global cards */
 
 cards.model = (function() {
-  var createModel;
+  var createModel, createCollection;
 
   createModel = function(data_tmpl) {
     var create;
     create = function(data) {
       var
       config = { on_change: [], on_change_key: {}, on_destroy: [] },
-      get, set, destroy,
+      get, set, destroy,  // fetch, save
       on, off
       ;
       data = cards.util.cloneUpdateObj(data_tmpl, data);
@@ -82,10 +82,49 @@ cards.model = (function() {
     return { create: create };
   };
 
-  return { createModel: createModel };
+  createCollection = function() {
+    var create;
+    create = function() {
+      var
+      models = {}, model_ids = [],
+      add, remove, get, at  // fetch, create
+      ;
+
+      get = function(id) {
+        return models[id];
+      };
+
+      at = function(index) {
+        return models[model_ids[index]];
+      };
+
+      add = function(model) {
+        models[model.id] = model;
+        model_ids.push(model.id);
+      };
+
+      remove = function(id) {
+        if (models.hasOwnProperty(id)) {
+          delete models[id];
+          model_ids.splice(model_ids.indexOf(id), 1);
+        }
+      };
+      return {
+        add: add, remove: remove,
+        get: get, at: at
+      };
+    };
+    return { create: create };
+  };
+
+  return {
+    createModel: createModel,
+    createColleciton: createCollection
+  };
 }());
 
 
+// cards.model.card = cards.model.createModel({});
 cards.model.card = (function() {
   var
   data_tmpl = {
