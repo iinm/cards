@@ -12,7 +12,8 @@ cards.nav = (function() {
   config = {
     self_selector: '.cards-nav',
     set_nav_anchor: null,
-    tmpl_index: null
+    tmpl_index: null,
+    index: null
   },
 
   state = {
@@ -63,6 +64,11 @@ cards.nav = (function() {
     // template
     config.tmpl_index = document.getElementById('tmpl-nav-index').text.trim();
     renderIndex();
+
+    // test
+    console.log(config.index);
+    console.log(config.index.at(0).get('name'));
+    console.log(config.index.at(0).get('id'));
   };
 
   renderIndex = function() {

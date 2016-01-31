@@ -32,7 +32,7 @@ cards.shell = (function() {
   setNavAnchor = function(nav_state) {
     changeAnchorPart({
       nav: nav_state.self,
-      nav_q: nav_state.search_input
+      q: nav_state.search_input
     });
   };
 
@@ -75,7 +75,12 @@ cards.shell = (function() {
   };
 
   init = function(container) {
-    cards.nav.configure({ set_nav_anchor: setNavAnchor });
+    cards.model.init();
+
+    cards.nav.configure({
+      set_nav_anchor: setNavAnchor,
+      index: cards.model.getIndex()
+    });
     cards.nav.init(container);
     cards.content.init(container);
     cards.editor.configure({ set_editor_anchor: setEditorAnchor });

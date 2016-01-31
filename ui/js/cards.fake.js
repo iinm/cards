@@ -8,7 +8,20 @@
 
 cards.fake = (function() {
   "use strict";
-  var getTagList, getNoteList, getCards;
+  var getTagList, getNoteList, getCards, getCollections;
+
+  getCollections = function() {
+    var collections = [];
+    getTagList().forEach(function(tag) {
+      tag.type = 'tag';
+      collections.push(tag);
+    });
+    getNoteList().forEach(function(note) {
+      note.type = 'note';
+      collections.push(note);
+    });
+    return collections;
+  };
 
   getTagList = function() {
     return [
@@ -95,6 +108,7 @@ cards.fake = (function() {
   return {
     getTagList: getTagList,
     getNoteList: getNoteList,
-    getCards: getCards
+    getCards: getCards,
+    getCollections: getCollections
   };
 }());
