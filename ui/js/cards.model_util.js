@@ -87,34 +87,44 @@ cards.model_util = (function() {
     //create = function() {
     var
     config = { model: model, on: {} },
-    data = { models: {}, model_ids: []},
-    add, remove, get, at, create,  // fetch
+    data = { instances: {}, instance_ids: [] },
+    get, at, len, each,
+    add, remove, create,  // fetch
     on, off
     ;
 
     get = function(id) {
-      return data.models[id];
+      return data.instances[id];
     };
 
     at = function(index) {
-      return data.models[data.model_ids[index]];
+      return data.instances[data.instance_ids[index]];
     };
 
-    add = function(model) {
-      data.models[model.id] = model;
-      data.model_ids.push(model.id);
+    len = function() { return data.instance_ids.length; };
+
+    each = function(f) {
+      data.instance_ids.forEach(function(id) {
+        f(data.instances[id]);
+      });
+    };
+
+    add = function(instance) {
+      data.instances[instance.get('id')] = instance;
+      data.instance_ids.push(instance.get('id'));
       if (config.on['add']) {
-        config.on['add'].forEach(function(f) { f(model); });
+        config.on['add'].forEach(function(f) { f(instance); });
       }
     };
 
     remove = function(id) {
-      if (data.models.hasOwnProperty(id)) {
-        delete data.models[id];
-        data.model_ids.splice(data.model_ids.indexOf(id), 1);
+      var instance = get(id);
+      if (data.instances.hasOwnProperty(id)) {
+        delete data.instances[id];
+        data.instance_ids.splice(data.instance_ids.indexOf(id), 1);
       }
       if (config.on['remove']) {
-        config.on['remove'].forEach(function(f) { f(model); });
+        config.on['remove'].forEach(function(f) { f(instance); });
       }
     };
 
@@ -137,9 +147,8 @@ cards.model_util = (function() {
     };
 
     return {
-      add: add, remove: remove,
-      create: create,
-      get: get, at: at,
+      get: get, at: at, len: len, each: each,
+      add: add, remove: remove, create: create,
       on: on, off: off
     };
     //};

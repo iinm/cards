@@ -66,9 +66,13 @@ cards.nav = (function() {
     renderIndex();
 
     // test
-    console.log(config.index);
-    console.log(config.index.at(0).get('name'));
-    console.log(config.index.at(0).get('id'));
+    //for (var i = 0; i < config.index.len(); i++) {
+    //  var instance = config.index.at(i);
+    //config.index.each(function(instance) {
+    //  console.log('-- ' + instance.get('id'));
+    //  console.log(instance.get('name'));
+    //  console.log(instance.get('type'));
+    //});
   };
 
   renderIndex = function() {

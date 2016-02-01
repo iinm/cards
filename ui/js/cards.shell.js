@@ -82,6 +82,7 @@ cards.shell = (function() {
       index: cards.model.getIndex()
     });
     cards.nav.init(container);
+
     cards.content.init(container);
     cards.editor.configure({ set_editor_anchor: setEditorAnchor });
     cards.editor.init(container);
