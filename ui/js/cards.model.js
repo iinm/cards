@@ -40,6 +40,7 @@ cards.model = (function() {
 
   return {
     init: init,
+    models: models,
     getIndex: getIndex
   };
 }());

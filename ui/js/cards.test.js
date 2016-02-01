@@ -27,7 +27,7 @@ cards.test = (function () {
   };
 
   onModelChange = function() {
-    var card = cards.model.card.create({ title: 'タイトル', _id: 'card_00' });
+    var card = cards.model.models.card.create({ title: 'タイトル', _id: 'card_00' });
     console.log('-- model created');
     console.log('title: ' + card.get('title'));
     console.log('id: ' + card.get('_id'));
