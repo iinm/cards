@@ -8,7 +8,7 @@
 
 cards.view = (function() {
   "use strict";
-  var index_item, index;
+  var index_item, index, card;
 
   index_item = (function() {
     var
@@ -24,13 +24,23 @@ cards.view = (function() {
       }
       
       self.render = function() {
+        var icon_html;
+        switch (model.get('type')) {
+        case 'tag':
+          icon_html = '<i class="fa fa-tag"></i>';
+          break;
+        case 'note':
+          icon_html = '<i class="fa fa-book"></i>';
+          break;
+        case 'special:all':
+          icon_html = '<i class="fa fa-circle-o"></i>';
+          break;
+        default:
+          //
+        }
         self.el = cards.util.createElement(
           cards.util.formatTmpl(config.tmpl, {
-            id: model.get('id'), name: model.get('name'),
-            icon: (
-              (model.get('type') === 'tag')
-                ? '<i class="fa fa-tag"></i>' : '<i class="fa fa-book"></i>'
-            )
+            id: model.get('id'), name: model.get('name'), icon: icon_html
           })
         );
         return self;
@@ -65,33 +75,42 @@ cards.view = (function() {
       self.render = function() {
         self.el = document.createElement('div');
 
+        // special index
+        dom.special_sec = cards.util.createElement(
+          cards.util.formatTmpl(config.tmpl_sec, { title: 'Special' })
+        );
+        dom.special_sec.classList.add('special');
+        self.el.appendChild(dom.special_sec);
+        dom.special_sec.appendChild(
+          index_item.create(index.get('special:all')).render().el
+        );
+
         index.each(function(coll) {
           switch (coll.get('type')) {
           case 'tag':
-            if (!dom.tag_sec_el) {
-              dom.tag_sec_el = cards.util.createElement(
+            if (!dom.tag_sec) {
+              dom.tag_sec = cards.util.createElement(
                 cards.util.formatTmpl(config.tmpl_sec, { title: 'Tags' })
               );
-              self.el.appendChild(dom.tag_sec_el);
+              self.el.appendChild(dom.tag_sec);
             }
-            dom.tag_sec_el.appendChild(index_item.create(coll).render().el);
+            dom.tag_sec.appendChild(index_item.create(coll).render().el);
             break;
 
           case 'note':
-            if (!dom.note_sec_el) {
-              dom.note_sec_el = cards.util.createElement(
+            if (!dom.note_sec) {
+              dom.note_sec = cards.util.createElement(
                 cards.util.formatTmpl(config.tmpl_sec, { title: 'Notes' })
               );
-              self.el.appendChild(dom.note_sec_el);
+              self.el.appendChild(dom.note_sec);
             }
-            dom.note_sec_el.appendChild(index_item.create(coll).render().el);
+            dom.note_sec.appendChild(index_item.create(coll).render().el);
             break;
 
           default:
             //
           }
         });
-        console.log(self);
 
         return self;
       };
@@ -101,45 +120,59 @@ cards.view = (function() {
 
     return { create: create };
   }());  // index
-  
-  return { index: index, index_item: index_item };
-}());
 
+  card = (function() {
+    var
+    config = {
+      tmpl_id: 'tmpl-item',
+      tmpl: null
+    },
+    create
+    ;
 
-cards.view.item = (function() {
-  "use strict";
-  var
-  config = {
-    tmpl_id: 'tmpl-item',
-    tmpl: null
-  },
-  create
-  ;
+    create = function(model) {
+      var
+      self = { el: null, render: null },
+      state = { checked: false },
+      toggleCheck
+      ;
 
-  create = function(params) {
-    var html, el, self = { state: { checked: false } }, toggleCheck;
-
-    if (!config.tmpl) {
-      config.tmpl = document.getElementById(config.tmpl_id).text.trim();
-    }
-
-    toggleCheck = function(event) {
-      if (!self.state.checked) {
-        el.classList.add('checked');
-        self.state.checked = true;
-      } else {
-        el.classList.remove('checked');
-        self.state.checked = false;
+      if (!config.tmpl) {
+        config.tmpl = document.getElementById(config.tmpl_id).text.trim();
       }
+
+      self.render = function() {
+        self.el = cards.util.createElement(
+          cards.util.formatTmpl(config.tmpl, {
+            id: model.get('id'),
+            title: model.get('title'),
+            body: model.get('body')
+          })
+        );
+        self.el.querySelector('.item-check-trigger').addEventListener(
+          'click', toggleCheck, false
+        );
+        return self;
+      };
+
+      toggleCheck = function(event) {
+        if (!state.checked) {
+          self.el.classList.add('checked');
+          state.checked = true;
+        } else {
+          self.el.classList.remove('checked');
+          state.checked = false;
+        }
+      };
+
+      return self;
     };
 
-    html = cards.util.formatTmpl(config.tmpl, params.model);
-    el = cards.util.createElement(html);
-    el.querySelector('.item-check-trigger').addEventListener(
-      'click', toggleCheck, false
-    );
-    return el;
+    return { create: create };
+  }());  // card
+  
+  return {
+    index: index, index_item: index_item,
+    card: card
   };
-
-  return { create: create };
 }());

@@ -28,10 +28,22 @@ cards.model = (function() {
   ;
 
   init = function() {
+    var coll_all;
+    // create coll
     data.index = cards.model_util.createCollection(models.coll);
+    data.index.add(models.coll.create({
+      id: 'special:all', type: 'special:all', name: 'Cards'
+    }));
     cards.fake.getCollections().forEach(function(coll) {
       data.index.add(models.coll.create(coll));
     });
+
+    // create and cards
+    coll_all = cards.model_util.createCollection(models.card);
+    cards.fake.getCards().forEach(function(data) {
+      coll_all.create(data);
+    });
+    data.index.get('special:all').set({ cards: coll_all });
   };
 
   getIndex = function() {

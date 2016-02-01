@@ -223,6 +223,10 @@
   box-shadow: 0 0 .1em #777;
 }
 
+.cards-nav-content .nav-index.special .nav-index-title {
+  display: none;
+}
+
 .cards-nav-content .nav-index li {
   display: block;
   height: 2.5em;

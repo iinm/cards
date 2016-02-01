@@ -14,36 +14,38 @@ cards.content = (function() {
   },
 
   state = {
-    self: null
+    self: null,
+    coll: null  // cards.model/models.coll
   },
 
   dom = {},
 
-  init, render
+  init, setColl, render
   ;  // var
 
   init = function(container) {
     dom.self = container.querySelector(config.self_selector);
   }; 
 
-  render = function(collection_id) {
-    var card_models;
-
-    if (collection_id === state.self) {
+  setColl = function(coll) {
+    if (coll.get('id') === state.self) {
       return;
     }
+    state.coll = coll;
+    state.self = coll.get('id');
+    render();
+  };
 
-    card_models = cards.fake.getCards();
-    console.log('render');
+  render = function() {
     dom.self.innerHTML = null;
-    card_models.forEach(function(model) {
-      dom.self.appendChild(cards.view.item.create({ model: model }));
+    state.coll.get('cards').each(function(model) {
+      dom.self.appendChild(cards.view.card.create(model).render().el);
     });
-    state.self = collection_id;
   };
 
   return {
     init: init,
+    setColl: setColl,
     render: render
   };
 }());

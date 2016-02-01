@@ -66,7 +66,6 @@ cards.shell = (function() {
     }
 
     cards.nav.setNavState(anchor_map.nav);
-    cards.content.render();
     cards.editor.setEditorState(anchor_map.editor);
 
     // update
@@ -75,15 +74,17 @@ cards.shell = (function() {
   };
 
   init = function(container) {
-    cards.model.init();
+    var index;
 
-    cards.nav.configure({
-      set_nav_anchor: setNavAnchor,
-      index: cards.model.getIndex()
-    });
+    cards.model.init();
+    index = cards.model.getIndex();
+
+    cards.nav.configure({ set_nav_anchor: setNavAnchor, index: index });
     cards.nav.init(container);
 
     cards.content.init(container);
+    cards.content.setColl(index.get('special:all'));
+
     cards.editor.configure({ set_editor_anchor: setEditorAnchor });
     cards.editor.init(container);
 
