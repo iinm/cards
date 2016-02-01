@@ -12,8 +12,7 @@ cards.nav = (function() {
   config = {
     self_selector: '.cards-nav',
     set_nav_anchor: null,
-    tmpl_index: null,
-    index: null
+    index: null  // collection of cards.model/models.coll
   },
 
   state = {
@@ -61,8 +60,6 @@ cards.nav = (function() {
     //  dom.self.classList.remove('annot-opened');
     //}, false);
 
-    // template
-    config.tmpl_index = document.getElementById('tmpl-nav-index').text.trim();
     renderIndex();
 
     // test
@@ -76,47 +73,8 @@ cards.nav = (function() {
   };
 
   renderIndex = function() {
-    var tag_index_el, note_index_el, tag_list, note_list;
-
-    // get list
-    tag_list = cards.fake.getTagList();
-    note_list = cards.fake.getNoteList();
-
-    // init
     dom.content.innerHTML = null;
-
-    // notes
-    // TODO: sort by created date
-    note_index_el = cards.util.createElement(
-      cards.util.formatTmpl(config.tmpl_index, { title: 'Notes'})
-    );
-    note_list.forEach(function(note) {
-      note_index_el.appendChild(
-        cards.util.createElement(
-          cards.util.formatTmpl(
-            '<li><i class="fa fa-book"></i>&nbsp; {{name}}</li>', note
-          )
-        )
-      );
-    });
-    // tags
-    // TODO: sort by num. of cards
-    tag_index_el = cards.util.createElement(
-      cards.util.formatTmpl(config.tmpl_index, { title: 'Tags'})
-    );
-    tag_list.forEach(function(tag) {
-      tag_index_el.appendChild(
-        cards.util.createElement(
-          cards.util.formatTmpl(
-            '<li><i class="fa fa-tag"></i>&nbsp; {{name}}</li>', tag
-          )
-        )
-      );
-    });
-
-    // render
-    dom.content.appendChild(note_index_el);
-    dom.content.appendChild(tag_index_el);
+    dom.content.appendChild(cards.view.index.create(config.index).render().el);
   };
 
   onClickToggleNav = function(event) {
