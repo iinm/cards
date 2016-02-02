@@ -108,11 +108,15 @@ cards.nav = (function() {
     switch (nav_state) {
     case 'index':
       dom.self.classList.remove('annot-opened');
+      dom.content.style.display = 'block';
       dom.self.classList.add('opened');
       state.self = 'index';
       break;
 
     case 'annot':
+      if (!dom.self.classList.contains('opened')) {
+        dom.content.style.display = 'none';
+      }
       dom.self.classList.add('opened', 'annot-opened');
       state.self = 'annot';
       break;

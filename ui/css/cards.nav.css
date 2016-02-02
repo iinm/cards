@@ -10,7 +10,7 @@
   left: 0;
   right: 0;
   height: 3em;
-  transition: height 250ms;
+  transition: height 300ms;
   overflow: hidden;
   /*   background: #EAE4DD; */
   background: #ddd;
@@ -198,7 +198,7 @@
   position: absolute;
   left: 0;
   height: 100%;
-  transition: width 250ms;
+  transition: width 300ms;
   overflow: scroll;
 }
 
