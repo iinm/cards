@@ -24,7 +24,7 @@ cards.model = (function() {
     })
   },
   data = { index: null },
-  init, getIndex
+  init, getIndex, createCard
   ;
 
   init = function() {
@@ -50,9 +50,14 @@ cards.model = (function() {
     return data.index;
   };
 
+  createCard = function(data) {
+    return models.card.create(data);
+  };
+
   return {
     init: init,
     models: models,
-    getIndex: getIndex
+    getIndex: getIndex,
+    createCard: createCard
   };
 }());

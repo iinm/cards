@@ -8,7 +8,7 @@
 
 cards.view = (function() {
   "use strict";
-  var index_item, index, card;
+  var index_item, index, annot_index, card;
 
   index_item = (function() {
     var
@@ -121,6 +121,86 @@ cards.view = (function() {
     return { create: create };
   }());  // index
 
+  annot_index = (function() {
+    var
+    config = {
+      tmpl_sec_id: 'tmpl-nav-index-sec', tmpl_sec: null
+    },
+    create
+    ;
+
+    create = function(index) {
+      var
+      self = { el: null, render: null, setState: null },
+      state = { target: [] },
+      dom = { tag_sec: null, note_sec: null }
+      ;
+
+      if (!config.tmpl) {
+        config.tmpl_sec = (
+          document.getElementById(config.tmpl_sec_id).text.trim()
+        );
+      }
+
+      self.render = function() {
+        self.el = document.createElement('div');
+
+        index.each(function(coll) {
+          switch (coll.get('type')) {
+          case 'tag':
+            if (!dom.tag_sec) {
+              dom.tag_sec = cards.util.createElement(
+                cards.util.formatTmpl(config.tmpl_sec, { title: 'Add Tags' })
+              );
+              self.el.appendChild(dom.tag_sec);
+            }
+            dom.tag_sec.appendChild(index_item.create(coll).render().el);
+            break;
+
+          case 'note':
+            if (!dom.note_sec) {
+              dom.note_sec = cards.util.createElement(
+                cards.util.formatTmpl(
+                  config.tmpl_sec, { title: 'Append to Notes' }
+                )
+              );
+              self.el.appendChild(dom.note_sec);
+            }
+            dom.note_sec.appendChild(index_item.create(coll).render().el);
+            break;
+
+          default:
+            //
+          }
+        });
+
+        return self;
+      };
+
+      self.setState = function(card_array, annot_type) {
+        // TODO
+        state.target = card_array;
+
+        switch (annot_type) {
+        case 'tag':
+          dom.note_sec.style.display = 'none';
+          dom.tag_sec.style.display = 'block';
+          break;
+        case 'note':
+          dom.tag_sec.style.display = 'none';
+          dom.note_sec.style.display = 'block';
+          break;
+        default:
+          //
+        }
+      };
+      
+      return self;
+    };
+
+    return { create: create };
+  }());  // annot_index
+
   card = (function() {
     var
     config = {
@@ -173,6 +253,7 @@ cards.view = (function() {
   
   return {
     index: index, index_item: index_item,
+    annot_index: annot_index,
     card: card
   };
 }());

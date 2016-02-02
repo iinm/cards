@@ -17,15 +17,16 @@ cards.nav = (function() {
 
   state = {
     self: 'closed',
-    search_box: 'closed',
     search_input: ''
   },
 
   dom = {},
+  view = {},
 
   init, configure, setDomMap,
   renderIndex,
-  setNavState, onClickToggleNav
+  setNavState, onClickToggleNav,
+  annotate
   ;  // var
 
   setDomMap = function(container) {
@@ -51,16 +52,21 @@ cards.nav = (function() {
     dom.title.addEventListener('click', function(event) {
       event.preventDefault();
       config.set_nav_anchor(
-        cards.util.cloneUpdateObj(state, { self: 'opened' })
+        cards.util.cloneUpdateObj(state, { self: 'index' })
       );
     }, false);
 
-    //dom.annot_closer.addEventListener('click', function(event) {
-    //  event.preventDefault();
-    //  dom.self.classList.remove('annot-opened');
-    //}, false);
+    dom.annot_closer.addEventListener('click', function(event) {
+      event.preventDefault();
+      config.set_nav_anchor(
+        cards.util.cloneUpdateObj(state, { self: 'closed' })
+      );
+    }, false);
 
     renderIndex();
+
+    view.annot_index = cards.view.annot_index.create(config.index);
+    dom.annotator.appendChild(view.annot_index.render().el);
 
     // test
     //for (var i = 0; i < config.index.len(); i++) {
@@ -72,6 +78,13 @@ cards.nav = (function() {
     //});
   };
 
+  annotate = function(card_array, annot_type) {
+    view.annot_index.setState(card_array, annot_type);
+    config.set_nav_anchor(
+      cards.util.cloneUpdateObj(state, { self: 'annot' })
+    );
+  };
+
   renderIndex = function() {
     dom.content.innerHTML = null;
     dom.content.appendChild(cards.view.index.create(config.index).render().el);
@@ -81,8 +94,8 @@ cards.nav = (function() {
     var new_state = cards.util.cloneObj(state);
     event.preventDefault();
     if (state.self === 'closed') {
-      new_state.self = 'opened';
-    } else if (state.self === 'opened') {
+      new_state.self = 'index';
+    } else if (state.self === 'index') {
       new_state.self = 'closed';
     }
     config.set_nav_anchor(new_state);
@@ -93,13 +106,19 @@ cards.nav = (function() {
       return;
     }
     switch (nav_state) {
-    case 'opened':
+    case 'index':
+      dom.self.classList.remove('annot-opened');
       dom.self.classList.add('opened');
-      state.self = 'opened';
+      state.self = 'index';
+      break;
+
+    case 'annot':
+      dom.self.classList.add('opened', 'annot-opened');
+      state.self = 'annot';
       break;
 
     case 'closed':
-      dom.self.classList.remove('opened');
+      dom.self.classList.remove('opened', 'annot-opened');
       state.self = 'closed';
       break;
 
@@ -111,6 +130,7 @@ cards.nav = (function() {
   return {
     configure: configure,
     init: init,
-    setNavState: setNavState
+    setNavState: setNavState,
+    annotate: annotate
   };
 }());

@@ -16,7 +16,7 @@ cards.shell = (function() {
   
   init,
   changeAnchorPart, onHashchange,
-  setNavAnchor, setEditorAnchor, saveCard
+  setNavAnchor, setEditorAnchor, saveCard, requestAnnot
   ;  // var
 
   changeAnchorPart = function(kv_map) {
@@ -35,6 +35,13 @@ cards.shell = (function() {
       nav: nav_state.self,
       q: nav_state.search_input
     });
+  };
+
+  requestAnnot = function(card_array, annot_type) {
+    // card_array: array of model/models.card
+    // annot_type: 'tag' of 'note'
+    console.log('annot requested');
+    cards.nav.annotate(card_array, annot_type);
   };
 
   setEditorAnchor = function(editor_state) {
@@ -57,7 +64,7 @@ cards.shell = (function() {
     if (!anchor_map.content) {
       anchor_map.content = 'all';
     }
-    if (['opened', 'closed'].indexOf(anchor_map.nav) === -1) {
+    if (['index', 'annot', 'closed'].indexOf(anchor_map.nav) === -1) {
       valid = false;
       anchor_map.nav = 'closed';
     }
@@ -80,20 +87,20 @@ cards.shell = (function() {
   };
 
   init = function(container) {
-    var index;
-
     cards.model.init();
-    index = cards.model.getIndex();
+    data.index = cards.model.getIndex();
 
-    cards.nav.configure({ set_nav_anchor: setNavAnchor, index: index });
+    cards.nav.configure({ set_nav_anchor: setNavAnchor, index: data.index });
     cards.nav.init(container);
 
     cards.content.init(container);
-    cards.content.setColl(index.get('special:all'));
+    cards.content.setColl(data.index.get('special:all'));
 
     cards.editor.configure({
       set_editor_anchor: setEditorAnchor,
-      save_card: saveCard
+      create_card: cards.model.createCard,
+      save_card: saveCard,
+      request_annot: requestAnnot
     });
     cards.editor.init(container);
 

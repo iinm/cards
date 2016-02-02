@@ -12,13 +12,13 @@ cards.editor = (function() {
   config = {
     self_selector: '.cards-editor',
     set_editor_anchor: null,
-    save_card: null
-  },
-  
-  state = {
-    self: 'closed'
+    create_card: null,
+    save_card: null,
+    request_annot: null
   },
 
+  data = { draft: null },
+  state = { self: 'closed' },
   dom = {},
 
   init, configure, setDomMap,
@@ -29,11 +29,10 @@ cards.editor = (function() {
   setDomMap = function(container) {
     dom.self = container.querySelector(config.self_selector);
     dom.editor_trigger = dom.self.querySelector('.editor-trigger');
-    //dom.control = dom.self.querySelector('.cards-editor-control');
-    dom.content = dom.self.querySelector('.cards-editor-content');
+    dom.control = dom.self.querySelector('.cards-editor-control');
+    //dom.content = dom.self.querySelector('.cards-editor-content');
     dom.content_title = dom.self.querySelector('.title-input');
     dom.content_body = dom.self.querySelector('.body-input');
-    dom.save_trigger = dom.self.querySelector('.save');
   };
 
   configure = function(kv_map) {
@@ -44,9 +43,26 @@ cards.editor = (function() {
     // set dom map
     setDomMap(container);
 
+    // create draft
+    data.draft = config.create_card({});
+
     // set event handler
     dom.editor_trigger.addEventListener('click', onClickToggleEditor, false);
-    dom.save_trigger.addEventListener('click', onClickSaveCard, false);
+    dom.control.querySelector('.save').addEventListener(
+      'click', onClickSaveCard, false
+    );
+    dom.control.querySelector('.add-tag').addEventListener(
+      'click', function(event) {
+        event.preventDefault();
+        config.request_annot([data.draft], 'tag');
+      }, false
+    );
+    dom.control.querySelector('.add-to-note').addEventListener(
+      'click', function(event) {
+        event.preventDefault();
+        config.request_annot([data.draft], 'note');
+      }, false
+    );
   };
 
   onClickSaveCard = function(event) {
