@@ -288,3 +288,7 @@
 .nav-index li.checked .item-checkbox-checked {
   height: 100%;
 }
+.nav-index li.checked {
+  /*   box-shadow: 0 0 .5em #40C0CB; */
+}
+

@@ -17,7 +17,12 @@ cards.view = (function() {
     ;
 
     create = function(model) {  // model: cards.model/models.coll
-      var self = { el: null, render: null }, dom = {};
+      var
+      self = { el: null, render: null },
+      state = { checked: false },
+      dom = {},
+      toggleCheck
+      ;
 
       if (!config.tmpl) {
         config.tmpl = document.getElementById(config.tmpl_id).text.trim();
@@ -43,7 +48,24 @@ cards.view = (function() {
             id: model.get('id'), name: model.get('name'), icon: icon_html
           })
         );
+
+        self.el.querySelector('.item-check-trigger').addEventListener(
+          'click', toggleCheck, false
+        );
+
         return self;
+      };
+
+      toggleCheck = function(event) {
+        console.log('clicked');
+        console.log(self.el);
+        if (!state.checked) {
+          self.el.classList.add('checked');
+          state.checked = true;
+        } else {
+          self.el.classList.remove('checked');
+          state.checked = false;
+        }
       };
 
       return self;
@@ -63,7 +85,11 @@ cards.view = (function() {
     create = function(index) {
       var
       self = { el: null, render: null },
-      dom = {}
+      dom = {
+        special_sec: null, special_sec_ul: null,
+        tag_sec: null, tag_sec_ul: null,
+        note_sec: null, note_sec_ul: null
+      }
       ;
 
       if (!config.tmpl) {
@@ -79,9 +105,10 @@ cards.view = (function() {
         dom.special_sec = cards.util.createElement(
           cards.util.formatTmpl(config.tmpl_sec, { title: 'Special' })
         );
+        dom.special_sec_ul = dom.special_sec.querySelector('ul');
         dom.special_sec.classList.add('special');
         self.el.appendChild(dom.special_sec);
-        dom.special_sec.appendChild(
+        dom.special_sec_ul.appendChild(
           index_item.create(index.get('special:all')).render().el
         );
 
@@ -92,9 +119,10 @@ cards.view = (function() {
               dom.tag_sec = cards.util.createElement(
                 cards.util.formatTmpl(config.tmpl_sec, { title: 'Tags' })
               );
+              dom.tag_sec_ul = dom.tag_sec.querySelector('ul');
               self.el.appendChild(dom.tag_sec);
             }
-            dom.tag_sec.appendChild(index_item.create(coll).render().el);
+            dom.tag_sec_ul.appendChild(index_item.create(coll).render().el);
             break;
 
           case 'note':
@@ -102,9 +130,10 @@ cards.view = (function() {
               dom.note_sec = cards.util.createElement(
                 cards.util.formatTmpl(config.tmpl_sec, { title: 'Notes' })
               );
+              dom.note_sec_ul = dom.note_sec.querySelector('ul');
               self.el.appendChild(dom.note_sec);
             }
-            dom.note_sec.appendChild(index_item.create(coll).render().el);
+            dom.note_sec_ul.appendChild(index_item.create(coll).render().el);
             break;
 
           default:
@@ -133,7 +162,10 @@ cards.view = (function() {
       var
       self = { el: null, render: null, setState: null },
       state = { target: [] },
-      dom = { tag_sec: null, note_sec: null }
+      dom = {
+        tag_sec: null, tag_sec_ul: null,
+        note_sec: null, note_sec_ul: null
+      }
       ;
 
       if (!config.tmpl) {
@@ -152,9 +184,10 @@ cards.view = (function() {
               dom.tag_sec = cards.util.createElement(
                 cards.util.formatTmpl(config.tmpl_sec, { title: 'Add Tags' })
               );
+              dom.tag_sec_ul = dom.tag_sec.querySelector('ul');
               self.el.appendChild(dom.tag_sec);
             }
-            dom.tag_sec.appendChild(index_item.create(coll).render().el);
+            dom.tag_sec_ul.appendChild(index_item.create(coll).render().el);
             break;
 
           case 'note':
@@ -164,9 +197,10 @@ cards.view = (function() {
                   config.tmpl_sec, { title: 'Append to Notes' }
                 )
               );
+              dom.note_sec_ul = dom.note_sec.querySelector('ul');
               self.el.appendChild(dom.note_sec);
             }
-            dom.note_sec.appendChild(index_item.create(coll).render().el);
+            dom.note_sec_ul.appendChild(index_item.create(coll).render().el);
             break;
 
           default:
