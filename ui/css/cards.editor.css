@@ -141,7 +141,8 @@
   width: calc(3em / 1.2);
   height: calc(3em / 1.2);
   text-align: center;
-  line-height: calc(3em / 1.2);
+  /*   line-height: calc(3em / 1.2); */  /* doesn't work with FireFox */
+  line-height: 2.5em;
   cursor: pointer;
 }
 /* 
