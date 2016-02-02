@@ -36,7 +36,7 @@ cards.test = (function () {
     card.set({ title: '新しいタイトル' });
     console.log('title: ' + card.get('title'));
 
-    card.on('body:change', function() { console.log('-- body changed!'); });
+    card.on('change:body', function() { console.log('-- body changed!'); });
     card.set({ body: '内容' });
     console.log('body: ' + card.get('body'));
     card.set({ body: '内容' });

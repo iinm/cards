@@ -42,13 +42,12 @@ cards.model_util = (function() {
         config.on_destroy.forEach(function(f) { f(); });
       };
 
-      on = function(target_event, f) {
+      on = function(event_target, f) {
         var target, event;
-        target_event = target_event.split(':');  // 'key:change' or 'change'
-        target = ((target_event.length === 2) ? target_event[0] : null);
-        event = (
-          (target_event.length === 2) ? target_event[1] : target_event[0]
-        );
+        event_target = event_target.split(':');  // 'change:key' or 'change'
+        event = event_target[0];
+        target = ((event_target.length === 2) ? event_target[1] : null);
+
         switch (event) {
         case 'change':
           if (!target) {

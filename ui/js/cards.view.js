@@ -19,9 +19,7 @@ cards.view = (function() {
     create = function(model) {  // model: cards.model/models.coll
       var
       self = { el: null, render: null },
-      state = { checked: false },
-      dom = {},
-      toggleCheck
+      dom = {}
       ;
 
       if (!config.tmpl) {
@@ -49,23 +47,21 @@ cards.view = (function() {
           })
         );
 
+        model.on('change:annot_checked', function() {
+          if (model.get('annot_checked')) {
+            self.el.classList.add('checked');
+          } else {
+            self.el.classList.remove('checked');
+          }
+        });
+
         self.el.querySelector('.item-check-trigger').addEventListener(
-          'click', toggleCheck, false
+          'click', function(event) {
+            model.set({ annot_checked: !model.get('annot_checked') });
+          }, false
         );
 
         return self;
-      };
-
-      toggleCheck = function(event) {
-        console.log('clicked');
-        console.log(self.el);
-        if (!state.checked) {
-          self.el.classList.add('checked');
-          state.checked = true;
-        } else {
-          self.el.classList.remove('checked');
-          state.checked = false;
-        }
       };
 
       return self;

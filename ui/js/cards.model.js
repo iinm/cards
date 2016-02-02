@@ -20,6 +20,7 @@ cards.model = (function() {
       id: null,
       type: '',  // tag or note
       name: '',
+      annot_checked: false,  // used by annotator
       cards: null
     })
   },
