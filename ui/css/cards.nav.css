@@ -183,37 +183,39 @@
   font-size: 1.2em;
   width: calc(3em / 1.2);
   text-align: center;
-  line-height: calc(3em / 1.2);
+  line-height: 2.5em;
   cursor: pointer;
 }
 
 .cards-nav-content-wrapper {
   top: 3em;  /* .cards-nav-head/height */
   bottom: 0;
-  overflow-y: scroll;
+  background: inherit;
+  overflow: hidden;
 }
 
 .cards-nav-content,
 .cards-nav-annotator {
   position: absolute;
   left: 0;
-  height: 100%;
-  transition: width 300ms;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+  transition: left 300ms;
   overflow: scroll;
 }
 
 .cards-nav-content {
-  width: 100%; 
-  /*   background: #bbb; */
   background: inherit;
 }
 
 .cards-nav-annotator {
-  width: 0;
-  background: #ccc;
+  left: -100%;
+  background: inherit;
+  /*   background: #ccc; */
 }
 .cards-nav.annot-opened .cards-nav-annotator {
-  width: 100%;
+  left: 0;
 }
 
 .cards-nav-annotator .nav-index,
