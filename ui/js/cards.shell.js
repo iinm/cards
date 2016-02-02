@@ -9,13 +9,14 @@
 cards.shell = (function() {
   "use strict";
   var
+  data = { index: null },
   state = {
     anchor_map: {}
   },
   
   init,
   changeAnchorPart, onHashchange,
-  setNavAnchor, setEditorAnchor
+  setNavAnchor, setEditorAnchor, saveCard
   ;  // var
 
   changeAnchorPart = function(kv_map) {
@@ -38,6 +39,11 @@ cards.shell = (function() {
 
   setEditorAnchor = function(editor_state) {
     changeAnchorPart({ editor: editor_state });
+  };
+
+  saveCard = function(data) {
+    // TODO: save or create?
+    data.index.get(anchor_map.content).create(data);
   };
 
   onHashchange = function(event) {
@@ -85,7 +91,10 @@ cards.shell = (function() {
     cards.content.init(container);
     cards.content.setColl(index.get('special:all'));
 
-    cards.editor.configure({ set_editor_anchor: setEditorAnchor });
+    cards.editor.configure({
+      set_editor_anchor: setEditorAnchor,
+      save_card: saveCard
+    });
     cards.editor.init(container);
 
     //

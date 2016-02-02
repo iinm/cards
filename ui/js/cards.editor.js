@@ -11,7 +11,8 @@ cards.editor = (function() {
   var
   config = {
     self_selector: '.cards-editor',
-    set_editor_anchor: null
+    set_editor_anchor: null,
+    save_card: null
   },
   
   state = {
@@ -21,16 +22,18 @@ cards.editor = (function() {
   dom = {},
 
   init, configure, setDomMap,
-  setEditorState, onClickToggleEditor
+  setEditorState, onClickToggleEditor,
+  onClickSaveCard
   ;  // var
 
   setDomMap = function(container) {
     dom.self = container.querySelector(config.self_selector);
     dom.editor_trigger = dom.self.querySelector('.editor-trigger');
-    dom.control = dom.self.querySelector('.cards-editor-control');
+    //dom.control = dom.self.querySelector('.cards-editor-control');
     dom.content = dom.self.querySelector('.cards-editor-content');
     dom.content_title = dom.self.querySelector('.title-input');
     dom.content_body = dom.self.querySelector('.body-input');
+    dom.save_trigger = dom.self.querySelector('.save');
   };
 
   configure = function(kv_map) {
@@ -43,6 +46,18 @@ cards.editor = (function() {
 
     // set event handler
     dom.editor_trigger.addEventListener('click', onClickToggleEditor, false);
+    dom.save_trigger.addEventListener('click', onClickSaveCard, false);
+  };
+
+  onClickSaveCard = function(event) {
+    // TODO
+    var data;
+    event.preventDefault();
+    data = {
+      title: dom.content_title.innerHTML,
+      body: dom.content_body.innerHTML
+    };
+    console.log(data);
   };
 
   setEditorState = function(editor_state) {
