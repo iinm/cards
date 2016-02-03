@@ -40,16 +40,21 @@ cards.model = (function() {
     data.index.add(models.coll.create({
       id: 'special:all', type: 'special:all', name: 'Cards'
     }));
-    cards.fake.getCollections().forEach(function(coll) {
-      data.index.add(models.coll.create(coll));
+    cards.fake.getCollections().forEach(function(data_) {
+      var coll = models.coll.create(data_);
+      data_.card_ids.forEach(function(card_id) {
+        coll.get('cards').create(cards.fake.getCard(card_id));
+      });
+      data.index.add(coll);
     });
 
     // create and cards
-    coll_all = cards.model_util.createCollection(models.card);
-    cards.fake.getCards().forEach(function(data) {
-      coll_all.create(data);
+    cards.fake.getCards().forEach(function(data_) {
+      data.index.get('special:all').get('cards').create(data_);
+      //data_.coll_ids.forEach(function(coll_id) {
+      //  data.index.get(coll_id).get('cards').create(data_);
+      //});
     });
-    data.index.get('special:all').set({ cards: coll_all });
   };
 
   getIndex = function() {

@@ -14,7 +14,6 @@ cards.content = (function() {
   },
 
   state = {
-    self: null,
     coll: null  // cards.model/models.coll
   },
 
@@ -28,11 +27,10 @@ cards.content = (function() {
   }; 
 
   setColl = function(coll) {
-    if (coll.get('id') === state.self) {
+    if (state.coll !== null && coll.get('id') === state.coll.get('id')) {
       return;
     }
     state.coll = coll;
-    state.self = coll.get('id');
     render();
   };
 

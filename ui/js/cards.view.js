@@ -11,19 +11,13 @@ cards.view = (function() {
   var index_item, index, annot_index, card;
 
   index_item = (function() {
-    var
-    config = { tmpl_id: 'tmpl-nav-index-item', tmpl: null },
-    create
-    ;
+    var tmpl_id = 'tmpl-nav-index-item', tmpl = null, create;
 
     create = function(model) {  // model: cards.model/models.coll
-      var
-      self = { el: null, render: null },
-      dom = {}
-      ;
+      var self = { el: null, render: null }, dom = {};
 
-      if (!config.tmpl) {
-        config.tmpl = document.getElementById(config.tmpl_id).text.trim();
+      if (!tmpl) {
+        tmpl = document.getElementById(tmpl_id).text.trim();
       }
       
       self.render = function() {
@@ -42,15 +36,10 @@ cards.view = (function() {
           //
         }
         self.el = cards.util.createElement(
-          cards.util.formatTmpl(config.tmpl, {
+          cards.util.formatTmpl(tmpl, {
             id: model.get('id'), name: model.get('name'), icon: icon_html
           })
         );
-
-        // for index
-        self.el.addEventListener('click', function(event) {
-          // TODO
-        });
 
         // for annotator
         model.on('change:annot_check', function() {
@@ -87,36 +76,37 @@ cards.view = (function() {
   }());  // index_item
 
   index = (function() {
-    var
-    config = {
-      tmpl_sec_id: 'tmpl-nav-index-sec', tmpl_sec: null
-    },
-    create
-    ;
+    var tmpl_sec_id = 'tmpl-nav-index-sec', tmpl_sec = null, create;
 
-    create = function(index) {
+    create = function(index) {  // index: cards.model.index
       var
       self = { el: null, render: null, configure: null },
-      //config = { request_render: null },
+      config = { set_content_anchor: null },
       dom = {
         special_sec: null, special_sec_ul: null,
         tag_sec: null, tag_sec_ul: null,
         note_sec: null, note_sec_ul: null
-      }
+      },
+      onClickSetContentAnchor
       ;
 
-      if (!config.tmpl) {
-        config.tmpl_sec = (
-          document.getElementById(config.tmpl_sec_id).text.trim()
+      if (!tmpl_sec) {
+        tmpl_sec = (
+          document.getElementById(tmpl_sec_id).text.trim()
         );
       }
 
+      self.configure = function(kv_map) {
+        cards.util.updateObj(config, kv_map);
+      };
+
       self.render = function() {
+        var index_items, i;
         self.el = document.createElement('div');
 
         // special index
         dom.special_sec = cards.util.createElement(
-          cards.util.formatTmpl(config.tmpl_sec, { title: 'Special' })
+          cards.util.formatTmpl(tmpl_sec, { title: 'Special' })
         );
         dom.special_sec_ul = dom.special_sec.querySelector('ul');
         dom.special_sec.classList.add('special');
@@ -130,7 +120,7 @@ cards.view = (function() {
           case 'tag':
             if (!dom.tag_sec) {
               dom.tag_sec = cards.util.createElement(
-                cards.util.formatTmpl(config.tmpl_sec, { title: 'Tags' })
+                cards.util.formatTmpl(tmpl_sec, { title: 'Tags' })
               );
               dom.tag_sec_ul = dom.tag_sec.querySelector('ul');
               self.el.appendChild(dom.tag_sec);
@@ -141,7 +131,7 @@ cards.view = (function() {
           case 'note':
             if (!dom.note_sec) {
               dom.note_sec = cards.util.createElement(
-                cards.util.formatTmpl(config.tmpl_sec, { title: 'Notes' })
+                cards.util.formatTmpl(tmpl_sec, { title: 'Notes' })
               );
               dom.note_sec_ul = dom.note_sec.querySelector('ul');
               self.el.appendChild(dom.note_sec);
@@ -154,22 +144,32 @@ cards.view = (function() {
           }
         });
 
+        // index works as content selector
+        index_items = self.el.querySelectorAll('li');
+        for (i = 0; i < index_items.length; i++) {
+          index_items[i].addEventListener(
+            'click', onClickSetContentAnchor, false
+          );
+        }
+
         return self;
+      };  // render
+
+      onClickSetContentAnchor = function(event) {
+        event.preventDefault();
+        if (index.get(event.target.id)) {
+          config.set_content_anchor(event.target.id);
+        }
       };
-      
+
       return self;
-    };
+    };  // index.create
 
     return { create: create };
   }());  // index
 
   annot_index = (function() {
-    var
-    config = {
-      tmpl_sec_id: 'tmpl-nav-index-sec', tmpl_sec: null
-    },
-    create
-    ;
+    var tmpl_sec_id = 'tmpl-nav-index-sec', tmpl_sec = null, create;
 
     create = function(index) {  // index: cards.model.index
       var
@@ -181,9 +181,9 @@ cards.view = (function() {
       }
       ;
 
-      if (!config.tmpl) {
-        config.tmpl_sec = (
-          document.getElementById(config.tmpl_sec_id).text.trim()
+      if (!tmpl_sec) {
+        tmpl_sec = (
+          document.getElementById(tmpl_sec_id).text.trim()
         );
       }
 
@@ -210,7 +210,7 @@ cards.view = (function() {
           case 'tag':
             if (!dom.tag_sec) {
               dom.tag_sec = cards.util.createElement(
-                cards.util.formatTmpl(config.tmpl_sec, { title: 'Add Tags' })
+                cards.util.formatTmpl(tmpl_sec, { title: 'Add Tags' })
               );
               dom.tag_sec_ul = dom.tag_sec.querySelector('ul');
               self.el.appendChild(dom.tag_sec);
@@ -222,7 +222,7 @@ cards.view = (function() {
             if (!dom.note_sec) {
               dom.note_sec = cards.util.createElement(
                 cards.util.formatTmpl(
-                  config.tmpl_sec, { title: 'Append to Notes' }
+                  tmpl_sec, { title: 'Append to Notes' }
                 )
               );
               dom.note_sec_ul = dom.note_sec.querySelector('ul');
@@ -300,13 +300,7 @@ cards.view = (function() {
   }());  // annot_index
 
   card = (function() {
-    var
-    config = {
-      tmpl_id: 'tmpl-item',
-      tmpl: null
-    },
-    create
-    ;
+    var tmpl_id = 'tmpl-item', tmpl = null, create;
 
     create = function(model) {
       var
@@ -315,13 +309,13 @@ cards.view = (function() {
       toggleCheck
       ;
 
-      if (!config.tmpl) {
-        config.tmpl = document.getElementById(config.tmpl_id).text.trim();
+      if (!tmpl) {
+        tmpl = document.getElementById(tmpl_id).text.trim();
       }
 
       self.render = function() {
         self.el = cards.util.createElement(
-          cards.util.formatTmpl(config.tmpl, {
+          cards.util.formatTmpl(tmpl, {
             id: model.get('id'),
             title: model.get('title'),
             body: model.get('body')

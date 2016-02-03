@@ -126,6 +126,9 @@
   font-weight: bold;
   line-height: 3em;
   cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .cards-nav-head .search-input {
@@ -249,6 +252,9 @@
   padding: 0 .5em;
   line-height: 2.5em;
   /*   border-radius: .2em; */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   background: #F9F2E7;
   box-shadow: 0 0 .1em #777;
 }

@@ -16,7 +16,8 @@ cards.shell = (function() {
   
   init,
   changeAnchorPart, onHashchange,
-  setNavAnchor, setEditorAnchor, saveCard, requestAnnot
+  setNavAnchor, setEditorAnchor, setContentAnchor,
+  saveCard, requestAnnot
   ;  // var
 
   changeAnchorPart = function(kv_map) {
@@ -35,6 +36,10 @@ cards.shell = (function() {
       nav: nav_state.self,
       q: nav_state.search_input
     });
+  };
+
+  setContentAnchor = function(coll_id) {
+    changeAnchorPart({ content: coll_id, nav: 'closed' });
   };
 
   requestAnnot = function(card_array, annot_type) {
@@ -61,9 +66,6 @@ cards.shell = (function() {
     console.log(anchor_map);
 
     // validate
-    if (!anchor_map.content) {
-      anchor_map.content = 'all';
-    }
     if (['index', 'annot', 'closed'].indexOf(anchor_map.nav) === -1) {
       valid = false;
       anchor_map.nav = 'closed';
@@ -72,29 +74,44 @@ cards.shell = (function() {
       valid = false;
       anchor_map.editor = 'closed';
     }
+    if (!data.index.get(anchor_map.content)) {
+      valid = false;
+      anchor_map.content = 'special:all';
+    }
+    // if content is changed, close nav and editor
+    //if (state.anchor_map.content !== anchor_map.content) {
+    //  valid = false;
+    //  console.log('content changed');
+    //  console.log(state.anchor_map.content + ' ' + anchor_map.content);
+    //  anchor_map.nav = 'closed';
+    //  anchor_map.editor = 'closed';
+    //}
 
     if (!valid) {
       changeAnchorPart(anchor_map);
-      return false;
     }
 
     cards.nav.setNavState(anchor_map.nav);
     cards.editor.setEditorState(anchor_map.editor);
+    cards.content.setColl(data.index.get(anchor_map.content));
+    cards.nav.setTitle(data.index.get(anchor_map.content).get('name'));
 
     // update
     state.anchor_map = anchor_map;
-    return false;
   };
 
   init = function(container) {
     cards.model.init();
     data.index = cards.model.getIndex();
 
-    cards.nav.configure({ set_nav_anchor: setNavAnchor, index: data.index });
+    cards.nav.configure({
+      set_nav_anchor: setNavAnchor,
+      set_content_anchor: setContentAnchor,
+      index: data.index
+    });
     cards.nav.init(container);
 
     cards.content.init(container);
-    cards.content.setColl(data.index.get('special:all'));
 
     cards.editor.configure({
       set_editor_anchor: setEditorAnchor,

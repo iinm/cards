@@ -12,6 +12,7 @@ cards.nav = (function() {
   config = {
     self_selector: '.cards-nav',
     set_nav_anchor: null,
+    set_content_anchor: null,
     index: null  // collection of cards.model/models.coll
   },
 
@@ -24,8 +25,7 @@ cards.nav = (function() {
   view = {},
 
   init, configure, setDomMap,
-  renderIndex,
-  setNavState, onClickToggleNav,
+  renderIndex, setTitle, setNavState, onClickToggleNav,
   annotate
   ;  // var
 
@@ -63,19 +63,14 @@ cards.nav = (function() {
       );
     }, false);
 
-    renderIndex();
+    // render index
+    view.index = cards.view.index.create(config.index);
+    view.index.configure({ set_content_anchor: config.set_content_anchor });
+    dom.content.appendChild(view.index.render().el);
 
+    // render annotator's index
     view.annot_index = cards.view.annot_index.create(config.index);
     dom.annotator.appendChild(view.annot_index.render().el);
-
-    // test
-    //for (var i = 0; i < config.index.len(); i++) {
-    //  var instance = config.index.at(i);
-    //config.index.each(function(instance) {
-    //  console.log('-- ' + instance.get('id'));
-    //  console.log(instance.get('name'));
-    //  console.log(instance.get('type'));
-    //});
   };
 
   annotate = function(card_array, annot_type) {
@@ -85,9 +80,8 @@ cards.nav = (function() {
     );
   };
 
-  renderIndex = function() {
-    dom.content.innerHTML = null;
-    dom.content.appendChild(cards.view.index.create(config.index).render().el);
+  setTitle = function(title) {
+    dom.title.innerHTML = title;
   };
 
   onClickToggleNav = function(event) {
@@ -135,6 +129,7 @@ cards.nav = (function() {
     configure: configure,
     init: init,
     setNavState: setNavState,
+    setTitle: setTitle,
     annotate: annotate
   };
 }());
