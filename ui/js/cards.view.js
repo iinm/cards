@@ -47,6 +47,12 @@ cards.view = (function() {
           })
         );
 
+        // for index
+        self.el.addEventListener('click', function(event) {
+          // TODO
+        });
+
+        // for annotator
         model.on('change:annot_check', function() {
           switch (model.get('annot_check')) {
           case 'checked':
@@ -90,7 +96,8 @@ cards.view = (function() {
 
     create = function(index) {
       var
-      self = { el: null, render: null },
+      self = { el: null, render: null, configure: null },
+      //config = { request_render: null },
       dom = {
         special_sec: null, special_sec_ul: null,
         tag_sec: null, tag_sec_ul: null,
