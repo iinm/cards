@@ -23,14 +23,16 @@ cards.editor = (function() {
 
   init, configure, setDomMap,
   setEditorState, onClickToggleEditor,
-  onClickSaveCard
+  onClickSaveCard,
+  renderMeta
   ;  // var
 
   setDomMap = function(container) {
     dom.self = container.querySelector(config.self_selector);
     dom.editor_trigger = dom.self.querySelector('.editor-trigger');
     dom.control = dom.self.querySelector('.cards-editor-control');
-    //dom.content = dom.self.querySelector('.cards-editor-content');
+    //dom.content_meta = dom.self.querySelector('.cards-editor-meta');
+    dom.content_colls = dom.self.querySelector('.colls');
     dom.content_title = dom.self.querySelector('.title-input');
     dom.content_body = dom.self.querySelector('.body-input');
   };
@@ -45,6 +47,14 @@ cards.editor = (function() {
 
     // create draft
     data.draft = config.create_card({});
+    data.draft.get('colls').on('add', function(coll) {
+      console.log(coll.get('name') + ' is added.');
+      renderMeta();
+    });
+    data.draft.get('colls').on('remove', function(coll) {
+      console.log(coll.get('name') + ' is removed.');
+      renderMeta();
+    });
 
     // set event handler
     dom.editor_trigger.addEventListener('click', onClickToggleEditor, false);
@@ -65,6 +75,21 @@ cards.editor = (function() {
     );
   };
 
+  renderMeta = function() {
+    dom.content_colls.innerHTML = null;
+    data.draft.get('colls').each(function(coll) {
+      var icon = ((coll.get('type') === 'tag') ? 'tag' : 'book');
+      dom.content_colls.appendChild(
+        cards.util.createElement(
+          cards.util.formatTmpl(
+            '<li><i class="fa fa-{{icon}}"></i>&nbsp;{{name}}</li>',
+            { icon: icon, name: coll.get('name') }
+          )
+        )
+      );
+    });
+  };
+
   onClickSaveCard = function(event) {
     // TODO
     var data;
@@ -82,7 +107,7 @@ cards.editor = (function() {
     }
     switch (editor_state) {
     case 'opened':
-      dom.self.classList.add('cards-editor-opened');
+      dom.self.classList.add('opened');
       dom.content_title.setAttribute('contenteditable', 'true');
       dom.content_body.setAttribute('contenteditable', 'true');
 
@@ -90,7 +115,7 @@ cards.editor = (function() {
       break;
 
     case 'closed':
-      dom.self.classList.remove('cards-editor-opened');
+      dom.self.classList.remove('opened');
       dom.content_title.setAttribute('contenteditable', 'false');
       dom.content_body.setAttribute('contenteditable', 'false');
 

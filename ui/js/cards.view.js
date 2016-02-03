@@ -47,17 +47,27 @@ cards.view = (function() {
           })
         );
 
-        model.on('change:annot_checked', function() {
-          if (model.get('annot_checked')) {
+        model.on('change:annot_check', function() {
+          switch (model.get('annot_check')) {
+          case 'checked':
             self.el.classList.add('checked');
-          } else {
+            break;
+          case 'partial':
+            // TODO: change icon color
+            self.el.classList.add('checked');
+            break;
+          default:
             self.el.classList.remove('checked');
           }
         });
 
         self.el.querySelector('.item-check-trigger').addEventListener(
           'click', function(event) {
-            model.set({ annot_checked: !model.get('annot_checked') });
+            model.set({
+              annot_check: (
+                (model.get('annot_check') !== 'checked') ? 'checked' : null
+              )
+            });
           }, false
         );
 
@@ -154,10 +164,10 @@ cards.view = (function() {
     create
     ;
 
-    create = function(index) {
+    create = function(index) {  // index: cards.model.index
       var
       self = { el: null, render: null, setState: null },
-      state = { target: [] },
+      state = { target: [], checked_colls: {} },
       dom = {
         tag_sec: null, tag_sec_ul: null,
         note_sec: null, note_sec_ul: null
@@ -174,6 +184,21 @@ cards.view = (function() {
         self.el = document.createElement('div');
 
         index.each(function(coll) {
+          //
+          coll.on('change:annot_check', function() {
+            if (coll.get('annot_check') === 'checked') {
+              state.checked_colls[coll.get('id')] = coll;
+              state.target.forEach(function(card) {
+                card.get('colls').add(coll);
+              });
+            } else {
+              delete state.checked_colls[coll.get('id')];
+              state.target.forEach(function(card) {
+                card.get('colls').remove(coll.get('id'));
+              });
+            }
+          });
+          
           switch (coll.get('type')) {
           case 'tag':
             if (!dom.tag_sec) {
@@ -208,8 +233,44 @@ cards.view = (function() {
       };
 
       self.setState = function(card_array, annot_type) {
-        // TODO
+        var freq = {}, checked_ids = [], partial_checked_ids = [];
         state.target = card_array;
+
+        // clear check
+        Object.keys(state.checked_colls).forEach(function(coll_id) {
+          var checked = false;
+          state.target.forEach(function(card) {
+            if (card.get('colls').get(coll_id) !== undefined) {
+              checked = true;
+            }
+          });
+          if (!checked) {
+            index.get(coll_id).set({ annot_check: null });
+          }
+        });
+
+        // set check status
+        state.target.forEach(function(card) {
+          card.get('colls').each(function(coll) {
+            var coll_id = coll.get('id');
+            freq[coll_id] = ((freq.hasOwnProperty(coll_id))
+                             ? freq[coll_id] + 1 : 1);
+          });
+        });
+        Object.keys(freq).forEach(function(coll_id) {
+          if (state.target.length === freq[coll_id]) {
+            checked_ids.push(coll_id);
+          } else {
+            partial_checked_ids.push(coll_id);
+          }
+        });
+
+        checked_ids.forEach(function(coll_id) {
+          index.get(coll_id).set({ annot_check: 'checked' });
+        });
+        partial_checked_ids.forEach(function(coll_id) {
+          index.get(coll_id).set({ annot_check: 'partial' });
+        });
 
         switch (annot_type) {
         case 'tag':

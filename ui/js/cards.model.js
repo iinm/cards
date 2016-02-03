@@ -8,25 +8,30 @@
 
 cards.model = (function() {
   var
-  models = {
-    card: cards.model_util.createModel({
-      id: null,
-      title: '', body: '',
-      tags: [], notes: [],
-      checked: false
-    }),
-
-    coll: cards.model_util.createModel({
-      id: null,
-      type: '',  // tag or note
-      name: '',
-      annot_checked: false,  // used by annotator
-      cards: null
-    })
-  },
+  models = {},
   data = { index: null },
   init, getIndex, createCard
   ;
+
+  // define models
+  models.card = cards.model_util.createModel(function () {
+    return {
+      id: null,
+      title: '', body: '',
+      colls: cards.model_util.createCollection(models.coll),
+      checked: false
+    };
+  });
+
+  models.coll = cards.model_util.createModel(function() {
+    return {
+      id: null,
+      type: '',  // tag or note
+      name: '',
+      annot_check: null,  // used by annotator, 'checked' or 'partial'
+      cards: cards.model_util.createCollection(models.card)
+    };
+  });
 
   init = function() {
     var coll_all;

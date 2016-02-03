@@ -13,7 +13,7 @@
   box-shadow: 0 0 .3em #777;
 }
 
-.cards-editor-opened {
+.cards-editor.opened {
   height: calc(100vh - 3.5em);  /* .cards-nav/height + a */
 }
 
@@ -56,7 +56,7 @@
   top: 0;
   height: 100%;
 }
-.cards-editor-opened .cards-editor-head .editor-opener {
+.cards-editor.opened .cards-editor-head .editor-opener {
   height: 0;
 }
 
@@ -64,7 +64,7 @@
   bottom: 0;
   height: 0;
 }
-.cards-editor-opened .cards-editor-head .editor-closer {
+.cards-editor.opened .cards-editor-head .editor-closer {
   height: 100%;
 }
 
@@ -76,7 +76,7 @@
   overflow-y: hidden;
 }
 
-.cards-editor-opened .cards-editor-content {
+.cards-editor.opened .cards-editor-content {
   bottom: 3em;  /* control/height */
   overflow-y: scroll;
 }
@@ -89,8 +89,11 @@
 
 .cards-editor-content .title-input {
   width: calc(100% - 2.5em);  /* trigger/width - content/margin - .5 */
-  min-height: 1.5em;  /* content/margin + ht/margin */
+  min-height: 2em;  /* content/top + 2em = editor/height */
   font-weight: bold;
+}
+.cards-editor.opened .cards-editor-content .title-input {
+  min-height: 1.5em;
 }
 
 .cards-editor-content .title-input[contentEditable]:empty:not(:focus):before{
@@ -108,6 +111,11 @@
   border-bottom: .1em solid #888;
   margin-bottom: .5em;
 }
+.cards-editor-meta .colls li {
+  display: inline-block;
+  font-size: .7em;
+  margin: 0 .3em;
+}
 
 .cards-editor-control {
   bottom: 0;
@@ -118,7 +126,7 @@
   overflow: hidden;
 }
 
-.cards-editor-opened .cards-editor-control {
+.cards-editor.opened .cards-editor-control {
   height: 3em;
 }
 

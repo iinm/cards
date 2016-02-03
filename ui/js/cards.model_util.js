@@ -17,7 +17,12 @@ cards.model_util = (function() {
       get, set, destroy,  // fetch, save
       on, off
       ;
-      data = cards.util.cloneUpdateObj(data_tmpl, data);
+
+      if (typeof(data_tmpl) === 'object') {
+        data = cards.util.cloneUpdateObj(data_tmpl, data);
+      } else if (typeof(data_tmpl) === 'function') {
+        data = cards.util.cloneUpdateObj(data_tmpl(), data);
+      }
 
       get = function(key) { return data[key]; };
       set = function(kvs) {
