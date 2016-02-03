@@ -91,14 +91,24 @@ cards.editor = (function() {
   };
 
   onClickSaveCard = function(event) {
-    // TODO
-    var data;
+    var data_, coll_ids = [];
     event.preventDefault();
-    data = {
+    data.draft.get('colls').each(function(coll) {
+      coll_ids.push(coll.get('id'));
+    });
+    data_ = {
       title: dom.content_title.innerHTML,
-      body: dom.content_body.innerHTML
+      body: dom.content_body.innerHTML,
+      coll_ids: coll_ids
     };
-    console.log(data);
+
+    if (data_.title.trim().length === 0 && data_.body.trim().length === 0) {
+      // skip if body is empty
+      return;
+    }
+
+    console.log(cards.fake.saveCard(data_));
+    // TODO: update related collections
   };
 
   setEditorState = function(editor_state) {
