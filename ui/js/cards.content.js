@@ -40,10 +40,10 @@ cards.content = (function() {
     if (state.coll !== null) {
       // TODO: これどうにかならない？
       state.coll.get('cards').off('add', onAddRenderItem);
-      state.coll.get('cards').off('add', onAddRenderItem);
       state.coll.get('cards').off('remove', onRemoveItem);
     }
     state.coll = coll;
+    console.log(state.coll.get('name'));
     state.coll.get('cards').on('add', onAddRenderItem);
     state.coll.get('cards').on('remove', onRemoveItem);
     render();

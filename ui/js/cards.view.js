@@ -197,11 +197,13 @@ cards.view = (function() {
               state.checked_colls[coll.get('id')] = coll;
               state.target.forEach(function(card) {
                 card.get('colls').add(coll);
+                coll.get('cards').add(card);
               });
             } else {
               delete state.checked_colls[coll.get('id')];
               state.target.forEach(function(card) {
                 card.get('colls').remove(coll.get('id'));
+                coll.get('cards').remove(card.get('id'));
               });
             }
           });

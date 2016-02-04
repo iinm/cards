@@ -64,7 +64,20 @@ cards.editor = (function() {
     );
   };
 
+  var on_remove_coll;
+  on_remove_coll = function(coll)  {
+    //console.log(coll.get('name') + ' is removed.');
+    renderMeta();
+    // TODO: ここじゃなくて，model.saveCardのところで消す．
+    coll.get('cards').remove(data.draft.get('id'));
+  };
+
   setEditTarget = function(card) {
+    if (data.draft) {
+      data.draft.get('colls').off('add', renderMeta);
+      data.draft.get('colls').off('remove', on_remove_coll);
+    }
+    
     if (!card) {
       dom.content_title.innerHTML = null;
       dom.content_body.innerHTML = null;
@@ -80,16 +93,8 @@ cards.editor = (function() {
     renderMeta();
     config.set_editor_anchor('opened');
 
-    data.draft.get('colls').on('add', function(coll) {
-      console.log(coll.get('name') + ' is added.');
-      renderMeta();
-    });
-    data.draft.get('colls').on('remove', function(coll) {
-      console.log(coll.get('name') + ' is removed.');
-      renderMeta();
-      // TODO: ここじゃなくて，model.saveCardのところで消す．
-      coll.get('cards').remove(data.draft.get('id'));
-    });
+    data.draft.get('colls').on('add', renderMeta);
+    data.draft.get('colls').on('remove', on_remove_coll);
   };
 
   renderMeta = function() {
@@ -122,9 +127,7 @@ cards.editor = (function() {
       body: dom.content_body.innerHTML
     });
 
-    console.log(data.draft.get('colls').len());
     card = config.save_card(data.draft);
-    console.log(card.get('colls').len());
     if (card) {
       setEditTarget(null);
       config.set_editor_anchor('closed');

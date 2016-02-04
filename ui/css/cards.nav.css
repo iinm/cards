@@ -159,6 +159,20 @@
   left: 0;
 }
 
+.cards-nav.annot-opened .cards-nav-head .annot-trigger-wrapper {
+  left: 100% !important;
+}
+/* 
+   .cards-nav-head .annot-target-clear {
+   position: absolute;
+   top: .5em;
+   left: .5em;
+   height: 2em;
+   width: 2em;
+   text-align: center;
+   line-height: 2em;
+   } */
+
 .cards-nav-head .annot-target-indicator {
   position: absolute;
   top: .5em;
@@ -192,6 +206,10 @@
 
 .cards-nav.content-is-not-note .annot-trigger li.move {
   display: none;
+}
+
+.cards-nav-head .annot-trigger li.clear-check i {
+  font-weight: bold;
 }
 
 .cards-nav-content-wrapper {

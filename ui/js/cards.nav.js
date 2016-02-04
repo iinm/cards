@@ -68,7 +68,8 @@ cards.nav = (function() {
       );
     }, false);
 
-    dom.annot_trigger.querySelector('.remove').addEventListener('click',
+    dom.annot_trigger.querySelector('.remove').addEventListener(
+      'click',
       function(event) {
         event.preventDefault();
         state.annot_targets.each(function(card) {
@@ -77,6 +78,37 @@ cards.nav = (function() {
         state.annot_targets.reset();
       }, false
     );
+
+    dom.annot_trigger.querySelector('.add-tag').addEventListener(
+      'click',
+      function(event) {
+        var card_array = [];
+        event.preventDefault();
+        state.annot_targets.each(function(card) { card_array.push(card); });
+        annotate(card_array, 'tag');
+      }, false
+    );
+
+    dom.annot_trigger.querySelector('.add-to-note').addEventListener(
+      'click',
+      function(event) {
+        var i, card, card_array = [];
+        event.preventDefault();
+        state.annot_targets.each(function(card) { card_array.push(card); });
+        annotate(card_array, 'note');
+      }, false
+    );
+
+    dom.annot_trigger.querySelector('.clear-check').addEventListener(
+      'click',
+      function(event) {
+        event.preventDefault();
+        while (state.annot_targets.len() > 0) {
+          state.annot_targets.at(0).set({ checked: false });
+        }
+      }, false
+    );
+
 
     // render index
     view.index = cards.view.index.create(config.index);
