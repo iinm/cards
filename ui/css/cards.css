@@ -52,6 +52,7 @@ strong {
 .cards-item .item-content {
   margin: .3em 2em .3em .4em;
 }
+
 .cards-item .item-content .item-title {
   margin: 0;
   font-size: .95em;
@@ -61,14 +62,25 @@ strong {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 .cards-item .item-content .item-meta {
   margin: 0;
   font-size: .75em;
 }
+
+.cards-item .item-content .item-meta .date,
+.cards-item .item-content .item-meta .colls {
+  display: inline;
+}
+
 .cards-item .item-content .item-meta li {
   display: inline-block;
   margin: 0 .3em;
 }
+.cards-item .item-content .item-meta li i {
+  color: #777;
+}
+
 .cards-item .item-content .item-body {
   margin: 0;
   font-size: .95em;

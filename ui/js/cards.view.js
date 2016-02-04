@@ -362,6 +362,8 @@ cards.view = (function() {
 
       // set event handlers
       model.on('change', self.render);
+      model.get('colls').on('add', self.render);
+      model.get('colls').on('remove', self.render);
 
       return self;
     };
