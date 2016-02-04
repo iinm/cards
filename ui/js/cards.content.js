@@ -11,7 +11,8 @@ cards.content = (function() {
   var
   config = {
     self_selector: '.cards-content',
-    set_edit_target: null
+    set_edit_target: null,
+    set_annot_target: null
   },
 
   state = {
@@ -48,7 +49,10 @@ cards.content = (function() {
     dom.self.innerHTML = null;
     state.coll.get('cards').each(function(model) {
       var card_view = cards.view.card.create(model);
-      card_view.configure({ set_edit_target: config.set_edit_target });
+      card_view.configure({
+        set_edit_target: config.set_edit_target,
+        set_annot_target: config.set_annot_target
+      });
       dom.self.appendChild(card_view.render().el);
     });
   };
@@ -56,7 +60,10 @@ cards.content = (function() {
   onAddRenderItem = function(card) {
     var sibling, card_view, card_el;
     card_view = cards.view.card.create(card);
-    card_view.configure({ set_edit_target: config.set_edit_target });
+    card_view.configure({
+      set_edit_target: config.set_edit_target,
+      set_annot_target: config.set_annot_target
+    });
     card_el = card_view.render().el;
 
     if (state.coll.get('type') === 'note') {

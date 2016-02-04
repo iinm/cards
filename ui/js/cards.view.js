@@ -305,7 +305,7 @@ cards.view = (function() {
     create = function(model) {
       var
       self = { el: null, render: null, configure: null },
-      config = { set_edit_target: null },
+      config = { set_edit_target: null, set_annot_target: null },
       dom = {},
       state = { checked: false },
       toggleCheck
@@ -320,7 +320,6 @@ cards.view = (function() {
       };
 
       self.render = function() {
-        console.log('render card');
         if (!self.el) {
           self.el = cards.util.createElement(
             cards.util.formatTmpl(tmpl, { id: model.get('id') })
@@ -334,7 +333,10 @@ cards.view = (function() {
 
           // set event handlers
           self.el.querySelector('.item-check-trigger').addEventListener(
-            'click', toggleCheck, false
+            'click', function(event) {
+              event.preventDefault();
+              model.set({ checked: !model.get('checked') });
+            }, false
           );
           self.el.querySelector('.item-edit-trigger').addEventListener(
             'click', function(event) {
@@ -375,6 +377,14 @@ cards.view = (function() {
       model.on('change', self.render);
       model.get('colls').on('add', self.render);
       model.get('colls').on('remove', self.render);
+      model.on('change:checked', function() {
+        config.set_annot_target(model);
+        if (model.get('checked')) {
+          self.el.classList.add('checked');
+        } else {
+          self.el.classList.remove('checked');
+        }
+      });
 
       return self;
     };

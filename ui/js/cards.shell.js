@@ -117,7 +117,8 @@ cards.shell = (function() {
     cards.nav.init(container);
 
     cards.content.configure({
-      set_edit_target: cards.editor.setEditTarget
+      set_edit_target: cards.editor.setEditTarget,
+      set_annot_target: cards.nav.setAnnotTarget
     });
     cards.content.init(container);
 

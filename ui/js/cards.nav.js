@@ -18,7 +18,8 @@ cards.nav = (function() {
 
   state = {
     self: 'closed',
-    search_input: ''
+    search_input: '',
+    annot_targets: null
   },
 
   dom = {},
@@ -26,7 +27,7 @@ cards.nav = (function() {
 
   init, configure, setDomMap,
   setTitle, setNavState, onClickToggleNav,
-  annotate
+  updateAnnotTrigger, setAnnotTarget, annotate
   ;  // var
 
   setDomMap = function(container) {
@@ -37,6 +38,7 @@ cards.nav = (function() {
     dom.search_box = dom.self.querySelector('.search-input');
     dom.content = dom.self.querySelector('.cards-nav-content');
     dom.annotator = dom.self.querySelector('.cards-nav-annotator');
+    dom.target_indicator = dom.self.querySelector('.annot-target-indicator');
   };
 
   configure = function(kv_map) {
@@ -71,6 +73,30 @@ cards.nav = (function() {
     // render annotator's index
     view.annot_index = cards.view.annot_index.create(config.index);
     dom.annotator.appendChild(view.annot_index.render().el);
+
+    // init annot targets
+    state.annot_targets = cards.model_util.createCollection(
+      cards.model.models.card
+    );
+    state.annot_targets.on('add', updateAnnotTrigger);
+    state.annot_targets.on('remove', updateAnnotTrigger);
+  };
+
+  updateAnnotTrigger = function() {
+    dom.target_indicator.innerHTML = String(state.annot_targets.len());
+    if (state.annot_targets.len() > 0) {
+      dom.self.classList.add('annot-trigger-opened');
+    } else {
+      dom.self.classList.remove('annot-trigger-opened');
+    }
+  };
+
+  setAnnotTarget = function(card) {
+    if (card.get('checked')) {
+      state.annot_targets.add(card);
+    } else {
+      state.annot_targets.remove(card.get('id'));
+    }
   };
 
   annotate = function(card_array, annot_type) {
@@ -130,6 +156,8 @@ cards.nav = (function() {
     init: init,
     setNavState: setNavState,
     setTitle: setTitle,
+    setAnnotTarget: setAnnotTarget,
+    updateAnnotTrigger: updateAnnotTrigger,
     annotate: annotate
   };
 }());
