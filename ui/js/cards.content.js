@@ -38,7 +38,10 @@ cards.content = (function() {
       return;
     }
     if (state.coll !== null) {
+      // TODO: これどうにかならない？
       state.coll.get('cards').off('add', onAddRenderItem);
+      state.coll.get('cards').off('add', onAddRenderItem);
+      state.coll.get('cards').off('remove', onRemoveItem);
     }
     state.coll = coll;
     state.coll.get('cards').on('add', onAddRenderItem);
