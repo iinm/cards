@@ -61,7 +61,7 @@ cards.shell = (function() {
   onHashchange = function(event) {
     var
     anchor_map = cards.util.makeAnchorMap(),
-    valid = true
+    valid = true, current_coll, title_icon
     ;
     console.log(anchor_map);
 
@@ -85,8 +85,22 @@ cards.shell = (function() {
 
     cards.nav.setNavState(anchor_map.nav);
     cards.editor.setEditorState(anchor_map.editor);
-    cards.content.setColl(data.index.get(anchor_map.content));
-    cards.nav.setTitle(data.index.get(anchor_map.content).get('name'));
+    current_coll = data.index.get(anchor_map.content);
+    cards.content.setColl(current_coll);
+    switch (current_coll.get('type')) {
+    case 'tag':
+      title_icon = '<i class="fa fa-tag"></i>';
+      break;
+    case 'note':
+      title_icon = '<i class="fa fa-book"></i>';
+      break;
+    default:
+      title_icon = '<i class="fa fa-circle-o"></i>';
+    }
+    cards.nav.setTitle(
+      //title_icon + '&nbsp;' +
+      data.index.get(anchor_map.content).get('name')
+    );
 
     // update
     state.anchor_map = anchor_map;
