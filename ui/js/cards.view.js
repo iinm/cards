@@ -197,13 +197,16 @@ cards.view = (function() {
               state.checked_colls[coll.get('id')] = coll;
               state.target.forEach(function(card) {
                 card.get('colls').add(coll);
-                coll.get('cards').add(card);
+                if ((typeof card.get('id')) === 'string') {
+                  coll.get('cards').add(card);
+                }  // else, it's draft
               });
             } else {
               delete state.checked_colls[coll.get('id')];
               state.target.forEach(function(card) {
                 if (card.get('colls').get(coll.get('id'))) {
                   card.get('colls').remove(coll.get('id'));
+                  console.log(coll.get('id') + ' ' + card.get('id'));
                   coll.get('cards').remove(card.get('id'));
                 }
               });

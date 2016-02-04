@@ -86,6 +86,7 @@ cards.content = (function() {
 
   onRemoveItem = function(card) {
     // TODO: ちょっと気持ち悪い
+    console.log('remove ##');
     dom.self.querySelector('#' + card.get('id')).remove();
   };
 

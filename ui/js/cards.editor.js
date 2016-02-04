@@ -69,7 +69,7 @@ cards.editor = (function() {
     //console.log(coll.get('name') + ' is removed.');
     renderMeta();
     // TODO: ここじゃなくて，model.saveCardのところで消す．
-    coll.get('cards').remove(data.draft.get('id'));
+    //coll.get('cards').remove(data.draft.get('id'));
   };
 
   setEditTarget = function(card) {
