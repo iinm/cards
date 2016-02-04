@@ -114,13 +114,17 @@ cards.model = (function() {
       data.cards.get(data_.id).set(data_);
     }
     card = data.cards.get(data_.id);
+    console.log(data_);
 
     data_.coll_ids.forEach(function(coll_id) {
       var idx, coll;
       coll = data.index.get(coll_id);
       if (!coll.get('cards').get(card.get('id'))) {
-        idx = ((data.index.get(coll_id).get('type') === 'tag') ? 0 : null);
+        // add card to coll
+        idx = ((coll.get('type') === 'tag') ? 0 : null);
         data.index.get(coll_id).get('cards').add(card, idx);
+        // add coll to card
+        card.get('colls').add(coll);
       }
     });
     if (!data.index.get('special:all').get('cards').get(card.get('id'))) {

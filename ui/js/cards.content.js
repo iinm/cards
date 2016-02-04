@@ -10,7 +10,8 @@ cards.content = (function() {
   "use strict";
   var
   config = {
-    self_selector: '.cards-content'
+    self_selector: '.cards-content',
+    set_edit_target: null
   },
 
   state = {
@@ -19,8 +20,13 @@ cards.content = (function() {
 
   dom = {},
 
-  init, setColl, render, onAddRenderItem
+  init, configure,
+  setColl, render, onAddRenderItem
   ;  // var
+
+  configure = function(kv_map) {
+    cards.util.updateObj(config, kv_map);
+  };
 
   init = function(container) {
     dom.self = container.querySelector(config.self_selector);
@@ -41,12 +47,18 @@ cards.content = (function() {
   render = function() {
     dom.self.innerHTML = null;
     state.coll.get('cards').each(function(model) {
-      dom.self.appendChild(cards.view.card.create(model).render().el);
+      var card_view = cards.view.card.create(model);
+      card_view.configure({ set_edit_target: config.set_edit_target });
+      dom.self.appendChild(card_view.render().el);
     });
   };
 
   onAddRenderItem = function(card) {
-    var sibling, card_el = cards.view.card.create(card).render().el;
+    var sibling, card_view, card_el;
+    card_view = cards.view.card.create(card);
+    card_view.configure({ set_edit_target: config.set_edit_target });
+    card_el = card_view.render().el;
+
     if (state.coll.get('type') === 'note') {
       dom.self.appendChild(card_el);
     } else {
@@ -63,6 +75,7 @@ cards.content = (function() {
 
   return {
     init: init,
+    configure: configure,
     setColl: setColl,
     render: render
   };

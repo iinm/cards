@@ -70,6 +70,7 @@ cards.editor = (function() {
       dom.content_body.innerHTML = null;
       dom.content_colls.innerHTML = null;
       data.draft = null;
+      console.log('draft discard');
       return;
     }
     
@@ -77,6 +78,7 @@ cards.editor = (function() {
     dom.content_title.innerHTML = card.get('title');
     dom.content_body.innerHTML = card.get('body');
     renderMeta();
+    config.set_editor_anchor('opened');
 
     data.draft.get('colls').on('add', function(coll) {
       console.log(coll.get('name') + ' is added.');
@@ -118,7 +120,9 @@ cards.editor = (function() {
       body: dom.content_body.innerHTML
     });
 
+    console.log(data.draft.get('colls').len());
     card = config.save_card(data.draft);
+    console.log(card.get('colls').len());
     if (card) {
       setEditTarget(null);
       config.set_editor_anchor('closed');
@@ -147,6 +151,14 @@ cards.editor = (function() {
       dom.self.classList.remove('opened');
       dom.content_title.setAttribute('contenteditable', 'false');
       dom.content_body.setAttribute('contenteditable', 'false');
+
+      if (dom.content_title.innerHTML.trim().length === 0
+          && dom.content_body.innerHTML.trim().length === 0
+          //&& data.draft.get('colls').len() === 0
+         ) {
+        // remove draft
+        setEditTarget(null);
+      }
 
       state.self = 'closed';
       break;

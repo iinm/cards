@@ -304,7 +304,8 @@ cards.view = (function() {
 
     create = function(model) {
       var
-      self = { el: null, render: null },
+      self = { el: null, render: null, configure: null },
+      config = { set_edit_target: null },
       dom = {},
       state = { checked: false },
       toggleCheck
@@ -313,6 +314,10 @@ cards.view = (function() {
       if (!tmpl) {
         tmpl = document.getElementById(tmpl_id).text.trim();
       }
+
+      self.configure = function(kv_map) {
+        cards.util.updateObj(config, kv_map);
+      };
 
       self.render = function() {
         console.log('render card');
@@ -325,11 +330,17 @@ cards.view = (function() {
           dom.title = self.el.querySelector('.item-title');
           dom.body = self.el.querySelector('.item-body');
           dom.colls = self.el.querySelector('.item-meta .colls');
+          dom.edit_trigger = self.el.querySelector('.item-edit-trigger');
 
           // set event handlers
           self.el.querySelector('.item-check-trigger').addEventListener(
             'click', toggleCheck, false
           );
+          self.el.querySelector('.item-edit-trigger').addEventListener(
+            'click', function(event) {
+              event.preventDefault();
+              config.set_edit_target(model);
+            }, false);
         }
 
         dom.title.innerHTML = model.get('title');

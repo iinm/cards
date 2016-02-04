@@ -17,7 +17,7 @@ cards.shell = (function() {
   init,
   changeAnchorPart, onHashchange,
   setNavAnchor, setEditorAnchor, setContentAnchor,
-  saveCard, requestAnnot
+  createCard, saveCard, requestAnnot
   ;  // var
 
   changeAnchorPart = function(kv_map) {
@@ -92,6 +92,19 @@ cards.shell = (function() {
     state.anchor_map = anchor_map;
   };
 
+  createCard = function(data_) {
+    var card, coll;
+    card = cards.model.createCard(data_);
+    coll = data.index.get(state.anchor_map.content);
+    if (state.anchor_map.content
+        && ['tag', 'note'].indexOf(coll.get('type')) > -1
+    ) {
+      card.get('colls').add(coll);
+    }
+    console.log('new card');
+    return card;
+  };
+
   init = function(container) {
     cards.model.init();
     data.index = cards.model.getIndex();
@@ -103,11 +116,14 @@ cards.shell = (function() {
     });
     cards.nav.init(container);
 
+    cards.content.configure({
+      set_edit_target: cards.editor.setEditTarget
+    });
     cards.content.init(container);
 
     cards.editor.configure({
       set_editor_anchor: setEditorAnchor,
-      create_card: cards.model.createCard,
+      create_card: createCard,
       save_card: cards.model.saveCard,
       request_annot: requestAnnot
     });
