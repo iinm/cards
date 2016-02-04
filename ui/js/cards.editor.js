@@ -136,7 +136,7 @@ cards.editor = (function() {
       dom.content_body.setAttribute('contenteditable', 'true');
 
       // create new card
-      if (!state.draft) {
+      if (!data.draft) {
         setEditTarget(config.create_card({}));
       }
 
@@ -168,6 +168,7 @@ cards.editor = (function() {
   return {
     configure: configure,
     init: init,
-    setEditorState: setEditorState
+    setEditorState: setEditorState,
+    setEditTarget: setEditTarget
   };
 }());

@@ -9,7 +9,7 @@
 cards.model = (function() {
   var
   models = {},
-  data = { index: null },
+  data = { index: null, cards: null },
   init, getIndex, createCard, saveCard
   ;
 
@@ -36,22 +36,35 @@ cards.model = (function() {
   init = function() {
     // create colls
     data.index = cards.model_util.createCollection(models.coll);
-    data.index.add(models.coll.create({
-      id: 'special:all', type: 'special:all', name: 'Cards'
-    }));
-    cards.fake.getCollections().forEach(function(data_) {
-      var coll = models.coll.create(data_);
-      // create cards
-      data_.card_ids.forEach(function(card_id) {
-        coll.get('cards').create(cards.fake.getCard(card_id));
-        //coll.get('cards').get(card_id).get('colls').add(coll);
-      });
-      data.index.add(coll);
+    data.cards = cards.model_util.createCollection(models.card);
+
+    // create special coll
+    data.index.add(
+      models.coll.create({
+        id: 'special:all', type: 'special:all', name: 'Cards'
+      })
+    );
+
+    // cache all cards
+    cards.fake.getCards().forEach(function(data_) {
+      data.cards.create(data_);
+    });
+    
+    // add cards to special:all
+    cards.fake.getCards().forEach(function(data_) {
+      data.index.get('special:all').get('cards').add(data.cards.get(data_.id));
     });
 
-    // create cards for special:all
-    cards.fake.getCards().forEach(function(data_) {
-      data.index.get('special:all').get('cards').create(data_);
+    // create colls add cards
+    cards.fake.getCollections().forEach(function(data_) {
+      var coll = models.coll.create(data_);
+      data_.card_ids.forEach(function(card_id) {
+        if (!data.cards.get(card_id)) {
+          data.cards.create(cards.fake.getCard(card_id));
+        }
+        coll.get('cards').add(data.cards.get(card_id));
+      });
+      data.index.add(coll);
     });
   };
 
@@ -65,6 +78,8 @@ cards.model = (function() {
 
   saveCard = function(card) {
     var data_, coll_ids = [];
+
+    // save to fake storage
     card.get('colls').each(function(coll) {
       coll_ids.push(coll.get('id'));
     });
@@ -75,18 +90,29 @@ cards.model = (function() {
     };
 
     data_ = cards.fake.saveCard(data_);
-    if (!data_) {
+    if (!data_) {  // failed to save
       return null;
     }
 
-    // update collection
-    // TODO: if card id exists, ...
-    card = models.card.create(data_);
+    // update models
+    if (!data.cards.get(data_.id)) {
+      data.cards.create(data_);
+    } else {
+      data.cards.get(data_.id).set(data_);
+    }
+    card = data.cards.get(data_.id);
+
     data_.coll_ids.forEach(function(coll_id) {
-      var idx = ((data.index.get(coll_id).get('type') === 'tag') ? 0 : null);
-      data.index.get(coll_id).get('cards').add(card, idx);
+      var idx, coll;
+      coll = data.index.get(coll_id);
+      if (!coll.get('cards').get(card.get('id'))) {
+        idx = ((data.index.get(coll_id).get('type') === 'tag') ? 0 : null);
+        data.index.get(coll_id).get('cards').add(card, idx);
+      }
     });
-    data.index.get('special:all').get('cards').add(card, 0);
+    if (!data.index.get('special:all').get('cards').get(card.get('id'))) {
+      data.index.get('special:all').get('cards').add(card, 0);
+    }
 
     return card;
   };
