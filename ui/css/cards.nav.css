@@ -190,6 +190,10 @@
   cursor: pointer;
 }
 
+.cards-nav.content-is-not-note .annot-trigger li.move {
+  display: none;
+}
+
 .cards-nav-content-wrapper {
   top: 3em;  /* .cards-nav-head/height */
   bottom: 0;

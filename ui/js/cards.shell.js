@@ -113,7 +113,10 @@ cards.shell = (function() {
       set_nav_anchor: setNavAnchor,
       set_content_anchor: setContentAnchor,
       remove_card: cards.model.removeCard,
-      index: data.index
+      index: data.index,
+      get_current_coll: function() {
+        return data.index.get(state.anchor_map.content);
+      }
     });
     cards.nav.init(container);
 

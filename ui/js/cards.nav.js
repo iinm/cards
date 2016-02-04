@@ -14,7 +14,8 @@ cards.nav = (function() {
     set_nav_anchor: null,
     set_content_anchor: null,
     remove_card: null,
-    index: null  // collection of cards.model/models.coll
+    index: null,  // collection of cards.model/models.coll
+    get_current_coll: null
   },
 
   state = {
@@ -98,8 +99,12 @@ cards.nav = (function() {
     dom.target_indicator.innerHTML = String(state.annot_targets.len());
     if (state.annot_targets.len() > 0) {
       dom.self.classList.add('annot-trigger-opened');
+      if (config.get_current_coll().get('type') !== 'note') {
+        dom.self.classList.add('content-is-not-note');
+      }
     } else {
       dom.self.classList.remove('annot-trigger-opened');
+      dom.self.classList.remove('content-is-not-note');
     }
   };
 
