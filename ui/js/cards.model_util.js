@@ -150,7 +150,7 @@ cards.model_util = (function() {
     off = function(event, f) {
       var index = config.on[event].indexOf(f);
       if (index > -1) {
-        config.on.splice(index, 1);
+        config.on[event].splice(index, 1);
       }
     };
 
