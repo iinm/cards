@@ -93,7 +93,7 @@ cards.model_util = (function() {
     config = { model: model, on: {} },
     data = { instances: {}, instance_ids: [] },
     get, at, len, each,
-    add, remove, create,  // fetch
+    add, create, remove, reset,  // fetch
     on, off
     ;
 
@@ -140,6 +140,12 @@ cards.model_util = (function() {
       }
     };
 
+    reset = function() {
+      while (data.instance_ids.length > 0) {
+        remove(data.instance_ids.pop());
+      }
+    };
+
     create = function(data, idx) {
       var instance = config.model.create(data);
       add(instance, idx);
@@ -162,7 +168,7 @@ cards.model_util = (function() {
 
     return {
       get: get, at: at, len: len, each: each,
-      add: add, remove: remove, create: create,
+      add: add, create: create, remove: remove, reset: reset,
       on: on, off: off
     };
     //};

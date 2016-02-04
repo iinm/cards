@@ -13,6 +13,7 @@ cards.nav = (function() {
     self_selector: '.cards-nav',
     set_nav_anchor: null,
     set_content_anchor: null,
+    remove_card: null,
     index: null  // collection of cards.model/models.coll
   },
 
@@ -39,6 +40,7 @@ cards.nav = (function() {
     dom.content = dom.self.querySelector('.cards-nav-content');
     dom.annotator = dom.self.querySelector('.cards-nav-annotator');
     dom.target_indicator = dom.self.querySelector('.annot-target-indicator');
+    dom.annot_trigger = dom.self.querySelector('.annot-trigger');
   };
 
   configure = function(kv_map) {
@@ -64,6 +66,16 @@ cards.nav = (function() {
         cards.util.cloneUpdateObj(state, { self: 'closed' })
       );
     }, false);
+
+    dom.annot_trigger.querySelector('.remove').addEventListener('click',
+      function(event) {
+        event.preventDefault();
+        state.annot_targets.each(function(card) {
+          config.remove_card(card);
+        });
+        state.annot_targets.reset();
+      }, false
+    );
 
     // render index
     view.index = cards.view.index.create(config.index);

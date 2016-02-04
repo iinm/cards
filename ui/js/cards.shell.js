@@ -112,6 +112,7 @@ cards.shell = (function() {
     cards.nav.configure({
       set_nav_anchor: setNavAnchor,
       set_content_anchor: setContentAnchor,
+      remove_card: cards.model.removeCard,
       index: data.index
     });
     cards.nav.init(container);

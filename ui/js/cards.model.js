@@ -10,7 +10,7 @@ cards.model = (function() {
   var
   models = {},
   data = { index: null, cards: null },
-  init, getIndex, createCard, saveCard
+  init, getIndex, createCard, saveCard, removeCard
   ;
 
   // define models
@@ -134,10 +134,26 @@ cards.model = (function() {
     return card;
   };
 
+  removeCard = function(card) {
+    var data_, coll_ids = [];
+
+    // TODO: remove from fake storage
+
+    // update models
+    card.get('colls').each(function(coll) {
+      coll.get('cards').remove(card.get('id'));
+    });
+    data.index.get('special:all').get('cards').remove(card.get('id'));
+    data.cards.remove(card.get('id'));
+    // destroy self
+    //card.destroy();
+  };
+
   return {
     init: init,
     models: models,
     getIndex: getIndex,
-    createCard: createCard, saveCard: saveCard
+    createCard: createCard, saveCard: saveCard,
+    removeCard: removeCard
   };
 }());

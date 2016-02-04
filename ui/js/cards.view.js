@@ -385,6 +385,7 @@ cards.view = (function() {
           self.el.classList.remove('checked');
         }
       });
+      //model.on('destroy', function() { self.el.remove(); });
 
       return self;
     };

@@ -22,7 +22,7 @@ cards.content = (function() {
   dom = {},
 
   init, configure,
-  setColl, render, onAddRenderItem
+  setColl, render, onAddRenderItem, onRemoveItem
   ;  // var
 
   configure = function(kv_map) {
@@ -42,6 +42,7 @@ cards.content = (function() {
     }
     state.coll = coll;
     state.coll.get('cards').on('add', onAddRenderItem);
+    state.coll.get('cards').on('remove', onRemoveItem);
     render();
   };
 
@@ -78,6 +79,11 @@ cards.content = (function() {
     }
     //card_el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     card_el.scrollIntoView();
+  };
+
+  onRemoveItem = function(card) {
+    // TODO: ちょっと気持ち悪い
+    dom.self.querySelector('#' + card.get('id')).remove();
   };
 
   return {
