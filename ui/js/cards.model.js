@@ -44,27 +44,39 @@ cards.model = (function() {
         id: 'special:all', type: 'special:all', name: 'Cards'
       })
     );
-
-    // cache all cards
-    cards.fake.getCards().forEach(function(data_) {
-      data.cards.create(data_);
+    // create colls (tags and notes)
+    cards.fake.getCollections().forEach(function(data_) {
+      var coll = models.coll.create(data_);
+      data.index.add(coll);
     });
-    
+
     // add cards to special:all
     cards.fake.getCards().forEach(function(data_) {
+      var card;
+      if (!data.cards.get(data_.id)) {
+        card = data.cards.create(data_);
+        data_.coll_ids.forEach(function(coll_id) {
+          card.get('colls').add(data.index.get(coll_id));
+        });
+        data.cards.add(card);
+      }
       data.index.get('special:all').get('cards').add(data.cards.get(data_.id));
     });
 
-    // create colls add cards
+    // add cards to colls
     cards.fake.getCollections().forEach(function(data_) {
-      var coll = models.coll.create(data_);
       data_.card_ids.forEach(function(card_id) {
+        var card, card_data;
         if (!data.cards.get(card_id)) {
-          data.cards.create(cards.fake.getCard(card_id));
+          card_data = cards.fake.getCard(card_id);
+          card = data.cards.create(card_data);
+          card_data.coll_ids.forEach(function(coll_id) {
+            card.get('colls').add(data.index.get(coll_id));
+          });
+          data.cards.add(card);
         }
-        coll.get('cards').add(data.cards.get(card_id));
+        data.index.get(data_.id).get('cards').add(data.cards.get(card_id));
       });
-      data.index.add(coll);
     });
   };
 
@@ -84,6 +96,7 @@ cards.model = (function() {
       coll_ids.push(coll.get('id'));
     });
     data_ = {
+      id: card.get('id'),
       title: card.get('title'),
       body: card.get('body'),
       coll_ids: coll_ids

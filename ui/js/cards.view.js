@@ -305,6 +305,7 @@ cards.view = (function() {
     create = function(model) {
       var
       self = { el: null, render: null },
+      dom = {},
       state = { checked: false },
       toggleCheck
       ;
@@ -314,26 +315,38 @@ cards.view = (function() {
       }
 
       self.render = function() {
-        var colls_html = '{{meta}}';
-        //model.get('colls').each(function(coll) {
-        //  var icon = ((coll.get('type') === 'tag') ? 'tag' : 'book');
-        //  colls_html += cards.util.formatTmpl(
-        //    '<li><i class="fa fa-{{icon}}"></i>&nbsp;{{name}}</li>',
-        //    { icon: icon, name: coll.get('name') }
-        //  );
-        //});
+        console.log('render card');
+        if (!self.el) {
+          self.el = cards.util.createElement(
+            cards.util.formatTmpl(tmpl, { id: model.get('id') })
+          );
 
-        self.el = cards.util.createElement(
-          cards.util.formatTmpl(tmpl, {
-            id: model.get('id'),
-            title: model.get('title'),
-            body: model.get('body'),
-            colls: colls_html
-          })
-        );
-        self.el.querySelector('.item-check-trigger').addEventListener(
-          'click', toggleCheck, false
-        );
+          // set dom map
+          dom.title = self.el.querySelector('.item-title');
+          dom.body = self.el.querySelector('.item-body');
+          dom.colls = self.el.querySelector('.item-meta .colls');
+
+          // set event handlers
+          self.el.querySelector('.item-check-trigger').addEventListener(
+            'click', toggleCheck, false
+          );
+        }
+
+        dom.title.innerHTML = model.get('title');
+        dom.body.innerHTML = model.get('body');
+        dom.colls.innerHTML = null;
+        model.get('colls').each(function(coll) {
+          var icon = ((coll.get('type') === 'tag') ? 'tag' : 'book');
+          dom.colls.appendChild(
+            cards.util.createElement(
+              cards.util.formatTmpl(
+                '<li><i class="fa fa-{{icon}}"></i>&nbsp;{{name}}</li>',
+                { icon: icon, name: coll.get('name') }
+              )
+            )
+          );
+        });
+
         return self;
       };
 
@@ -346,6 +359,9 @@ cards.view = (function() {
           state.checked = false;
         }
       };
+
+      // set event handlers
+      model.on('change', self.render);
 
       return self;
     };

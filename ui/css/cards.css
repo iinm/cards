@@ -65,6 +65,10 @@ strong {
   margin: 0;
   font-size: .75em;
 }
+.cards-item .item-content .item-meta li {
+  display: inline-block;
+  margin: 0 .3em;
+}
 .cards-item .item-content .item-body {
   margin: 0;
   font-size: .95em;

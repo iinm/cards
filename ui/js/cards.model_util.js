@@ -114,6 +114,10 @@ cards.model_util = (function() {
     };
 
     add = function(instance, idx) {
+      if (data.instances.hasOwnProperty(instance.get('id'))) {
+        // already exists
+        return;
+      }
       data.instances[instance.get('id')] = instance;
       if ((typeof idx) !== 'number') {
         data.instance_ids.push(instance.get('id'));
@@ -137,7 +141,9 @@ cards.model_util = (function() {
     };
 
     create = function(data, idx) {
-      add(config.model.create(data), idx);
+      var instance = config.model.create(data);
+      add(instance, idx);
+      return instance;
     };
 
     on = function(event, f) {
