@@ -25,7 +25,7 @@ cards.nav = (function() {
   view = {},
 
   init, configure, setDomMap,
-  renderIndex, setTitle, setNavState, onClickToggleNav,
+  setTitle, setNavState, onClickToggleNav,
   annotate
   ;  // var
 

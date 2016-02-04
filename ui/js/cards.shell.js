@@ -55,7 +55,7 @@ cards.shell = (function() {
 
   saveCard = function(data) {
     // TODO: save or create?
-    data.index.get(anchor_map.content).create(data);
+    data.index.get(state.anchor_map.content).create(data);
   };
 
   onHashchange = function(event) {
@@ -78,14 +78,6 @@ cards.shell = (function() {
       valid = false;
       anchor_map.content = 'special:all';
     }
-    // if content is changed, close nav and editor
-    //if (state.anchor_map.content !== anchor_map.content) {
-    //  valid = false;
-    //  console.log('content changed');
-    //  console.log(state.anchor_map.content + ' ' + anchor_map.content);
-    //  anchor_map.nav = 'closed';
-    //  anchor_map.editor = 'closed';
-    //}
 
     if (!valid) {
       changeAnchorPart(anchor_map);

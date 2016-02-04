@@ -18,9 +18,9 @@ cards.model_util = (function() {
       on, off
       ;
 
-      if (typeof(data_tmpl) === 'object') {
+      if ((typeof data_tmpl) === 'object') {
         data = cards.util.cloneUpdateObj(data_tmpl, data);
-      } else if (typeof(data_tmpl) === 'function') {
+      } else if ((typeof data_tmpl) === 'function') {
         data = cards.util.cloneUpdateObj(data_tmpl(), data);
       }
 
@@ -113,9 +113,13 @@ cards.model_util = (function() {
       });
     };
 
-    add = function(instance) {
+    add = function(instance, idx) {
       data.instances[instance.get('id')] = instance;
-      data.instance_ids.push(instance.get('id'));
+      if ((typeof idx) !== 'number') {
+        data.instance_ids.push(instance.get('id'));
+      } else {
+        data.instance_ids.splice(idx, 0, instance.get('id'));
+      }
       if (config.on['add']) {
         config.on['add'].forEach(function(f) { f(instance); });
       }
@@ -132,8 +136,8 @@ cards.model_util = (function() {
       }
     };
 
-    create = function(data) {
-      add(config.model.create(data));
+    create = function(data, idx) {
+      add(config.model.create(data), idx);
     };
 
     on = function(event, f) {

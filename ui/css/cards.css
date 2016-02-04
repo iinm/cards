@@ -40,7 +40,7 @@ strong {
 .cards-item {
   position: relative;
   margin: .5em auto;
-  /*   height: 6em; */
+  min-height: 4em;
   width: 100%;
   max-width: 45em;
   background: #F9F2E7;

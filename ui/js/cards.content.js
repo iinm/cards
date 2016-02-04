@@ -19,7 +19,7 @@ cards.content = (function() {
 
   dom = {},
 
-  init, setColl, render
+  init, setColl, render, onAddRenderItem
   ;  // var
 
   init = function(container) {
@@ -30,7 +30,11 @@ cards.content = (function() {
     if (state.coll !== null && coll.get('id') === state.coll.get('id')) {
       return;
     }
+    if (state.coll !== null) {
+      state.coll.get('cards').off('add', onAddRenderItem);
+    }
     state.coll = coll;
+    state.coll.get('cards').on('add', onAddRenderItem);
     render();
   };
 
@@ -39,6 +43,20 @@ cards.content = (function() {
     state.coll.get('cards').each(function(model) {
       dom.self.appendChild(cards.view.card.create(model).render().el);
     });
+  };
+
+  onAddRenderItem = function(card) {
+    var sibling, card_el = cards.view.card.create(card).render().el;
+    if (state.coll.get('type') === 'note') {
+      dom.self.appendChild(card_el);
+    } else {
+      sibling = dom.self.querySelector('.cards-item');
+      if (sibling) {
+        dom.self.insertBefore(card_el, sibling);
+      } else {
+        dom.self.appendChild(card_el);
+      }
+    }
   };
 
   return {

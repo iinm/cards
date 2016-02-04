@@ -91,24 +91,25 @@ cards.editor = (function() {
   };
 
   onClickSaveCard = function(event) {
-    var data_, coll_ids = [];
+    var card;
     event.preventDefault();
-    data.draft.get('colls').each(function(coll) {
-      coll_ids.push(coll.get('id'));
-    });
-    data_ = {
-      title: dom.content_title.innerHTML,
-      body: dom.content_body.innerHTML,
-      coll_ids: coll_ids
-    };
-
-    if (data_.title.trim().length === 0 && data_.body.trim().length === 0) {
+    if (dom.content_title.innerHTML.trim().length === 0
+        && dom.content_body.innerHTML.trim().length === 0
+       ) {
       // skip if body is empty
       return;
     }
 
-    console.log(cards.fake.saveCard(data_));
-    // TODO: update related collections
+    data.draft.set({
+      title: dom.content_title.innerHTML,
+      body: dom.content_body.innerHTML
+    });
+
+    // TODO: configure
+    card = cards.model.saveCard(data.draft);
+    if (card) {
+      config.set_editor_anchor('closed');
+    }
   };
 
   setEditorState = function(editor_state) {
