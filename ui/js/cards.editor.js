@@ -87,6 +87,8 @@ cards.editor = (function() {
     data.draft.get('colls').on('remove', function(coll) {
       console.log(coll.get('name') + ' is removed.');
       renderMeta();
+      // TODO: ここじゃなくて，model.saveCardのところで消す．
+      coll.get('cards').remove(data.draft.get('id'));
     });
   };
 
