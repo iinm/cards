@@ -202,8 +202,10 @@ cards.view = (function() {
             } else {
               delete state.checked_colls[coll.get('id')];
               state.target.forEach(function(card) {
-                card.get('colls').remove(coll.get('id'));
-                coll.get('cards').remove(card.get('id'));
+                if (card.get('colls').get(coll.get('id'))) {
+                  card.get('colls').remove(coll.get('id'));
+                  coll.get('cards').remove(card.get('id'));
+                }
               });
             }
           });
@@ -249,7 +251,7 @@ cards.view = (function() {
         Object.keys(state.checked_colls).forEach(function(coll_id) {
           var checked = false;
           state.target.forEach(function(card) {
-            if (card.get('colls').get(coll_id) !== undefined) {
+            if (card.get('colls').get(coll_id)) {
               checked = true;
             }
           });
@@ -377,6 +379,7 @@ cards.view = (function() {
 
       // set event handlers
       model.on('change', self.render);
+      // TODO: これまずいかも
       model.get('colls').on('add', self.render);
       model.get('colls').on('remove', self.render);
       model.on('change:checked', function() {

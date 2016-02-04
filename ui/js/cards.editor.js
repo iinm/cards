@@ -93,6 +93,7 @@ cards.editor = (function() {
     renderMeta();
     config.set_editor_anchor('opened');
 
+    console.log('on');
     data.draft.get('colls').on('add', renderMeta);
     data.draft.get('colls').on('remove', on_remove_coll);
   };
