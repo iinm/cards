@@ -23,7 +23,7 @@ cards.editor = (function() {
 
   init, configure, setDomMap,
   setEditorState, onClickToggleEditor,
-  onClickSaveCard,
+  onClickSaveCard, setEditTarget,
   renderMeta
   ;  // var
 
@@ -45,17 +45,6 @@ cards.editor = (function() {
     // set dom map
     setDomMap(container);
 
-    // create draft
-    data.draft = config.create_card({});
-    data.draft.get('colls').on('add', function(coll) {
-      console.log(coll.get('name') + ' is added.');
-      renderMeta();
-    });
-    data.draft.get('colls').on('remove', function(coll) {
-      console.log(coll.get('name') + ' is removed.');
-      renderMeta();
-    });
-
     // set event handler
     dom.editor_trigger.addEventListener('click', onClickToggleEditor, false);
     dom.control.querySelector('.save').addEventListener(
@@ -73,6 +62,30 @@ cards.editor = (function() {
         config.request_annot([data.draft], 'note');
       }, false
     );
+  };
+
+  setEditTarget = function(card) {
+    if (!card) {
+      dom.content_title.innerHTML = null;
+      dom.content_body.innerHTML = null;
+      dom.content_colls.innerHTML = null;
+      data.draft = null;
+      return;
+    }
+    
+    data.draft = card;
+    dom.content_title.innerHTML = card.get('title');
+    dom.content_body.innerHTML = card.get('body');
+    renderMeta();
+
+    data.draft.get('colls').on('add', function(coll) {
+      console.log(coll.get('name') + ' is added.');
+      renderMeta();
+    });
+    data.draft.get('colls').on('remove', function(coll) {
+      console.log(coll.get('name') + ' is removed.');
+      renderMeta();
+    });
   };
 
   renderMeta = function() {
@@ -105,9 +118,9 @@ cards.editor = (function() {
       body: dom.content_body.innerHTML
     });
 
-    // TODO: configure
-    card = cards.model.saveCard(data.draft);
+    card = config.save_card(data.draft);
     if (card) {
+      setEditTarget(null);
       config.set_editor_anchor('closed');
     }
   };
@@ -121,6 +134,11 @@ cards.editor = (function() {
       dom.self.classList.add('opened');
       dom.content_title.setAttribute('contenteditable', 'true');
       dom.content_body.setAttribute('contenteditable', 'true');
+
+      // create new card
+      if (!state.draft) {
+        setEditTarget(config.create_card({}));
+      }
 
       state.self = 'opened';
       break;

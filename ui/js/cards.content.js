@@ -57,6 +57,8 @@ cards.content = (function() {
         dom.self.appendChild(card_el);
       }
     }
+    //card_el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    card_el.scrollIntoView();
   };
 
   return {

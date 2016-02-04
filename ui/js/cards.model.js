@@ -44,6 +44,7 @@ cards.model = (function() {
       // create cards
       data_.card_ids.forEach(function(card_id) {
         coll.get('cards').create(cards.fake.getCard(card_id));
+        //coll.get('cards').get(card_id).get('colls').add(coll);
       });
       data.index.add(coll);
     });
@@ -79,6 +80,7 @@ cards.model = (function() {
     }
 
     // update collection
+    // TODO: if card id exists, ...
     card = models.card.create(data_);
     data_.coll_ids.forEach(function(coll_id) {
       var idx = ((data.index.get(coll_id).get('type') === 'tag') ? 0 : null);

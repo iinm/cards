@@ -314,11 +314,21 @@ cards.view = (function() {
       }
 
       self.render = function() {
+        var colls_html = '{{meta}}';
+        //model.get('colls').each(function(coll) {
+        //  var icon = ((coll.get('type') === 'tag') ? 'tag' : 'book');
+        //  colls_html += cards.util.formatTmpl(
+        //    '<li><i class="fa fa-{{icon}}"></i>&nbsp;{{name}}</li>',
+        //    { icon: icon, name: coll.get('name') }
+        //  );
+        //});
+
         self.el = cards.util.createElement(
           cards.util.formatTmpl(tmpl, {
             id: model.get('id'),
             title: model.get('title'),
-            body: model.get('body')
+            body: model.get('body'),
+            colls: colls_html
           })
         );
         self.el.querySelector('.item-check-trigger').addEventListener(

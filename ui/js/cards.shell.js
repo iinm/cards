@@ -108,7 +108,7 @@ cards.shell = (function() {
     cards.editor.configure({
       set_editor_anchor: setEditorAnchor,
       create_card: cards.model.createCard,
-      save_card: saveCard,
+      save_card: cards.model.saveCard,
       request_annot: requestAnnot
     });
     cards.editor.init(container);
