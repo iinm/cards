@@ -327,6 +327,7 @@ cards.view = (function() {
       };
 
       self.render = function() {
+        console.log('render card ' + model.get('title'));
         if (!self.el) {
           self.el = cards.util.createElement(
             cards.util.formatTmpl(tmpl, { id: model.get('id') })
@@ -382,7 +383,7 @@ cards.view = (function() {
 
       // set event handlers
       model.on('change', self.render);
-      // TODO: これまずいかも
+      // TODO: define destory method and `off` these callbacks
       model.get('colls').on('add', self.render);
       model.get('colls').on('remove', self.render);
       model.on('change:checked', function() {
