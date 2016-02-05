@@ -71,6 +71,8 @@ cards.content = (function() {
   onAddRenderItem = function(card) {
     var sibling, card_view, card_el;
     card_view = cards.view.card.create(card);
+    state.card_id2view[card.get('id')] = card_view;
+
     card_view.configure({
       set_edit_target: config.set_edit_target,
       set_annot_target: config.set_annot_target
