@@ -198,7 +198,7 @@
 .cards-nav-head .annot-trigger li {
   display: inline-block;
   font-size: 1.2em;
-  width: calc(3em / 1.2);
+  width: calc(2.5em / 1.2);
   text-align: center;
   line-height: 2.5em;
   cursor: pointer;

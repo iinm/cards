@@ -16,7 +16,8 @@ cards.content = (function() {
   },
 
   state = {
-    coll: null  // cards.model/models.coll
+    coll: null,  // cards.model/models.coll
+    card_id2view: {}
   },
 
   dom = {},
@@ -50,9 +51,15 @@ cards.content = (function() {
   };
 
   render = function() {
-    dom.self.innerHTML = null;
+    //dom.self.innerHTML = null;
+    Object.keys(state.card_id2view).forEach(function(card_id) {
+      state.card_id2view[card_id].destroy();
+    });
+    state.card_id2view = {};
+    
     state.coll.get('cards').each(function(model) {
       var card_view = cards.view.card.create(model);
+      state.card_id2view[model.get('id')] = card_view;
       card_view.configure({
         set_edit_target: config.set_edit_target,
         set_annot_target: config.set_annot_target
@@ -85,9 +92,10 @@ cards.content = (function() {
   };
 
   onRemoveItem = function(card) {
-    // TODO: ちょっと気持ち悪い
-    console.log('remove ##');
-    dom.self.querySelector('#' + card.get('id')).remove();
+    console.log('remove card view');
+    //dom.self.querySelector('#' + card.get('id')).remove();
+    state.card_id2view[card.get('id')].destroy();
+    delete state.card_id2view[card.get('id')];
   };
 
   return {

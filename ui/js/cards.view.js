@@ -311,11 +311,11 @@ cards.view = (function() {
 
     create = function(model) {
       var
-      self = { el: null, render: null, configure: null },
+      self = { el: null, render: null, configure: null, destroy: null },
       config = { set_edit_target: null, set_annot_target: null },
       dom = {},
       state = { checked: false },
-      toggleCheck
+      onChangeChecked
       ;
 
       if (!tmpl) {
@@ -351,6 +351,11 @@ cards.view = (function() {
               event.preventDefault();
               config.set_edit_target(model);
             }, false);
+
+          model.on('change', self.render);
+          model.get('colls').on('add', self.render);
+          model.get('colls').on('remove', self.render);
+          model.on('change:checked', onChangeChecked);
         }
 
         dom.title.innerHTML = model.get('title');
@@ -371,30 +376,37 @@ cards.view = (function() {
         return self;
       };
 
-      toggleCheck = function(event) {
-        if (!state.checked) {
-          self.el.classList.add('checked');
-          state.checked = true;
-        } else {
-          self.el.classList.remove('checked');
-          state.checked = false;
-        }
+      self.destroy = function() {
+        model.off('change', self.render);
+        model.get('colls').off('add', self.render);
+        model.get('colls').off('remove', self.render);
+        model.off('change:checked', onChangeChecked);
+        self.el.remove();
       };
 
-      // set event handlers
-      model.on('change', self.render);
-      // TODO: define destory method and `off` these callbacks
-      model.get('colls').on('add', self.render);
-      model.get('colls').on('remove', self.render);
-      model.on('change:checked', function() {
+      onChangeChecked = function(event) {
         config.set_annot_target(model);
         if (model.get('checked')) {
           self.el.classList.add('checked');
         } else {
           self.el.classList.remove('checked');
         }
-      });
-      //model.on('destroy', function() { self.el.remove(); });
+      };
+
+      // set event handlers
+      //model.on('change', self.render);
+      //// TODO: define destory method and `off` these callbacks
+      //model.get('colls').on('add', self.render);
+      //model.get('colls').on('remove', self.render);
+      //model.on('change:checked', function() {
+      //  config.set_annot_target(model);
+      //  if (model.get('checked')) {
+      //    self.el.classList.add('checked');
+      //  } else {
+      //    self.el.classList.remove('checked');
+      //  }
+      //});
+      ////model.on('destroy', function() { self.el.remove(); });
 
       return self;
     };
