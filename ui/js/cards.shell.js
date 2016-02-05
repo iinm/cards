@@ -98,7 +98,7 @@ cards.shell = (function() {
       title_icon = '<i class="fa fa-circle-o"></i>';
     }
     cards.nav.setTitle(
-      //title_icon + '&nbsp;' +
+      title_icon + '&nbsp;&nbsp' +
       data.index.get(anchor_map.content).get('name')
     );
 
