@@ -17,7 +17,7 @@ cards.shell = (function() {
   init,
   changeAnchorPart, onHashchange,
   setNavAnchor, setEditorAnchor, setContentAnchor,
-  createCard, saveCard, requestAnnot
+  createCard, requestAnnot
   ;  // var
 
   changeAnchorPart = function(kv_map) {
@@ -51,11 +51,6 @@ cards.shell = (function() {
 
   setEditorAnchor = function(editor_state) {
     changeAnchorPart({ editor: editor_state });
-  };
-
-  saveCard = function(data) {
-    // TODO: save or create?
-    data.index.get(state.anchor_map.content).create(data);
   };
 
   onHashchange = function(event) {

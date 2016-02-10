@@ -122,7 +122,7 @@ cards.model = (function() {
       if (!coll.get('cards').get(card.get('id'))) {
         // add card to coll
         idx = ((coll.get('type') === 'tag') ? 0 : null);
-        data.index.get(coll_id).get('cards').add(card, idx);
+        coll.get('cards').add(card, idx);
         // add coll to card
         card.get('colls').add(coll);
       }

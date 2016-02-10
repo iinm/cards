@@ -64,20 +64,7 @@ cards.editor = (function() {
     );
   };
 
-  var on_remove_coll;
-  on_remove_coll = function(coll)  {
-    //console.log(coll.get('name') + ' is removed.');
-    renderMeta();
-    // TODO: ここじゃなくて，model.saveCardのところで消す．
-    //coll.get('cards').remove(data.draft.get('id'));
-  };
-
   setEditTarget = function(card) {
-    if (data.draft) {
-      data.draft.get('colls').off('add', renderMeta);
-      data.draft.get('colls').off('remove', on_remove_coll);
-    }
-    
     if (!card) {
       dom.content_title.innerHTML = null;
       dom.content_body.innerHTML = null;
@@ -87,15 +74,19 @@ cards.editor = (function() {
       return;
     }
     
+    if (data.draft) {
+      data.draft.get('colls').off('add', renderMeta);
+      data.draft.get('colls').off('remove', renderMeta);
+    }
+
     data.draft = card;
     dom.content_title.innerHTML = card.get('title');
     dom.content_body.innerHTML = card.get('body');
     renderMeta();
     config.set_editor_anchor('opened');
 
-    console.log('on');
     data.draft.get('colls').on('add', renderMeta);
-    data.draft.get('colls').on('remove', on_remove_coll);
+    data.draft.get('colls').on('remove', renderMeta);
   };
 
   renderMeta = function() {
@@ -116,6 +107,7 @@ cards.editor = (function() {
   onClickSaveCard = function(event) {
     var card;
     event.preventDefault();
+
     if (dom.content_title.innerHTML.trim().length === 0
         && dom.content_body.innerHTML.trim().length === 0
        ) {
