@@ -65,6 +65,11 @@ cards.editor = (function() {
   };
 
   setEditTarget = function(card) {
+    if (data.draft) {
+      data.draft.get('colls').off('add', renderMeta);
+      data.draft.get('colls').off('remove', renderMeta);
+    }
+
     if (!card) {
       dom.content_title.innerHTML = null;
       dom.content_body.innerHTML = null;
@@ -72,11 +77,6 @@ cards.editor = (function() {
       data.draft = null;
       console.log('draft discard');
       return;
-    }
-    
-    if (data.draft) {
-      data.draft.get('colls').off('add', renderMeta);
-      data.draft.get('colls').off('remove', renderMeta);
     }
 
     data.draft = card;

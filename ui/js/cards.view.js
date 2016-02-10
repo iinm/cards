@@ -8,18 +8,18 @@
 
 cards.view = (function() {
   "use strict";
-  var index_item, index, annot_index, card;
+  var index_item, index, annot_index_item, annot_index, card;
 
   index_item = (function() {
     var tmpl_id = 'tmpl-nav-index-item', tmpl = null, create;
 
     create = function(model) {  // model: cards.model/models.coll
-      var self = { el: null, render: null }, dom = {};
+      var self = { el: null, render: null, configure: null };
 
       if (!tmpl) {
         tmpl = document.getElementById(tmpl_id).text.trim();
       }
-      
+
       self.render = function() {
         var icon_html;
         switch (model.get('type')) {
@@ -40,32 +40,6 @@ cards.view = (function() {
             id: model.get('id'), name: model.get('name'), icon: icon_html
           })
         );
-
-        // for annotator
-        model.on('change:annot_check', function() {
-          switch (model.get('annot_check')) {
-          case 'checked':
-            self.el.classList.add('checked');
-            break;
-          case 'partial':
-            // TODO: change icon color
-            self.el.classList.add('checked');
-            break;
-          default:
-            self.el.classList.remove('checked');
-          }
-        });
-
-        self.el.querySelector('.item-check-trigger').addEventListener(
-          'click', function(event) {
-            model.set({
-              annot_check: (
-                (model.get('annot_check') !== 'checked') ? 'checked' : null
-              )
-            });
-          }, false
-        );
-
         return self;
       };
 
@@ -74,6 +48,7 @@ cards.view = (function() {
 
     return { create: create };
   }());  // index_item
+
 
   index = (function() {
     var tmpl_sec_id = 'tmpl-nav-index-sec', tmpl_sec = null, create;
@@ -168,6 +143,82 @@ cards.view = (function() {
     return { create: create };
   }());  // index
 
+
+  annot_index_item = (function() {
+    var tmpl_id = 'tmpl-nav-index-item', tmpl = null, create;
+
+    create = function(model) {  // model: cards.model/models.coll
+      var
+      self = { el: null, render: null, configure: null },
+      config = { on_change_annot_check: null },
+      dom = {}
+      ;
+
+      if (!tmpl) {
+        tmpl = document.getElementById(tmpl_id).text.trim();
+      }
+
+      self.configure = function(kv_map) {
+        cards.util.updateObj(config, kv_map);
+      };
+     
+      self.render = function() {
+        var icon_html;
+        switch (model.get('type')) {
+        case 'tag':
+          icon_html = '<i class="fa fa-tag"></i>';
+          break;
+        case 'note':
+          icon_html = '<i class="fa fa-book"></i>';
+          break;
+        case 'special:all':
+          icon_html = '<i class="fa fa-circle-o"></i>';
+          break;
+        default:
+          //
+        }
+        self.el = cards.util.createElement(
+          cards.util.formatTmpl(tmpl, {
+            id: model.get('id'), name: model.get('name'), icon: icon_html
+          })
+        );
+
+        model.on('change:annot_check', function() {
+          config.on_change_annot_check(model);
+
+          switch (model.get('annot_check')) {
+          case 'checked':
+            self.el.classList.add('checked');
+            break;
+          case 'partial':
+            // TODO: change icon color
+            self.el.classList.add('checked');
+            break;
+          default:
+            self.el.classList.remove('checked');
+          }
+        });
+
+        self.el.querySelector('.item-check-trigger').addEventListener(
+          'click', function(event) {
+            model.set({
+              annot_check: (
+                (model.get('annot_check') !== 'checked') ? 'checked' : null
+              )
+            });
+          }, false
+        );
+
+        return self;
+      };
+
+      return self;
+    };
+
+    return { create: create };
+  }());  // annot_index_item
+
+
   annot_index = (function() {
     var tmpl_sec_id = 'tmpl-nav-index-sec', tmpl_sec = null, create;
 
@@ -178,7 +229,8 @@ cards.view = (function() {
       dom = {
         tag_sec: null, tag_sec_ul: null,
         note_sec: null, note_sec_ul: null
-      }
+      },
+      onChangeAnnotCheck
       ;
 
       if (!tmpl_sec) {
@@ -187,30 +239,37 @@ cards.view = (function() {
         );
       }
 
+      onChangeAnnotCheck = function(coll) {
+        // update models
+        // TODO: cards.model.saveCardsでコレクションの変更もしたら便利だと思う
+        if (coll.get('annot_check') === 'checked') {
+          state.checked_colls[coll.get('id')] = coll;
+          state.target.forEach(function(card) {
+            card.get('colls').add(coll);
+            if ((typeof card.get('id')) === 'string') {
+              coll.get('cards').add(card);
+            }  // else, it's draft
+          });
+        } else {
+          delete state.checked_colls[coll.get('id')];
+          state.target.forEach(function(card) {
+            if (card.get('colls').get(coll.get('id'))) {
+              card.get('colls').remove(coll.get('id'));
+              coll.get('cards').remove(card.get('id'));
+            }
+          });
+        }
+      };
+
       self.render = function() {
         self.el = document.createElement('div');
 
         index.each(function(coll) {
+          var index_item_view;
           //
-          coll.on('change:annot_check', function() {
-            if (coll.get('annot_check') === 'checked') {
-              state.checked_colls[coll.get('id')] = coll;
-              state.target.forEach(function(card) {
-                card.get('colls').add(coll);
-                if ((typeof card.get('id')) === 'string') {
-                  coll.get('cards').add(card);
-                }  // else, it's draft
-              });
-            } else {
-              delete state.checked_colls[coll.get('id')];
-              state.target.forEach(function(card) {
-                if (card.get('colls').get(coll.get('id'))) {
-                  card.get('colls').remove(coll.get('id'));
-                  console.log(coll.get('id') + ' ' + card.get('id'));
-                  coll.get('cards').remove(card.get('id'));
-                }
-              });
-            }
+          index_item_view = annot_index_item.create(coll);
+          index_item_view.configure({
+            on_change_annot_check: onChangeAnnotCheck
           });
           
           switch (coll.get('type')) {
@@ -222,7 +281,7 @@ cards.view = (function() {
               dom.tag_sec_ul = dom.tag_sec.querySelector('ul');
               self.el.appendChild(dom.tag_sec);
             }
-            dom.tag_sec_ul.appendChild(index_item.create(coll).render().el);
+            dom.tag_sec_ul.appendChild(index_item_view.render().el);
             break;
 
           case 'note':
@@ -235,7 +294,7 @@ cards.view = (function() {
               dom.note_sec_ul = dom.note_sec.querySelector('ul');
               self.el.appendChild(dom.note_sec);
             }
-            dom.note_sec_ul.appendChild(index_item.create(coll).render().el);
+            dom.note_sec_ul.appendChild(index_item_view.render().el);
             break;
 
           default:
