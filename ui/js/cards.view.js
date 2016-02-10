@@ -393,21 +393,6 @@ cards.view = (function() {
         }
       };
 
-      // set event handlers
-      //model.on('change', self.render);
-      //// TODO: define destory method and `off` these callbacks
-      //model.get('colls').on('add', self.render);
-      //model.get('colls').on('remove', self.render);
-      //model.on('change:checked', function() {
-      //  config.set_annot_target(model);
-      //  if (model.get('checked')) {
-      //    self.el.classList.add('checked');
-      //  } else {
-      //    self.el.classList.remove('checked');
-      //  }
-      //});
-      ////model.on('destroy', function() { self.el.remove(); });
-
       return self;
     };
 
