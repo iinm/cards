@@ -265,8 +265,8 @@
   display: none;
 }
 
-.cards-nav-annotator .nav-index li,
-.cards-nav-content .nav-index li {
+.cards-nav-annotator .nav-index li.nav-index-item,
+.cards-nav-content .nav-index li.nav-index-item {
   position: relative;
   display: block;
   height: 2.5em;
@@ -285,22 +285,61 @@
   color: #777;
 }
 
-.cards-nav-content .nav-index li .item-check-trigger {
+.cards-nav-annotator .nav-index li.nav-index-item .item-config-menu
+.cards-nav-annotator .nav-index li.nav-index-item .item-config-trigger {
   display: none;
 }
-.cards-nav-annotator .nav-index li .item-check-trigger {
-  display: block;
+.cards-nav-content .nav-index.special li.nav-index-item .item-config-trigger {
+  display: none;
+}
+.cards-nav-content .nav-index li.nav-index-item .item-config-trigger {
   position: absolute;
   top: 0;
   bottom: 0;
   right: 0;
   width: 2.5em;
-  height: 100%;
+  text-align: center;
+  line-height: 2.5em;
+  color: #999;
   background: inherit;
   cursor: pointer;
 }
-.nav-index li .item-checkbox,
-.nav-index li .item-checkbox-checked {
+.nav-index li.nav-index-item .item-config-menu {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: -6em;  /* = width */
+  transition: right 250ms;
+  background: inherit;
+  overflow: hidden;
+}
+.nav-index li.nav-index-item.config-menu-opened .item-config-menu {
+  right: .3em;
+}
+li.nav-index-item .item-config-menu li {
+  display: inline-block;
+  width: 2em;
+  height: 100%;
+  line-height: 2.5em;
+  text-align: center;
+  color: #999;
+  cursor: pointer;
+}
+
+.cards-nav-content .nav-index li.nav-index-item .item-check-trigger {
+  display: none;
+}
+.cards-nav-annotator .nav-index li.nav-index-item .item-check-trigger {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 2.5em;
+  background: inherit;
+  cursor: pointer;
+}
+.nav-index li.nav-index-item .item-checkbox,
+.nav-index li.nav-index-item .item-checkbox-checked {
   position: absolute;
   width: 100%;
   height: 100%;
@@ -310,13 +349,13 @@
   background: inherit;
   overflow: hidden;
 }
-.nav-index li .item-checkbox-checked {
+.nav-index li.nav-index-item .item-checkbox-checked {
   height: 0;
 }
-.nav-index li.checked .item-checkbox-checked {
+.nav-index li.nav-index-item.checked .item-checkbox-checked {
   height: 100%;
 }
-.nav-index li.checked {
+.nav-index li.nav-index-item.checked {
   /*   box-shadow: 0 0 .5em #40C0CB; */
 }
 

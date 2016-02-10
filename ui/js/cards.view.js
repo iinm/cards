@@ -14,11 +14,19 @@ cards.view = (function() {
     var tmpl_id = 'tmpl-nav-index-item', tmpl = null, create;
 
     create = function(model) {  // model: cards.model/models.coll
-      var self = { el: null, render: null, configure: null };
+      var
+      self = { el: null, render: null, configure: null },
+      config = { set_content_anchor: null },
+      onClickSetContentAnchor
+      ;
 
       if (!tmpl) {
         tmpl = document.getElementById(tmpl_id).text.trim();
       }
+
+      self.configure = function(kv_map) {
+        cards.util.updateObj(config, kv_map);
+      };
 
       self.render = function() {
         var icon_html;
@@ -40,7 +48,34 @@ cards.view = (function() {
             id: model.get('id'), name: model.get('name'), icon: icon_html
           })
         );
+
+        // set event handlers
+        self.el.querySelector('.title').addEventListener(
+          'click', onClickSetContentAnchor
+        );
+        self.el.querySelector('.item-config-trigger').addEventListener(
+          'click',
+          function(event) {
+            event.preventDefault();
+            self.el.classList.add('config-menu-opened');
+          },
+          false
+        );
+        self.el.querySelector('.done').addEventListener(
+          'click',
+          function(event) {
+            event.preventDefault();
+            self.el.classList.remove('config-menu-opened');
+          },
+          false
+        );
+
         return self;
+      };  // render
+
+      onClickSetContentAnchor = function(event) {
+        event.preventDefault();
+        config.set_content_anchor(model.get('id'));
       };
 
       return self;
@@ -76,7 +111,7 @@ cards.view = (function() {
       };
 
       self.render = function() {
-        var index_items, i;
+        var index_items, i, index_item_view;
         self.el = document.createElement('div');
 
         // special index
@@ -86,11 +121,18 @@ cards.view = (function() {
         dom.special_sec_ul = dom.special_sec.querySelector('ul');
         dom.special_sec.classList.add('special');
         self.el.appendChild(dom.special_sec);
-        dom.special_sec_ul.appendChild(
-          index_item.create(index.get('special:all')).render().el
-        );
+        index_item_view = index_item.create(index.get('special:all'));
+        index_item_view.configure({
+          set_content_anchor: config.set_content_anchor
+        });
+        dom.special_sec_ul.appendChild(index_item_view.render().el);
 
         index.each(function(coll) {
+          index_item_view = index_item.create(coll);
+          index_item_view.configure({
+            set_content_anchor: config.set_content_anchor
+          });
+
           switch (coll.get('type')) {
           case 'tag':
             if (!dom.tag_sec) {
@@ -100,7 +142,7 @@ cards.view = (function() {
               dom.tag_sec_ul = dom.tag_sec.querySelector('ul');
               self.el.appendChild(dom.tag_sec);
             }
-            dom.tag_sec_ul.appendChild(index_item.create(coll).render().el);
+            dom.tag_sec_ul.appendChild(index_item_view.render().el);
             break;
 
           case 'note':
@@ -111,7 +153,7 @@ cards.view = (function() {
               dom.note_sec_ul = dom.note_sec.querySelector('ul');
               self.el.appendChild(dom.note_sec);
             }
-            dom.note_sec_ul.appendChild(index_item.create(coll).render().el);
+            dom.note_sec_ul.appendChild(index_item_view.render().el);
             break;
 
           default:
@@ -120,22 +162,23 @@ cards.view = (function() {
         });
 
         // index works as content selector
-        index_items = self.el.querySelectorAll('li');
-        for (i = 0; i < index_items.length; i++) {
-          index_items[i].addEventListener(
-            'click', onClickSetContentAnchor, false
-          );
-        }
+        //index_items = self.el.querySelectorAll('li.nav-index-item');
+        //console.log(index_items);
+        //for (i = 0; i < index_items.length; i++) {
+        //  index_items[i].addEventListener(
+        //    'click', onClickSetContentAnchor, false
+        //  );
+        //}
 
         return self;
       };  // render
 
-      onClickSetContentAnchor = function(event) {
-        event.preventDefault();
-        if (index.get(event.target.id)) {
-          config.set_content_anchor(event.target.id);
-        }
-      };
+      //onClickSetContentAnchor = function(event) {
+      //  event.preventDefault();
+      //  if (index.get(event.target.id)) {
+      //    config.set_content_anchor(event.target.id);
+      //  }
+      //};
 
       return self;
     };  // index.create

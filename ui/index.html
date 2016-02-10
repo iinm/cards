@@ -127,8 +127,16 @@
     </script>
 
     <script id="tmpl-nav-index-item" type="text/html">
-      <li id="{{id}}">
-        {{icon}}&nbsp; {{name}}
+      <li id="{{id}}" class="nav-index-item">
+        <div class="title">{{icon}}&nbsp; {{name}}</div>
+        <div class="item-config-trigger">
+          <i class="fa fa-cog"></i>
+        </div>
+        <ul class="item-config-menu">
+          <li class="edit"><i class="fa fa-pencil"></i></li>
+          <li class="remove"><i class="fa fa-trash"></i></li>
+          <li class="done"><i class="fa fa-check"></i></li>
+        </ul>
         <div class="item-check-trigger">
           <div class="item-checkbox"><i class="fa fa-square-o"></i></div>
           <div class="item-checkbox-checked">
