@@ -13,7 +13,7 @@ cards.model_util = (function() {
     var create;
     create = function(data) {
       var
-      config = { on_change: [], on_change_key: {}, on_destroy: [] },
+      config = { on: {} },
       get, set, destroy,  // fetch, save
       on, off
       ;
@@ -34,48 +34,36 @@ cards.model_util = (function() {
           }
         });
         changed_keys.forEach(function(key) {
-          if (config.on_change_key[key]) {
-            config.on_change_key[key].forEach(function(f) { f(); });
+          if (config.on['change:' + key]) {
+            config.on['change:' + key].forEach(function(f) { f(); });
           }
         });
         if (changed_keys.length > 0) {
-          config.on_change.forEach(function(f) { f(); });
+          config.on['change'].forEach(function(f) { f(); });
         }
       };
 
       destroy = function() {
-        config.on_destroy.forEach(function(f) { f(); });
+        config.on['destroy'].forEach(function(f) { f(); });
       };
 
       on = function(event_target, f) {
-        var target, event;
-        event_target = event_target.split(':');  // 'change:key' or 'change'
-        event = event_target[0];
-        target = ((event_target.length === 2) ? event_target[1] : null);
-
-        switch (event) {
-        case 'change':
-          if (!target) {
-            config.on_change.push(f);
-          } else if (data.hasOwnProperty(target)) {
-            if (!config.on_change_key[target]) {
-              config.on_change_key[target] = [];
-            }
-            config.on_change_key[target].push(f);
-          }
-          break;
-        case 'destroy':
-          if (!target) {
-            config.on_destroy.push(f);
-          }
-          break;
-        default:
-          //
+        // event_target: 'change:key' or 'change'
+        if (!config.on[event_target]) {
+          config.on[event_target] = [];
         }
+        config.on[event_target].push(f);
       };
 
-      off = function() {
-        // TODO
+      off = function(event_target, f) {
+        console.log('off ' + event_target);
+        var idx;
+        if (config.on[event_target]) {
+          idx = config.on[event_target].indexOf(f);
+          if (idx > -1) {
+            config.on[event_target].splice(idx, 1);
+          }
+        }
       };
 
       return {
