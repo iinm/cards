@@ -309,7 +309,7 @@ cards.view = (function() {
   card = (function() {
     var tmpl_id = 'tmpl-item', tmpl = null, create;
 
-    create = function(model) {
+    create = function(model) {  // model: cards.model.models.card
       var
       self = { el: null, render: null, configure: null, destroy: null },
       config = { set_edit_target: null, set_annot_target: null },
@@ -358,6 +358,7 @@ cards.view = (function() {
           model.on('change:checked', onChangeChecked);
         }
 
+        // render model content
         dom.title.innerHTML = model.get('title');
         dom.body.innerHTML = model.get('body');
         dom.colls.innerHTML = null;

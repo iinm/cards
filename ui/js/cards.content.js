@@ -16,14 +16,14 @@ cards.content = (function() {
   },
 
   state = {
-    coll: null,  // cards.model/models.coll
+    coll: null,  // cards.model.models.coll
     card_id2view: {}
   },
 
   dom = {},
 
   init, configure,
-  setColl, render, onAddRenderItem, onRemoveItem
+  setColl, render, createCardView, onAddItem, onRemoveItem
   ;  // var
 
   configure = function(kv_map) {
@@ -40,43 +40,43 @@ cards.content = (function() {
     }
     if (state.coll !== null) {
       // TODO: これどうにかならない？
-      state.coll.get('cards').off('add', onAddRenderItem);
+      state.coll.get('cards').off('add', onAddItem);
       state.coll.get('cards').off('remove', onRemoveItem);
     }
     state.coll = coll;
     console.log(state.coll.get('name'));
-    state.coll.get('cards').on('add', onAddRenderItem);
+    state.coll.get('cards').on('add', onAddItem);
     state.coll.get('cards').on('remove', onRemoveItem);
     render();
   };
 
+  createCardView = function(card) {
+    var card_view = cards.view.card.create(card);
+    state.card_id2view[card.get('id')] = card_view;
+    card_view.configure({
+      set_edit_target: config.set_edit_target,
+      set_annot_target: config.set_annot_target
+    });
+    return card_view;
+  };
+
   render = function() {
-    //dom.self.innerHTML = null;
+    // destroy previous collection
     Object.keys(state.card_id2view).forEach(function(card_id) {
       state.card_id2view[card_id].destroy();
     });
     state.card_id2view = {};
     
-    state.coll.get('cards').each(function(model) {
-      var card_view = cards.view.card.create(model);
-      state.card_id2view[model.get('id')] = card_view;
-      card_view.configure({
-        set_edit_target: config.set_edit_target,
-        set_annot_target: config.set_annot_target
-      });
+    state.coll.get('cards').each(function(card) {
+      var card_view = createCardView(card);
       dom.self.appendChild(card_view.render().el);
     });
   };
 
-  onAddRenderItem = function(card) {
+  onAddItem = function(card) {
     var sibling, card_view, card_el;
-    card_view = cards.view.card.create(card);
-    state.card_id2view[card.get('id')] = card_view;
 
-    card_view.configure({
-      set_edit_target: config.set_edit_target,
-      set_annot_target: config.set_annot_target
-    });
+    card_view = createCardView(card);
     card_el = card_view.render().el;
 
     if (state.coll.get('type') === 'note') {
@@ -95,7 +95,6 @@ cards.content = (function() {
 
   onRemoveItem = function(card) {
     console.log('remove card view');
-    //dom.self.querySelector('#' + card.get('id')).remove();
     state.card_id2view[card.get('id')].destroy();
     delete state.card_id2view[card.get('id')];
   };

@@ -38,7 +38,7 @@ cards.model_util = (function() {
             config.on['change:' + key].forEach(function(f) { f(); });
           }
         });
-        if (changed_keys.length > 0) {
+        if (changed_keys.length > 0 && config.on['change']) {
           config.on['change'].forEach(function(f) { f(); });
         }
       };
