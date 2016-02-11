@@ -271,21 +271,49 @@
   display: block;
   height: 2.5em;
   margin: 3px 0;
-  padding: 0 .5em;
   line-height: 2.5em;
   /*   border-radius: .2em; */
-  white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
   background: #F9F2E7;
   box-shadow: 0 0 .1em #777;
 }
-.cards-nav-annotator .nav-index li i,
-.cards-nav-content .nav-index li i {
+.cards-nav-annotator .nav-index li.nav-index-item i,
+.cards-nav-content .nav-index li.nav-index-item i {
   color: #777;
 }
 
-.cards-nav-annotator .nav-index li.nav-index-item .item-config-menu
+.nav-index li.nav-index-item .coll-type-icon {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 2em;
+  text-align: center;
+  line-height: 2.5em;
+}
+.nav-index li.nav-index-item .title {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 2em;
+  right: 2.5em;
+  transition: right 250ms;
+  line-height: 2.5em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  outline: none;
+}
+.nav-index li.nav-index-item.config-menu-opened .title {
+  right: 7.5em;
+}
+.nav-index li.nav-index-item.config-menu-opened.edit-mode .title {
+  overflow: scroll;
+  text-overflow: clip;
+  right: 2.5em;
+}
+
+.cards-nav-annotator .nav-index li.nav-index-item .item-config-menu,
 .cards-nav-annotator .nav-index li.nav-index-item .item-config-trigger {
   display: none;
 }
@@ -308,22 +336,29 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  right: -6em;  /* = width */
+  right: -7.5em;
   transition: right 250ms;
   background: inherit;
   overflow: hidden;
 }
 .nav-index li.nav-index-item.config-menu-opened .item-config-menu {
-  right: .3em;
+  right: 0;
 }
-li.nav-index-item .item-config-menu li {
-  display: inline-block;
-  width: 2em;
+
+li.nav-index-item .item-config-menu > * {
+  float: left;  /* inline-blockにすると，スペースが入ってしまうので */
+  width: 2.5em;
+  transition: width 250ms;
   height: 100%;
   line-height: 2.5em;
   text-align: center;
   color: #999;
   cursor: pointer;
+  overflow: hidden;
+}
+li.nav-index-item.edit-mode .item-config-menu .edit,
+li.nav-index-item.edit-mode .item-config-menu .remove {
+  width: 0;
 }
 
 .cards-nav-content .nav-index li.nav-index-item .item-check-trigger {

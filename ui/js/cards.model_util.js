@@ -38,13 +38,13 @@ cards.model_util = (function() {
             config.on['change:' + key].forEach(function(f) { f(); });
           }
         });
-        if (changed_keys.length > 0 && config.on['change']) {
-          config.on['change'].forEach(function(f) { f(); });
+        if (changed_keys.length > 0 && config.on.change) {
+          config.on.change.forEach(function(f) { f(); });
         }
       };
 
       destroy = function() {
-        config.on['destroy'].forEach(function(f) { f(); });
+        config.on.destroy.forEach(function(f) { f(); });
       };
 
       on = function(event_target, f) {
@@ -112,8 +112,8 @@ cards.model_util = (function() {
       } else {
         data.instance_ids.splice(idx, 0, instance.get('id'));
       }
-      if (config.on['add']) {
-        config.on['add'].forEach(function(f) { f(instance); });
+      if (config.on.add) {
+        config.on.add.forEach(function(f) { f(instance); });
       }
     };
 
@@ -123,8 +123,8 @@ cards.model_util = (function() {
         delete data.instances[id];
         data.instance_ids.splice(data.instance_ids.indexOf(id), 1);
       }
-      if (config.on['remove']) {
-        config.on['remove'].forEach(function(f) { f(instance); });
+      if (config.on.remove) {
+        config.on.remove.forEach(function(f) { f(instance); });
       }
     };
 

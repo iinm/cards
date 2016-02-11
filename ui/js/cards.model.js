@@ -135,8 +135,6 @@ cards.model = (function() {
   };
 
   removeCard = function(card) {
-    var data_, coll_ids = [];
-
     // TODO: remove from fake storage
 
     // update models

@@ -17,6 +17,8 @@ cards.view = (function() {
       var
       self = { el: null, render: null, configure: null },
       config = { set_content_anchor: null },
+      state = { mode: null },
+      dom = {},
       onClickSetContentAnchor
       ;
 
@@ -49,10 +51,14 @@ cards.view = (function() {
           })
         );
 
+        // set dom map
+        dom.title = self.el.querySelector('.title');
+
         // set event handlers
         self.el.querySelector('.title').addEventListener(
           'click', onClickSetContentAnchor
         );
+
         self.el.querySelector('.item-config-trigger').addEventListener(
           'click',
           function(event) {
@@ -61,11 +67,39 @@ cards.view = (function() {
           },
           false
         );
-        self.el.querySelector('.done').addEventListener(
+
+        self.el.querySelector('.item-config-menu .remove').addEventListener(
           'click',
           function(event) {
             event.preventDefault();
+            // TODO
             self.el.classList.remove('config-menu-opened');
+            console.log('TODO: remove coll ' + model.get('name'));
+          },
+          false
+        );
+
+        self.el.querySelector('.item-config-menu .edit').addEventListener(
+          'click',
+          function(event) {
+            event.preventDefault();
+            state.mode = 'edit';
+            self.el.classList.add('edit-mode');
+            dom.title.setAttribute('contenteditable', 'true');
+            dom.title.focus();
+          },
+          false
+        );
+
+        self.el.querySelector('.item-config-menu .done').addEventListener(
+          'click',
+          function(event) {
+            event.preventDefault();
+            state.mode = null;
+            dom.title.focus();
+            dom.title.setAttribute('contenteditable', 'false');
+            self.el.classList.remove('config-menu-opened');
+            self.el.classList.remove('edit-mode');
           },
           false
         );
@@ -75,6 +109,9 @@ cards.view = (function() {
 
       onClickSetContentAnchor = function(event) {
         event.preventDefault();
+        if (state.mode === 'edit') {
+          return;
+        }
         config.set_content_anchor(model.get('id'));
       };
 
@@ -96,8 +133,7 @@ cards.view = (function() {
         special_sec: null, special_sec_ul: null,
         tag_sec: null, tag_sec_ul: null,
         note_sec: null, note_sec_ul: null
-      },
-      onClickSetContentAnchor
+      }
       ;
 
       if (!tmpl_sec) {
@@ -111,7 +147,7 @@ cards.view = (function() {
       };
 
       self.render = function() {
-        var index_items, i, index_item_view;
+        var index_item_view;
         self.el = document.createElement('div');
 
         // special index
@@ -193,8 +229,7 @@ cards.view = (function() {
     create = function(model) {  // model: cards.model/models.coll
       var
       self = { el: null, render: null, configure: null },
-      config = { on_change_annot_check: null },
-      dom = {}
+      config = { on_change_annot_check: null }
       ;
 
       if (!tmpl) {
@@ -244,6 +279,7 @@ cards.view = (function() {
 
         self.el.querySelector('.item-check-trigger').addEventListener(
           'click', function(event) {
+            event.preventDefault();
             model.set({
               annot_check: (
                 (model.get('annot_check') !== 'checked') ? 'checked' : null
@@ -416,7 +452,6 @@ cards.view = (function() {
       self = { el: null, render: null, configure: null, destroy: null },
       config = { set_edit_target: null, set_annot_target: null },
       dom = {},
-      state = { checked: false },
       onChangeChecked
       ;
 
@@ -487,7 +522,7 @@ cards.view = (function() {
         self.el.remove();
       };
 
-      onChangeChecked = function(event) {
+      onChangeChecked = function() {
         config.set_annot_target(model);
         if (model.get('checked')) {
           self.el.classList.add('checked');

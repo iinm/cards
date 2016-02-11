@@ -92,7 +92,7 @@ cards.nav = (function() {
     dom.annot_trigger.querySelector('.add-to-note').addEventListener(
       'click',
       function(event) {
-        var i, card, card_array = [];
+        var card_array = [];
         event.preventDefault();
         state.annot_targets.each(function(card) { card_array.push(card); });
         annotate(card_array, 'note');
