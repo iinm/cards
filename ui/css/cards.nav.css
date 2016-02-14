@@ -318,6 +318,7 @@
   text-overflow: clip;
   right: 2.5em;
 }
+
 .nav-index li.nav-index-item-new .title[contentEditable]:empty:not(:focus):before {
   content: attr(data-text);
   color: #aaa;
@@ -332,6 +333,11 @@
   line-height: 2.5em;
   background: inherit;
   cursor: pointer;
+}
+
+.nav-index li.nav-index-item .item-config-trigger i,
+.nav-index li.nav-index-item-new .item-add-trigger i {
+  color: #999;
 }
 
 .cards-nav-annotator .nav-index li.nav-index-item .item-config-menu,

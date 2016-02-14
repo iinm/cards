@@ -47,7 +47,7 @@
   line-height: 3em;
   text-align: center;
   overflow: hidden;
-  color: #777;
+  color: #888;
   /*   color: #aaa; */
   cursor: pointer;
 }
@@ -137,7 +137,7 @@
 .cards-editor-control .right-control {
   position: absolute;
   right: 0;
-  color: #777;
+  color: #888;
 }
 
 .cards-editor-control .left-control {
