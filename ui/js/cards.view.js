@@ -335,13 +335,14 @@ cards.view = (function() {
           switch (model.get('annot_check')) {
           case 'checked':
             self.el.classList.add('checked');
+            self.el.classList.remove('partial');
             break;
           case 'partial':
-            // TODO: change icon color
-            self.el.classList.add('checked');
+            self.el.classList.add('partial');
             break;
           default:
             self.el.classList.remove('checked');
+            self.el.classList.remove('partial');
           }
         });
 

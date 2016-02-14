@@ -411,8 +411,12 @@ li.nav-index-item.edit-mode .item-config-menu .remove {
 .nav-index li.nav-index-item .item-checkbox-checked {
   height: 0;
 }
-.nav-index li.nav-index-item.checked .item-checkbox-checked {
+.nav-index li.nav-index-item.checked .item-checkbox-checked,
+.nav-index li.nav-index-item.partial .item-checkbox-checked {
   height: 100%;
+}
+.nav-index li.nav-index-item.partial .item-checkbox-checked i {
+  color: #bbb;
 }
 .nav-index li.nav-index-item.checked {
   /*   box-shadow: 0 0 .5em #40C0CB; */
