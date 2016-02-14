@@ -52,14 +52,24 @@ cards.editor = (function() {
     );
     dom.control.querySelector('.add-tag').addEventListener(
       'click', function(event) {
+        var annot_targets;
         event.preventDefault();
-        config.request_annot([data.draft], 'tag');
+        annot_targets = cards.model_util.createCollection(
+          cards.model.models.card
+        );
+        annot_targets.add(data.draft);
+        config.request_annot(annot_targets, 'tag');
       }, false
     );
     dom.control.querySelector('.add-to-note').addEventListener(
       'click', function(event) {
+        var annot_targets;
         event.preventDefault();
-        config.request_annot([data.draft], 'note');
+        annot_targets = cards.model_util.createCollection(
+          cards.model.models.card
+        );
+        annot_targets.add(data.draft);
+        config.request_annot(annot_targets, 'note');
       }, false
     );
   };
