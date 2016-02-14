@@ -120,6 +120,9 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.cards-editor-meta .colls li i {
+  color: #777;
+}
 
 .cards-editor-control {
   bottom: 0;
