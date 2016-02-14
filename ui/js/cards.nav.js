@@ -82,20 +82,16 @@ cards.nav = (function() {
     dom.annot_trigger.querySelector('.add-tag').addEventListener(
       'click',
       function(event) {
-        var card_array = [];
         event.preventDefault();
-        state.annot_targets.each(function(card) { card_array.push(card); });
-        annotate(card_array, 'tag');
+        annotate(state.annot_targets, 'tag');
       }, false
     );
 
     dom.annot_trigger.querySelector('.add-to-note').addEventListener(
       'click',
       function(event) {
-        var card_array = [];
         event.preventDefault();
-        state.annot_targets.each(function(card) { card_array.push(card); });
-        annotate(card_array, 'note');
+        annotate(state.annot_targets, 'note');
       }, false
     );
 
@@ -148,8 +144,8 @@ cards.nav = (function() {
     }
   };
 
-  annotate = function(card_array, annot_type) {
-    view.annot_index.setState(card_array, annot_type);
+  annotate = function(cards_, annot_type) {
+    view.annot_index.setState(cards_, annot_type);
     config.set_nav_anchor(
       cards.util.cloneUpdateObj(state, { self: 'annot' })
     );

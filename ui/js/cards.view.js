@@ -373,7 +373,7 @@ cards.view = (function() {
     create = function(index) {  // index: cards.model.index
       var
       self = { el: null, render: null, setState: null },
-      state = { target: [], checked_colls: {} },
+      state = { target: null, checked_colls: {} },
       dom = {
         tag_sec: null, tag_sec_ul: null,
         note_sec: null, note_sec_ul: null
@@ -392,7 +392,7 @@ cards.view = (function() {
         // TODO: cards.model.saveCardsでコレクションの変更もしたら便利だと思う
         if (coll.get('annot_check') === 'checked') {
           state.checked_colls[coll.get('id')] = coll;
-          state.target.forEach(function(card) {
+          state.target.each(function(card) {
             card.get('colls').add(coll);
             if ((typeof card.get('id')) === 'string') {
               coll.get('cards').add(card);
@@ -400,7 +400,7 @@ cards.view = (function() {
           });
         } else {
           delete state.checked_colls[coll.get('id')];
-          state.target.forEach(function(card) {
+          state.target.each(function(card) {
             if (card.get('colls').get(coll.get('id'))) {
               card.get('colls').remove(coll.get('id'));
               coll.get('cards').remove(card.get('id'));
@@ -475,14 +475,14 @@ cards.view = (function() {
         console.log('create ' + coll_type + ' ' + title);
       };
 
-      self.setState = function(card_array, annot_type) {
+      self.setState = function(cards_, annot_type) {
         var freq = {}, checked_ids = [], partial_checked_ids = [];
-        state.target = card_array;
+        state.target = cards_;
 
         // clear check
         Object.keys(state.checked_colls).forEach(function(coll_id) {
           var checked = false;
-          state.target.forEach(function(card) {
+          state.target.each(function(card) {
             if (card.get('colls').get(coll_id)) {
               checked = true;
             }
@@ -493,7 +493,7 @@ cards.view = (function() {
         });
 
         // set check status
-        state.target.forEach(function(card) {
+        state.target.each(function(card) {
           card.get('colls').each(function(coll) {
             var coll_id = coll.get('id');
             freq[coll_id] = ((freq.hasOwnProperty(coll_id))
@@ -501,7 +501,7 @@ cards.view = (function() {
           });
         });
         Object.keys(freq).forEach(function(coll_id) {
-          if (state.target.length === freq[coll_id]) {
+          if (state.target.len() === freq[coll_id]) {
             checked_ids.push(coll_id);
           } else {
             partial_checked_ids.push(coll_id);
