@@ -8,7 +8,10 @@
 
 cards.view = (function() {
   "use strict";
-  var index_item, index, annot_index_item, annot_index, card;
+  var
+  index_item, index_item_new, index,
+  annot_index_item, annot_index,
+  card;
 
   index_item = (function() {
     var tmpl_id = 'tmpl-nav-index-item', tmpl = null, create;
@@ -122,6 +125,42 @@ cards.view = (function() {
   }());  // index_item
 
 
+  index_item_new = (function() {
+    var tmpl_id = 'tmpl-nav-index-item-new', tmpl = null, create;
+
+    create = function(coll_type) {
+      var self = { el: null, render: null };
+
+      if (!tmpl) {
+        tmpl = document.getElementById(tmpl_id).text.trim();
+      }
+
+      self.render = function() {
+        var icon_html;
+        switch (coll_type) {
+        case 'tag':
+          icon_html = '<i class="fa fa-tag"></i>';
+          break;
+        case 'note':
+          icon_html = '<i class="fa fa-book"></i>';
+          break;
+        default:
+          //
+        }
+        self.el = cards.util.createElement(
+          cards.util.formatTmpl(tmpl, { icon: icon_html })
+        );
+
+        return self;
+      };  // render
+
+      return self;
+    };  // create
+
+    return { create: create };
+  }());  // index_item_new
+
+
   index = (function() {
     var tmpl_sec_id = 'tmpl-nav-index-sec', tmpl_sec = null, create;
 
@@ -163,6 +202,27 @@ cards.view = (function() {
         });
         dom.special_sec_ul.appendChild(index_item_view.render().el);
 
+        // notes
+        dom.note_sec = cards.util.createElement(
+          cards.util.formatTmpl(tmpl_sec, { title: 'Notes' })
+        );
+        dom.note_sec_ul = dom.note_sec.querySelector('ul');
+        self.el.appendChild(dom.note_sec);
+        // new item
+        dom.new_note = index_item_new.create('note').render().el;
+        dom.note_sec_ul.appendChild(dom.new_note);
+
+        // tags
+        dom.tag_sec = cards.util.createElement(
+          cards.util.formatTmpl(tmpl_sec, { title: 'Tags' })
+        );
+        dom.tag_sec_ul = dom.tag_sec.querySelector('ul');
+        self.el.appendChild(dom.tag_sec);
+        // new item
+        dom.new_tag = index_item_new.create('tag').render().el;
+        dom.tag_sec_ul.appendChild(dom.new_tag);
+
+        // add to index
         index.each(function(coll) {
           index_item_view = index_item.create(coll);
           index_item_view.configure({
@@ -171,25 +231,17 @@ cards.view = (function() {
 
           switch (coll.get('type')) {
           case 'tag':
-            if (!dom.tag_sec) {
-              dom.tag_sec = cards.util.createElement(
-                cards.util.formatTmpl(tmpl_sec, { title: 'Tags' })
-              );
-              dom.tag_sec_ul = dom.tag_sec.querySelector('ul');
-              self.el.appendChild(dom.tag_sec);
-            }
-            dom.tag_sec_ul.appendChild(index_item_view.render().el);
+            //dom.tag_sec_ul.appendChild(index_item_view.render().el);
+            dom.tag_sec_ul.insertBefore(
+              index_item_view.render().el, dom.new_tag
+            );
             break;
 
           case 'note':
-            if (!dom.note_sec) {
-              dom.note_sec = cards.util.createElement(
-                cards.util.formatTmpl(tmpl_sec, { title: 'Notes' })
-              );
-              dom.note_sec_ul = dom.note_sec.querySelector('ul');
-              self.el.appendChild(dom.note_sec);
-            }
-            dom.note_sec_ul.appendChild(index_item_view.render().el);
+            //dom.note_sec_ul.appendChild(index_item_view.render().el);
+            dom.note_sec_ul.insertBefore(
+              index_item_view.render().el, dom.new_note
+            );
             break;
 
           default:
@@ -197,24 +249,8 @@ cards.view = (function() {
           }
         });
 
-        // index works as content selector
-        //index_items = self.el.querySelectorAll('li.nav-index-item');
-        //console.log(index_items);
-        //for (i = 0; i < index_items.length; i++) {
-        //  index_items[i].addEventListener(
-        //    'click', onClickSetContentAnchor, false
-        //  );
-        //}
-
         return self;
       };  // render
-
-      //onClickSetContentAnchor = function(event) {
-      //  event.preventDefault();
-      //  if (index.get(event.target.id)) {
-      //    config.set_content_anchor(event.target.id);
-      //  }
-      //};
 
       return self;
     };  // index.create
@@ -248,9 +284,6 @@ cards.view = (function() {
           break;
         case 'note':
           icon_html = '<i class="fa fa-book"></i>';
-          break;
-        case 'special:all':
-          icon_html = '<i class="fa fa-circle-o"></i>';
           break;
         default:
           //
@@ -343,37 +376,47 @@ cards.view = (function() {
       self.render = function() {
         self.el = document.createElement('div');
 
+        // notes
+        dom.note_sec = cards.util.createElement(
+          cards.util.formatTmpl(tmpl_sec, { title: 'Notes' })
+        );
+        dom.note_sec_ul = dom.note_sec.querySelector('ul');
+        self.el.appendChild(dom.note_sec);
+        // new item
+        dom.new_note = index_item_new.create('note').render().el;
+        dom.note_sec_ul.appendChild(dom.new_note);
+
+        // tags
+        dom.tag_sec = cards.util.createElement(
+          cards.util.formatTmpl(tmpl_sec, { title: 'Tags' })
+        );
+        dom.tag_sec_ul = dom.tag_sec.querySelector('ul');
+        self.el.appendChild(dom.tag_sec);
+        // new item
+        dom.new_tag = index_item_new.create('tag').render().el;
+        dom.tag_sec_ul.appendChild(dom.new_tag);
+
+        // add to index
         index.each(function(coll) {
           var index_item_view;
-          //
           index_item_view = annot_index_item.create(coll);
           index_item_view.configure({
             on_change_annot_check: onChangeAnnotCheck
           });
-          
+
           switch (coll.get('type')) {
           case 'tag':
-            if (!dom.tag_sec) {
-              dom.tag_sec = cards.util.createElement(
-                cards.util.formatTmpl(tmpl_sec, { title: 'Add Tags' })
-              );
-              dom.tag_sec_ul = dom.tag_sec.querySelector('ul');
-              self.el.appendChild(dom.tag_sec);
-            }
-            dom.tag_sec_ul.appendChild(index_item_view.render().el);
+            //dom.tag_sec_ul.appendChild(index_item_view.render().el);
+            dom.tag_sec_ul.insertBefore(
+              index_item_view.render().el, dom.new_tag
+            );
             break;
 
           case 'note':
-            if (!dom.note_sec) {
-              dom.note_sec = cards.util.createElement(
-                cards.util.formatTmpl(
-                  tmpl_sec, { title: 'Append to Notes' }
-                )
-              );
-              dom.note_sec_ul = dom.note_sec.querySelector('ul');
-              self.el.appendChild(dom.note_sec);
-            }
-            dom.note_sec_ul.appendChild(index_item_view.render().el);
+            //dom.note_sec_ul.appendChild(index_item_view.render().el);
+            dom.note_sec_ul.insertBefore(
+              index_item_view.render().el, dom.new_note
+            );
             break;
 
           default:
@@ -382,7 +425,7 @@ cards.view = (function() {
         });
 
         return self;
-      };
+      };  // self.render
 
       self.setState = function(card_array, annot_type) {
         var freq = {}, checked_ids = [], partial_checked_ids = [];

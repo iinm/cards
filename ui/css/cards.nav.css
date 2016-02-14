@@ -266,7 +266,9 @@
 }
 
 .cards-nav-annotator .nav-index li.nav-index-item,
-.cards-nav-content .nav-index li.nav-index-item {
+.cards-nav-content .nav-index li.nav-index-item,
+.cards-nav-annotator .nav-index li.nav-index-item-new,
+.cards-nav-content .nav-index li.nav-index-item-new {
   position: relative;
   display: block;
   height: 2.5em;
@@ -278,11 +280,14 @@
   box-shadow: 0 0 .1em #777;
 }
 .cards-nav-annotator .nav-index li.nav-index-item i,
-.cards-nav-content .nav-index li.nav-index-item i {
-  color: #777;
+.cards-nav-content .nav-index li.nav-index-item i,
+.cards-nav-annotator .nav-index li.nav-index-item-new i,
+.cards-nav-content .nav-index li.nav-index-item-new i {
+  color: #888;
 }
 
-.nav-index li.nav-index-item .coll-type-icon {
+.nav-index li.nav-index-item .coll-type-icon,
+.nav-index li.nav-index-item-new .coll-type-icon {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -291,7 +296,8 @@
   text-align: center;
   line-height: 2.5em;
 }
-.nav-index li.nav-index-item .title {
+.nav-index li.nav-index-item .title,
+.nav-index li.nav-index-item-new .title {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -312,6 +318,21 @@
   text-overflow: clip;
   right: 2.5em;
 }
+.nav-index li.nav-index-item-new .title[contentEditable]:empty:not(:focus):before {
+  content: attr(data-text);
+  color: #aaa;
+}
+.nav-index li.nav-index-item-new .item-add-trigger {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 2.5em;
+  text-align: center;
+  line-height: 2.5em;
+  background: inherit;
+  cursor: pointer;
+}
 
 .cards-nav-annotator .nav-index li.nav-index-item .item-config-menu,
 .cards-nav-annotator .nav-index li.nav-index-item .item-config-trigger {
@@ -328,7 +349,6 @@
   width: 2.5em;
   text-align: center;
   line-height: 2.5em;
-  color: #999;
   background: inherit;
   cursor: pointer;
 }
@@ -352,7 +372,6 @@ li.nav-index-item .item-config-menu > * {
   height: 100%;
   line-height: 2.5em;
   text-align: center;
-  color: #999;
   cursor: pointer;
   overflow: hidden;
 }
@@ -379,8 +398,7 @@ li.nav-index-item.edit-mode .item-config-menu .remove {
   width: 100%;
   height: 100%;
   text-align: center;
-  line-height: 2.5em
-  color: #999;
+  line-height: 2.5em;
   background: inherit;
   overflow: hidden;
 }
