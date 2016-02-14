@@ -555,6 +555,7 @@ cards.view = (function() {
       };
 
       self.render = function() {
+        var coll_array;  // for sort
         console.log('render card ' + model.get('title'));
         if (!self.el) {
           self.el = cards.util.createElement(
@@ -589,8 +590,22 @@ cards.view = (function() {
         // render model content
         dom.title.innerHTML = model.get('title');
         dom.body.innerHTML = model.get('body');
+
+        // render coll
         dom.colls.innerHTML = null;
+        // sort: note -> tag
+        coll_array = [];
         model.get('colls').each(function(coll) {
+          if (coll.get('type') === 'note') {
+            coll_array.push(coll);
+          }
+        });
+        model.get('colls').each(function(coll) {
+          if (coll.get('type') === 'tag') {
+            coll_array.push(coll);
+          }
+        });
+        coll_array.forEach(function(coll) {
           var icon = ((coll.get('type') === 'tag') ? 'tag' : 'book');
           dom.colls.appendChild(
             cards.util.createElement(

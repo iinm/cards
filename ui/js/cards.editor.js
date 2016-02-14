@@ -90,8 +90,20 @@ cards.editor = (function() {
   };
 
   renderMeta = function() {
+    var coll_array = [];
     dom.content_colls.innerHTML = null;
+    // sort: note -> tag
     data.draft.get('colls').each(function(coll) {
+      if (coll.get('type') === 'note') {
+        coll_array.push(coll);
+      }
+    });
+    data.draft.get('colls').each(function(coll) {
+      if (coll.get('type') === 'tag') {
+        coll_array.push(coll);
+      }
+    });
+    coll_array.forEach(function(coll) {
       var icon = ((coll.get('type') === 'tag') ? 'tag' : 'book');
       dom.content_colls.appendChild(
         cards.util.createElement(
