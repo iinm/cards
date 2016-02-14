@@ -75,7 +75,7 @@ cards.view = (function() {
           'click',
           function(event) {
             event.preventDefault();
-            // TODO
+            // TODO: remove coll and update models
             self.el.classList.remove('config-menu-opened');
             console.log('TODO: remove coll ' + model.get('name'));
           },
@@ -98,6 +98,7 @@ cards.view = (function() {
           'click',
           function(event) {
             event.preventDefault();
+            // TODO (?): save coll if title is changed
             state.mode = null;
             dom.title.focus();
             dom.title.setAttribute('contenteditable', 'false');
