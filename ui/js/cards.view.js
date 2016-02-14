@@ -129,11 +129,18 @@ cards.view = (function() {
     var tmpl_id = 'tmpl-nav-index-item-new', tmpl = null, create;
 
     create = function(coll_type) {
-      var self = { el: null, render: null };
+      var
+      self = { el: null, render: null, config: null },
+      config = { create_coll: null }
+      ;
 
       if (!tmpl) {
         tmpl = document.getElementById(tmpl_id).text.trim();
       }
+
+      self.configure = function(kv_map) {
+        cards.util.updateObj(config, kv_map);
+      };
 
       self.render = function() {
         var icon_html;
@@ -149,6 +156,18 @@ cards.view = (function() {
         }
         self.el = cards.util.createElement(
           cards.util.formatTmpl(tmpl, { icon: icon_html })
+        );
+
+        // set event handler
+        self.el.querySelector('.item-add-trigger').addEventListener(
+          'click',
+          function(event) {
+            event.preventDefault();
+            config.create_coll(
+              self.el.querySelector('.title').innerText, coll_type
+            );
+          },
+          false
         );
 
         return self;
@@ -172,7 +191,8 @@ cards.view = (function() {
         special_sec: null, special_sec_ul: null,
         tag_sec: null, tag_sec_ul: null,
         note_sec: null, note_sec_ul: null
-      }
+      },
+      createColl
       ;
 
       if (!tmpl_sec) {
@@ -209,7 +229,9 @@ cards.view = (function() {
         dom.note_sec_ul = dom.note_sec.querySelector('ul');
         self.el.appendChild(dom.note_sec);
         // new item
-        dom.new_note = index_item_new.create('note').render().el;
+        index_item_view = index_item_new.create('note');
+        index_item_view.configure({ create_coll: createColl });
+        dom.new_note = index_item_view.render().el;
         dom.note_sec_ul.appendChild(dom.new_note);
 
         // tags
@@ -219,7 +241,9 @@ cards.view = (function() {
         dom.tag_sec_ul = dom.tag_sec.querySelector('ul');
         self.el.appendChild(dom.tag_sec);
         // new item
-        dom.new_tag = index_item_new.create('tag').render().el;
+        index_item_view = index_item_new.create('tag');
+        index_item_view.configure({ create_coll: createColl });
+        dom.new_tag = index_item_view.render().el;
         dom.tag_sec_ul.appendChild(dom.new_tag);
 
         // add to index
@@ -252,6 +276,14 @@ cards.view = (function() {
         return self;
       };  // render
 
+      createColl = function(title, coll_type) {
+        if (title.trim().length === 0) {
+          return;
+        }
+        // TODO
+        console.log('create ' + coll_type + ' ' + title);
+      };
+
       return self;
     };  // index.create
 
@@ -265,7 +297,10 @@ cards.view = (function() {
     create = function(model) {  // model: cards.model/models.coll
       var
       self = { el: null, render: null, configure: null },
-      config = { on_change_annot_check: null }
+      config = {
+        on_change_annot_check: null,
+        create_coll: null
+      }
       ;
 
       if (!tmpl) {
@@ -342,7 +377,7 @@ cards.view = (function() {
         tag_sec: null, tag_sec_ul: null,
         note_sec: null, note_sec_ul: null
       },
-      onChangeAnnotCheck
+      onChangeAnnotCheck, createColl
       ;
 
       if (!tmpl_sec) {
@@ -374,6 +409,7 @@ cards.view = (function() {
       };
 
       self.render = function() {
+        var index_item_view;
         self.el = document.createElement('div');
 
         // notes
@@ -383,7 +419,9 @@ cards.view = (function() {
         dom.note_sec_ul = dom.note_sec.querySelector('ul');
         self.el.appendChild(dom.note_sec);
         // new item
-        dom.new_note = index_item_new.create('note').render().el;
+        index_item_view = index_item_new.create('note');
+        index_item_view.configure({ create_coll: createColl });
+        dom.new_note = index_item_view.render().el;
         dom.note_sec_ul.appendChild(dom.new_note);
 
         // tags
@@ -393,12 +431,13 @@ cards.view = (function() {
         dom.tag_sec_ul = dom.tag_sec.querySelector('ul');
         self.el.appendChild(dom.tag_sec);
         // new item
-        dom.new_tag = index_item_new.create('tag').render().el;
+        index_item_view = index_item_new.create('tag');
+        index_item_view.configure({ create_coll: createColl });
+        dom.new_tag = index_item_view.render().el;
         dom.tag_sec_ul.appendChild(dom.new_tag);
 
         // add to index
         index.each(function(coll) {
-          var index_item_view;
           index_item_view = annot_index_item.create(coll);
           index_item_view.configure({
             on_change_annot_check: onChangeAnnotCheck
@@ -426,6 +465,14 @@ cards.view = (function() {
 
         return self;
       };  // self.render
+
+      createColl = function(title, coll_type) {
+        if (title.trim().length === 0) {
+          return;
+        }
+        // TODO
+        console.log('create ' + coll_type + ' ' + title);
+      };
 
       self.setState = function(card_array, annot_type) {
         var freq = {}, checked_ids = [], partial_checked_ids = [];
