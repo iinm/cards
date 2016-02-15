@@ -63,9 +63,19 @@ cards.nav = (function() {
     }, false);
 
     dom.annot_closer.addEventListener('click', function(event) {
+      var save_failed = false;
       event.preventDefault();
       // save clone
-      state.annot_targets.each(function(card) { config.save_card(card); });
+      state.annot_targets.each(function(card) {
+        card = config.save_card(card);
+        if (!card) {
+          save_failed = true;
+        }
+      });
+      if (save_failed) {
+        window.alert('Error: Please try again :(');
+      }
+
       config.set_nav_anchor(
         cards.util.cloneUpdateObj(state, { self: 'closed' })
       );
