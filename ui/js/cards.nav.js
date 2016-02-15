@@ -64,7 +64,7 @@ cards.nav = (function() {
 
     dom.annot_closer.addEventListener('click', function(event) {
       event.preventDefault();
-      // save
+      // save clone
       state.annot_targets.each(function(card) { config.save_card(card); });
       config.set_nav_anchor(
         cards.util.cloneUpdateObj(state, { self: 'closed' })
@@ -74,11 +74,16 @@ cards.nav = (function() {
     dom.annot_trigger.querySelector('.remove').addEventListener(
       'click',
       function(event) {
+        var yn, card_id, coll = config.get_current_coll();
         event.preventDefault();
-        state.annot_targets.each(function(card) {
-          config.remove_card(card);
-        });
-        state.annot_targets.reset();
+        yn = window.confirm('Remove ' + state.annot_targets.len() + ' cards.');
+        if (yn !== true) {
+          return;
+        }
+        while (state.annot_targets.len() > 0) {
+          card_id = state.annot_targets.at(0).get('id');
+          config.remove_card(coll.get('cards').get(card_id));
+        }
       }, false
     );
 
