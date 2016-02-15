@@ -89,9 +89,11 @@ cards.editor = (function() {
       return;
     }
 
-    data.draft = card;
-    dom.content_title.innerHTML = card.get('title');
-    dom.content_body.innerHTML = card.get('body');
+    // make copy
+    data.draft = card.clone();
+
+    dom.content_title.innerHTML = data.draft.get('title');
+    dom.content_body.innerHTML = data.draft.get('body');
     renderMeta();
     config.set_editor_anchor('opened');
 

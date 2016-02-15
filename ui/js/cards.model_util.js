@@ -15,6 +15,7 @@ cards.model_util = (function() {
       var
       config = { on: {} },
       get, set, destroy,  // fetch, save
+      clone,
       on, off
       ;
 
@@ -47,6 +48,19 @@ cards.model_util = (function() {
         config.on.destroy.forEach(function(f) { f(); });
       };
 
+      clone = function() {
+        var instance = create(data), modifications = {};
+
+        Object.keys(data).forEach(function(key) {
+          if (data[key] !== null && (typeof data[key].clone) === 'function') {
+            modifications[key] = data[key].clone();
+          }
+        });
+        instance.set(modifications);
+
+        return instance;
+      };
+
       on = function(event_target, f) {
         // event_target: 'change:key' or 'change'
         if (!config.on[event_target]) {
@@ -68,6 +82,7 @@ cards.model_util = (function() {
 
       return {
         get: get, set: set, destroy: destroy,
+        clone: clone,
         on: on, off: off
       };
     };
@@ -82,6 +97,7 @@ cards.model_util = (function() {
     data = { instances: {}, instance_ids: [] },
     get, at, len, each,
     add, create, remove, reset,  // fetch
+    clone,
     on, off
     ;
 
@@ -140,6 +156,14 @@ cards.model_util = (function() {
       return instance;
     };
 
+    clone = function() {
+      var collection = createCollection(config.model);
+      data.instance_ids.forEach(function(id) {
+        collection.add(data.instances[id]);
+      });
+      return collection;
+    };
+
     on = function(event, f) {
       if (!config.on[event]) {
         config.on[event] = [];
@@ -156,6 +180,7 @@ cards.model_util = (function() {
 
     return {
       get: get, at: at, len: len, each: each,
+      clone: clone,
       add: add, create: create, remove: remove, reset: reset,
       on: on, off: off
     };

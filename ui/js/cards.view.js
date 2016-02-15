@@ -389,22 +389,17 @@ cards.view = (function() {
       }
 
       onChangeAnnotCheck = function(coll) {
-        // update models
-        // TODO: cards.model.saveCardsでコレクションの変更もしたら便利だと思う
+        // update card. coll is updated in cards.model.saveCard
         if (coll.get('annot_check') === 'checked') {
           state.checked_colls[coll.get('id')] = coll;
           state.target.each(function(card) {
             card.get('colls').add(coll);
-            if ((typeof card.get('id')) === 'string') {
-              coll.get('cards').add(card);
-            }  // else, it's draft
           });
         } else {
           delete state.checked_colls[coll.get('id')];
           state.target.each(function(card) {
             if (card.get('colls').get(coll.get('id'))) {
               card.get('colls').remove(coll.get('id'));
-              coll.get('cards').remove(card.get('id'));
             }
           });
         }
@@ -625,6 +620,7 @@ cards.view = (function() {
         model.off('change', self.render);
         model.get('colls').off('add', self.render);
         model.get('colls').off('remove', self.render);
+        model.set({ checked: false });
         model.off('change:checked', onChangeChecked);
         self.el.remove();
       };

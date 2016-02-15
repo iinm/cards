@@ -91,7 +91,7 @@ cards.model = (function() {
   saveCard = function(card) {
     var data_, coll_ids = [];
 
-    // save to fake storage
+    // 1. save to fake storage
     card.get('colls').each(function(coll) {
       coll_ids.push(coll.get('id'));
     });
@@ -107,15 +107,25 @@ cards.model = (function() {
       return null;
     }
 
-    // update models
-    if (!data.cards.get(data_.id)) {
+    // 2. update models
+    if (!data.cards.get(data_.id)) {  // no id -> new card
       data.cards.create(data_);
-    } else {
+    } else {  // update
       data.cards.get(data_.id).set(data_);
     }
     card = data.cards.get(data_.id);
     console.log(data_);
 
+    // update relations
+    card.get('colls').each(function(coll) {
+      if (data_.coll_ids.indexOf(coll.get('id')) === -1) {
+        // remove coll from card
+        card.get('colls').remove(coll.get('id'));
+        // remove card from coll
+        coll.get('cards').remove(card.get('id'));
+      }
+    });
+    
     data_.coll_ids.forEach(function(coll_id) {
       var idx, coll;
       coll = data.index.get(coll_id);
@@ -127,6 +137,7 @@ cards.model = (function() {
         card.get('colls').add(coll);
       }
     });
+
     if (!data.index.get('special:all').get('cards').get(card.get('id'))) {
       data.index.get('special:all').get('cards').add(card, 0);
     }

@@ -15,7 +15,8 @@ cards.nav = (function() {
     set_content_anchor: null,
     remove_card: null,
     index: null,  // collection of cards.model/models.coll
-    get_current_coll: null
+    get_current_coll: null,
+    save_card: null
   },
 
   state = {
@@ -63,6 +64,8 @@ cards.nav = (function() {
 
     dom.annot_closer.addEventListener('click', function(event) {
       event.preventDefault();
+      // save
+      state.annot_targets.each(function(card) { config.save_card(card); });
       config.set_nav_anchor(
         cards.util.cloneUpdateObj(state, { self: 'closed' })
       );
@@ -98,9 +101,12 @@ cards.nav = (function() {
     dom.annot_trigger.querySelector('.clear-check').addEventListener(
       'click',
       function(event) {
+        var coll = config.get_current_coll(), card_id;
         event.preventDefault();
         while (state.annot_targets.len() > 0) {
-          state.annot_targets.at(0).set({ checked: false });
+          //state.annot_targets.at(0).set({ checked: false });
+          card_id = state.annot_targets.at(0).get('id');
+          coll.get('cards').get(card_id).set({ checked: false });
         }
       }, false
     );
@@ -138,7 +144,8 @@ cards.nav = (function() {
 
   setAnnotTarget = function(card) {
     if (card.get('checked')) {
-      state.annot_targets.add(card);
+      // use clone
+      state.annot_targets.add(card.clone());
     } else {
       state.annot_targets.remove(card.get('id'));
     }
