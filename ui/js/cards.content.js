@@ -76,6 +76,11 @@ cards.content = (function() {
   onAddItem = function(card) {
     var sibling, card_view, card_el;
 
+    card_view = state.card_id2view[card.get('id')];
+    if (card_view) {
+      card_view.destroy();
+    }
+
     card_view = createCardView(card);
     card_el = card_view.render().el;
 

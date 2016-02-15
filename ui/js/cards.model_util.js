@@ -118,15 +118,22 @@ cards.model_util = (function() {
     };
 
     add = function(instance, idx) {
-      if (data.instances.hasOwnProperty(instance.get('id'))) {
+      var old_idx;
+      if (data.instances.hasOwnProperty(instance.get('id'))
+          && (typeof idx) !== 'number'
+         ) {
         // already exists
         return;
       }
       data.instances[instance.get('id')] = instance;
-      if ((typeof idx) !== 'number') {
-        data.instance_ids.push(instance.get('id'));
-      } else {
+      if ((typeof idx) === 'number') {
+        old_idx = data.instance_ids.indexOf(instance.get('id'));
+        if (old_idx > -1) {
+          data.instance_ids.splice(old_idx, 1);
+        }
         data.instance_ids.splice(idx, 0, instance.get('id'));
+      } else {
+        data.instance_ids.push(instance.get('id'));
       }
       if (config.on.add) {
         config.on.add.forEach(function(f) { f(instance); });

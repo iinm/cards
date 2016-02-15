@@ -63,15 +63,20 @@ cards.nav = (function() {
     }, false);
 
     dom.annot_closer.addEventListener('click', function(event) {
-      var save_failed = false;
+      var
+      save_failed = false, target_array = [];
       event.preventDefault();
-      // save clone
-      state.annot_targets.each(function(card) {
+
+      // if cards is removed from current coll, annot_targets will change
+      state.annot_targets.each(function(card) { target_array.push(card); });
+      target_array.forEach(function(card) {
+        // save clone
         card = config.save_card(card);
         if (!card) {
           save_failed = true;
         }
       });
+
       if (save_failed) {
         window.alert('Error: Please try again :(');
       }

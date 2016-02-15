@@ -9,8 +9,8 @@
 cards.model = (function() {
   var
   models = {},
-  data = { index: null, cards: null },
-  init, getIndex, createCard, saveCard, removeCard
+  data = { index: null, cards: null, all: null },
+  init, getIndex, getCards, createCard, saveCard, removeCard
   ;
 
   // define models
@@ -39,11 +39,11 @@ cards.model = (function() {
     data.cards = cards.model_util.createCollection(models.card);
 
     // create special coll
-    data.index.add(
-      models.coll.create({
-        id: 'special:all', type: 'special:all', name: 'Cards'
-      })
-    );
+    data.all = models.coll.create({
+      id: 'special:all', type: 'special:all', name: 'Cards'
+    });
+    data.index.add(data.all);
+
     // create colls (tags and notes)
     cards.fake.getCollections().forEach(function(data_) {
       var coll = models.coll.create(data_);
@@ -84,12 +84,16 @@ cards.model = (function() {
     return data.index;
   };
 
+  getCards = function() {
+    return data.cards;
+  };
+
   createCard = function(data_) {
     return models.card.create(data_);
   };
 
   saveCard = function(card) {
-    var data_, coll_ids = [];
+    var data_, coll_ids = [], changed = false;
 
     // 1. save to fake storage
     card.get('colls').each(function(coll) {
@@ -108,9 +112,23 @@ cards.model = (function() {
     }
 
     // 2. update models
-    if (!data.cards.get(data_.id)) {  // no id -> new card
+    card = data.cards.get(data_.id);
+    if (!card) {  // no id -> new card
       data.cards.create(data_);
     } else {  // update
+      // check change
+      if (card.get('title') !== data_.title
+          || card.get('body') !== data_.body
+          // ignore tag change
+          //|| card.get('colls').len() !== data_.coll_ids.length
+         ) {
+        changed = true;
+      }
+      //for (i = 0; i < data_.coll_ids.length; i++) {
+      //  if (!card.get('colls').get(data_.coll_ids[i])) {
+      //    changed = true;
+      //  }
+      //}
       data.cards.get(data_.id).set(data_);
     }
     card = data.cards.get(data_.id);
@@ -129,7 +147,7 @@ cards.model = (function() {
     data_.coll_ids.forEach(function(coll_id) {
       var idx, coll;
       coll = data.index.get(coll_id);
-      if (!coll.get('cards').get(card.get('id'))) {
+      if (!coll.get('cards').get(card.get('id')) || changed) {
         // add card to coll
         idx = ((coll.get('type') === 'tag') ? 0 : null);
         coll.get('cards').add(card, idx);
@@ -138,8 +156,8 @@ cards.model = (function() {
       }
     });
 
-    if (!data.index.get('special:all').get('cards').get(card.get('id'))) {
-      data.index.get('special:all').get('cards').add(card, 0);
+    if (!data.all.get('cards').get(card.get('id')) || changed) {
+      data.all.get('cards').add(card, 0);
     }
 
     return card;
@@ -161,7 +179,7 @@ cards.model = (function() {
   return {
     init: init,
     models: models,
-    getIndex: getIndex,
+    getIndex: getIndex, getCards: getCards,
     createCard: createCard, saveCard: saveCard,
     removeCard: removeCard
   };
