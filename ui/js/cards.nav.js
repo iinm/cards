@@ -4,7 +4,7 @@
   regexp : true, sloppy  : true, vars     : false,
   white  : true
 */
-/*global cards */
+/*global cards, Promise */
 
 cards.nav = (function() {
   "use strict";

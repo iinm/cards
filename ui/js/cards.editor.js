@@ -129,7 +129,6 @@ cards.editor = (function() {
   };
 
   onClickSaveCard = function(event) {
-    var card;
     event.preventDefault();
 
     if (dom.content_title.innerHTML.trim().length === 0
@@ -144,11 +143,6 @@ cards.editor = (function() {
       body: dom.content_body.innerHTML
     });
 
-    //card = config.save_card(data.draft);
-    //if (card) {
-    //  setEditTarget(null);
-    //  config.set_editor_anchor('closed');
-    //}
     dom.self.classList.add('saving');
     config.save_card(data.draft).then(function(card) {
       if (card) {

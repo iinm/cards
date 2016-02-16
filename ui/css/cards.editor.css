@@ -170,36 +170,3 @@
 .cards-editor.saving .cards-editor-control li.save {
   display: none;
 }
-
-/* 
-   .cards-editor-sub {
-   position: absolute;
-   top: 0;
-   bottom: 0;
-   left: 0;
-   width: 0;
-   transition: width 250ms;
-   background: #F9F2E7;
-   overflow: hidden;
-   box-shadow: 0 0 .3em #777;
-   }
-
-   .cards-editor-sub.opened {
-   width: 100%;
-   }
-
-   .cards-editor-sub .editor-sub-head {
-   position: absolute;
-   top: 0;
-   height: 3em;
-   width: 100%;
-   background: inherit;
-   }
-
-   .cards-editor-sub .editor-sub-content {
-   position: absolute;
-   top: 3em;
-   bottom: 0;
-   width: 100%;
-   background: inherit;
-   } */
