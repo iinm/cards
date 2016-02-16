@@ -23,15 +23,45 @@ cards.model = (function() {
     };
   });
 
-  models.coll = cards.model_util.createModel(function() {
-    return {
-      id: null,
-      type: '',  // tag or note
-      name: '',
-      annot_check: null,  // used by annotator, 'checked' or 'partial'
-      cards: cards.model_util.createCollection(models.card)
+  models.coll = (function() {
+    var base_model, create;
+    base_model = cards.model_util.createModel(function() {
+      return {
+        id: null,
+        type: '',  // tag or note
+        name: '',
+        annot_check: null,  // used by annotator, 'checked' or 'partial'
+        cards: cards.model_util.createCollection(models.card),
+        fetched: false
+      };
+    });
+
+    create = function(data_) {
+      var instance = base_model.create(data_);
+
+      instance.fetch_cards = function() {
+        console.log('fetch: ' + instance.get('name'));
+        if (instance.get('fetched')) {
+          return;
+        }
+        cards.fake.getCards(instance.get('id')).forEach(function(data_) {
+          var card;
+          if (!data.cards.get(data_.id)) {
+            card = data.cards.create(data_);
+            data_.coll_ids.forEach(function(coll_id) {
+              card.get('colls').add(data.index.get(coll_id));
+            });
+          }
+          instance.get('cards').add(data.cards.get(data_.id));
+        });
+        instance.set({ fetched: true });
+      };
+
+      return instance;
     };
-  });
+
+    return { create: create };
+  }());
 
   init = function() {
     // create colls
@@ -51,33 +81,33 @@ cards.model = (function() {
     });
 
     // add cards to special:all
-    cards.fake.getCards().forEach(function(data_) {
-      var card;
-      if (!data.cards.get(data_.id)) {
-        card = data.cards.create(data_);
-        data_.coll_ids.forEach(function(coll_id) {
-          card.get('colls').add(data.index.get(coll_id));
-        });
-        data.cards.add(card);
-      }
-      data.index.get('special:all').get('cards').add(data.cards.get(data_.id));
-    });
+    //cards.fake.getCards().forEach(function(data_) {
+    //  var card;
+    //  if (!data.cards.get(data_.id)) {
+    //    card = data.cards.create(data_);
+    //    data_.coll_ids.forEach(function(coll_id) {
+    //      card.get('colls').add(data.index.get(coll_id));
+    //    });
+    //    data.cards.add(card);
+    //  }
+    //  data.index.get('special:all').get('cards').add(data.cards.get(data_.id));
+    //});
 
     // add cards to colls
-    cards.fake.getCollections().forEach(function(data_) {
-      data_.card_ids.forEach(function(card_id) {
-        var card, card_data;
-        if (!data.cards.get(card_id)) {
-          card_data = cards.fake.getCard(card_id);
-          card = data.cards.create(card_data);
-          card_data.coll_ids.forEach(function(coll_id) {
-            card.get('colls').add(data.index.get(coll_id));
-          });
-          data.cards.add(card);
-        }
-        data.index.get(data_.id).get('cards').add(data.cards.get(card_id));
-      });
-    });
+    //cards.fake.getCollections().forEach(function(data_) {
+    //  data_.card_ids.forEach(function(card_id) {
+    //    var card, card_data;
+    //    if (!data.cards.get(card_id)) {
+    //      card_data = cards.fake.getCard(card_id);
+    //      card = data.cards.create(card_data);
+    //      card_data.coll_ids.forEach(function(coll_id) {
+    //        card.get('colls').add(data.index.get(coll_id));
+    //      });
+    //      data.cards.add(card);
+    //    }
+    //    data.index.get(data_.id).get('cards').add(data.cards.get(card_id));
+    //  });
+    //});
   };
 
   getIndex = function() {

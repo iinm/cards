@@ -74,19 +74,20 @@ cards.content = (function() {
       dom.self.appendChild(card_view.render().el);
     });
 
+    state.coll.fetch_cards();
+    dom.self.scrollTop = 0;
+
     // load more cards when scroll to bottom
     dom.self.addEventListener('scroll', onScroll, false);
   };
 
   onScroll = function(event) {
     // TODO: load more cards
-    console.log(dom.self.scrollTop);
-    //console.log(dom.self.scrollHeight);
-    //console.log(dom.self.clientHeight);
-    console.log(dom.self.scrollHeight - dom.self.clientHeight);
+    //console.log(dom.self.scrollTop);
+    //console.log(dom.self.scrollHeight - dom.self.clientHeight);
   };
 
-  onAddItem = function(card) {
+  onAddItem = function(card, idx) {
     var sibling, card_view, card_el;
 
     card_view = state.card_id2view[card.get('id')];
@@ -97,7 +98,7 @@ cards.content = (function() {
     card_view = createCardView(card);
     card_el = card_view.render().el;
 
-    if (state.coll.get('type') === 'note') {
+    if ((typeof idx) !== 'number') {
       dom.self.appendChild(card_el);
     } else {
       sibling = dom.self.querySelector('.cards-item');

@@ -111,12 +111,24 @@ cards.fake = (function() {
     return reversed;
   };
 
-  getCards = function() {
-    var i, reversed = [];
-    for (i = card_list.length - 1; i >= 0; i--) {
-      reversed.push(card_list[i]);
+  getCards = function(coll_id) {
+    var i, card_list_ = [];
+    if (coll_id === 'special:all' || colls[coll_id].type === 'tag') {
+      for (i = 0; i < card_list.length; i++) {
+        if (coll_id === 'special:all'
+            || card_list[i].coll_ids.indexOf(coll_id) > -1
+           ) {
+          card_list_.push(card_list[i]);
+        }
+      }
+      card_list_.reverse();
     }
-    return reversed;
+    else {  // note
+      colls[coll_id].card_ids.forEach(function(card_id) {
+        card_list_.push(cards_[card_id]);
+      });
+    }
+    return card_list_;
   };
 
   getCard = function(card_id) {

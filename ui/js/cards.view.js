@@ -552,7 +552,6 @@ cards.view = (function() {
 
       self.render = function() {
         var coll_array;  // for sort
-        console.log('render card ' + model.get('title'));
         if (!self.el) {
           self.el = cards.util.createElement(
             cards.util.formatTmpl(tmpl, { id: model.get('id') })

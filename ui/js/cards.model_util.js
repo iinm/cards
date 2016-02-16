@@ -70,7 +70,6 @@ cards.model_util = (function() {
       };
 
       off = function(event_target, f) {
-        console.log('off ' + event_target);
         var idx;
         if (config.on[event_target]) {
           idx = config.on[event_target].indexOf(f);
@@ -136,7 +135,7 @@ cards.model_util = (function() {
         data.instance_ids.push(instance.get('id'));
       }
       if (config.on.add) {
-        config.on.add.forEach(function(f) { f(instance); });
+        config.on.add.forEach(function(f) { f(instance, idx); });
       }
     };
 
