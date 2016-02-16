@@ -12,7 +12,7 @@ cards.fake = (function() {
   card_list, coll_list,
   cards_ = {}, colls = {}, updateIdMap,
   getCard, getCards, getCollections,
-  saveCard
+  saveCard, saveCardPromise
   ;
 
   card_list = [
@@ -136,11 +136,25 @@ cards.fake = (function() {
     return data;
   };
 
+  saveCardPromise = function(data_) {
+    var promise;
+    promise = new Promise(
+      function(resolve, reject) {
+        // TODO: handle error
+        data_ = saveCard(data_);
+        setTimeout(function() {
+          resolve(data_);
+        }, 2000);
+      }
+    );
+    return promise;
+  };
+
   updateIdMap();
 
   return {
     getCard: getCard, getCards: getCards,
     getCollections: getCollections,
-    saveCard: saveCard
+    saveCard: saveCard, saveCardPromise: saveCardPromise
   };
 }());

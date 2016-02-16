@@ -144,11 +144,17 @@ cards.editor = (function() {
       body: dom.content_body.innerHTML
     });
 
-    card = config.save_card(data.draft);
-    if (card) {
-      setEditTarget(null);
-      config.set_editor_anchor('closed');
-    }
+    //card = config.save_card(data.draft);
+    //if (card) {
+    //  setEditTarget(null);
+    //  config.set_editor_anchor('closed');
+    //}
+    config.save_card(data.draft).then(function(card) {
+      if (card) {
+        setEditTarget(null);
+        config.set_editor_anchor('closed');
+      }
+    });
   };
 
   setEditorState = function(editor_state) {

@@ -93,74 +93,84 @@ cards.model = (function() {
   };
 
   saveCard = function(card) {
-    var data_, coll_ids = [], changed = false;
+    var promise, update_models;
 
-    // 1. save to fake storage
-    card.get('colls').each(function(coll) {
-      coll_ids.push(coll.get('id'));
-    });
-    data_ = {
-      id: card.get('id'),
-      title: card.get('title'),
-      body: card.get('body'),
-      coll_ids: coll_ids
-    };
+    promise = new Promise(
+      function(resolve, reject) {
+        var data_, coll_ids = [];
 
-    data_ = cards.fake.saveCard(data_);
-    if (!data_) {  // failed to save
-      return null;
-    }
+        // 1. save to (fake) storage
+        card.get('colls').each(function(coll) {
+          coll_ids.push(coll.get('id'));
+        });
+        data_ = {
+          id: card.get('id'),
+          title: card.get('title'),
+          body: card.get('body'),
+          coll_ids: coll_ids
+        };
 
-    // 2. update models
-    card = data.cards.get(data_.id);
-    if (!card) {  // no id -> new card
-      data.cards.create(data_);
-    } else {  // update
-      // check change
-      if (card.get('title') !== data_.title
-          || card.get('body') !== data_.body
-          // ignore tag change
-          //|| card.get('colls').len() !== data_.coll_ids.length
-         ) {
-        changed = true;
+        cards.fake.saveCardPromise(data_).then(function(data_) {
+          var card = update_models(data_);
+          resolve(card);
+        });
       }
-      //for (i = 0; i < data_.coll_ids.length; i++) {
-      //  if (!card.get('colls').get(data_.coll_ids[i])) {
-      //    changed = true;
-      //  }
-      //}
-      data.cards.get(data_.id).set(data_);
-    }
-    card = data.cards.get(data_.id);
-    console.log(data_);
+    );
 
-    // update relations
-    card.get('colls').each(function(coll) {
-      if (data_.coll_ids.indexOf(coll.get('id')) === -1) {
-        // remove coll from card
-        card.get('colls').remove(coll.get('id'));
-        // remove card from coll
-        coll.get('cards').remove(card.get('id'));
+    update_models = function(data_) {
+      var card, changed = false;
+      card = data.cards.get(data_.id);
+      if (!card) {  // no id -> new card
+        data.cards.create(data_);
+      } else {  // update
+        // check change
+        if (card.get('title') !== data_.title
+            || card.get('body') !== data_.body
+            // ignore tag change
+            //|| card.get('colls').len() !== data_.coll_ids.length
+           ) {
+          changed = true;
+        }
+        //for (i = 0; i < data_.coll_ids.length; i++) {
+        //  if (!card.get('colls').get(data_.coll_ids[i])) {
+        //    changed = true;
+        //  }
+        //}
+        data.cards.get(data_.id).set(data_);
       }
-    });
-    
-    data_.coll_ids.forEach(function(coll_id) {
-      var idx, coll;
-      coll = data.index.get(coll_id);
-      if (!coll.get('cards').get(card.get('id')) || changed) {
-        // add card to coll
-        idx = ((coll.get('type') === 'tag') ? 0 : null);
-        coll.get('cards').add(card, idx);
-        // add coll to card
-        card.get('colls').add(coll);
+      card = data.cards.get(data_.id);
+      console.log(data_);
+
+      // update relations
+      card.get('colls').each(function(coll) {
+        if (data_.coll_ids.indexOf(coll.get('id')) === -1) {
+          // remove coll from card
+          card.get('colls').remove(coll.get('id'));
+          // remove card from coll
+          coll.get('cards').remove(card.get('id'));
+        }
+      });
+      
+      data_.coll_ids.forEach(function(coll_id) {
+        var idx, coll;
+        coll = data.index.get(coll_id);
+        if (!coll.get('cards').get(card.get('id')) || changed) {
+          // add card to coll
+          idx = ((coll.get('type') === 'tag') ? 0 : null);
+          coll.get('cards').add(card, idx);
+          // add coll to card
+          card.get('colls').add(coll);
+        }
+      });
+
+      if (!data.all.get('cards').get(card.get('id')) || changed) {
+        data.all.get('cards').add(card, 0);
       }
-    });
 
-    if (!data.all.get('cards').get(card.get('id')) || changed) {
-      data.all.get('cards').add(card, 0);
-    }
+      return card;
+    };  // update_models
 
-    return card;
+    return promise;
   };
 
   removeCard = function(card) {
