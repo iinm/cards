@@ -23,7 +23,8 @@ cards.content = (function() {
   dom = {},
 
   init, configure,
-  setColl, render, createCardView, onAddItem, onRemoveItem
+  setColl, render, createCardView, onAddItem, onRemoveItem,
+  onScroll
   ;  // var
 
   configure = function(kv_map) {
@@ -61,6 +62,7 @@ cards.content = (function() {
   };
 
   render = function() {
+    dom.self.removeEventListener('scroll', onScroll);
     // destroy previous collection
     Object.keys(state.card_id2view).forEach(function(card_id) {
       state.card_id2view[card_id].destroy();
@@ -71,6 +73,17 @@ cards.content = (function() {
       var card_view = createCardView(card);
       dom.self.appendChild(card_view.render().el);
     });
+
+    // load more cards when scroll to bottom
+    dom.self.addEventListener('scroll', onScroll, false);
+  };
+
+  onScroll = function(event) {
+    // TODO: load more cards
+    console.log(dom.self.scrollTop);
+    //console.log(dom.self.scrollHeight);
+    //console.log(dom.self.clientHeight);
+    console.log(dom.self.scrollHeight - dom.self.clientHeight);
   };
 
   onAddItem = function(card) {
