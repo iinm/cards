@@ -85,7 +85,7 @@ cards.nav = (function() {
     dom.annot_trigger.querySelector('.remove').addEventListener(
       'click',
       function(event) {
-        var yn, card_id, coll = config.get_current_coll();
+        var yn, card, card_id, coll = config.get_current_coll();
         event.preventDefault();
         yn = window.confirm('Remove ' + state.annot_targets.len() + ' cards.');
         if (yn !== true) {
@@ -93,7 +93,9 @@ cards.nav = (function() {
         }
         while (state.annot_targets.len() > 0) {
           card_id = state.annot_targets.at(0).get('id');
-          config.remove_card(coll.get('cards').get(card_id));
+          card = coll.get('cards').get(card_id);
+          config.remove_card(card);
+          card.set({ checked: false });
         }
       }, false
     );

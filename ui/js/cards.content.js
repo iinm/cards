@@ -116,14 +116,28 @@ cards.content = (function() {
         dom.self.appendChild(card_el);
       }
     }
+
+    // scroll into view
     //card_el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     card_el.scrollIntoView();
+    if (idx === 0) {
+      dom.self.scrollTop = 0;
+    }
+    setTimeout(function() { card_el.classList.add('blink'); }, 300);
+    setTimeout(function() { card_el.classList.remove('blink'); }, 600);
   };
 
   onRemoveItem = function(card) {
-    console.log('remove card view');
-    state.card_id2view[card.get('id')].destroy();
-    delete state.card_id2view[card.get('id')];
+    var card_view = state.card_id2view[card.get('id')];
+    // animation
+    card_view.el.classList.add('blink-red');
+    setTimeout(function() { card_view.el.classList.remove('blink-red'); }, 300);
+    setTimeout(function() {
+      card_view.destroy();
+      delete state.card_id2view[card.get('id')];
+    }, 600);
+    //card_view.destroy();
+    //delete state.card_id2view[card.get('id')];
   };
 
   return {

@@ -44,8 +44,17 @@ strong {
   width: 100%;
   background: #F9F2E7;
   box-shadow: 0 0 .1em #777;
-  transition: box-shadow 200ms;
+  transition: box-shadow 300ms, width 300ms;
   overflow: hidden;
+}
+.cards-item.before-render {
+  //width: 0;
+}
+.cards-item.blink {
+  box-shadow: 0 0 .6em #40C0CB;
+}
+.cards-item.blink-red {
+  box-shadow: 0 0 .6em #CB4040;
 }
 
 .cards-item .item-content {

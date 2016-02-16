@@ -619,7 +619,7 @@ cards.view = (function() {
         model.off('change', self.render);
         model.get('colls').off('add', self.render);
         model.get('colls').off('remove', self.render);
-        model.set({ checked: false });
+        //model.set({ checked: false });
         model.off('change:checked', onChangeChecked);
         self.el.remove();
       };
