@@ -70,6 +70,9 @@ strong {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.cards-item.opened .item-content .item-title {
+  white-space: normal;
+}
 
 .cards-item .item-content .item-meta {
   margin: 0;
@@ -90,11 +93,14 @@ strong {
 }
 
 .cards-item .item-content .item-body {
-  margin: 0;
+  margin: .2em 0;
   font-size: .95em;
   line-height: 1.3em;
   max-height: calc(1.3em * 3);
   overflow: hidden;
+}
+.cards-item.opened .item-content .item-body {
+  max-height: initial;
 }
 
 .cards-item.checked {

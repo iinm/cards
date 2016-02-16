@@ -538,6 +538,7 @@ cards.view = (function() {
       var
       self = { el: null, render: null, configure: null, destroy: null },
       config = { set_edit_target: null, set_annot_target: null },
+      state = { opened: false },
       dom = {},
       onChangeChecked
       ;
@@ -564,6 +565,20 @@ cards.view = (function() {
           dom.edit_trigger = self.el.querySelector('.item-edit-trigger');
 
           // set event handlers
+          self.el.querySelector('.item-content').addEventListener(
+            'click',
+            function(event) {
+              if (state.opened) {
+                self.el.classList.remove('opened');
+                state.opened = false;
+              }
+              else {
+                self.el.classList.add('opened');
+                state.opened = true;
+              }
+            },
+            false
+          );
           self.el.querySelector('.item-check-trigger').addEventListener(
             'click', function(event) {
               event.preventDefault();
@@ -619,7 +634,7 @@ cards.view = (function() {
         model.off('change', self.render);
         model.get('colls').off('add', self.render);
         model.get('colls').off('remove', self.render);
-        //model.set({ checked: false });
+        model.set({ checked: false });
         model.off('change:checked', onChangeChecked);
         self.el.remove();
       };
