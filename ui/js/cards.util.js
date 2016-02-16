@@ -4,7 +4,7 @@
   regexp : true, sloppy  : true, vars     : false,
   white  : true
 */
-/*global cards, getComputedStyle*/
+/*global cards, getComputedStyle, Promise*/
 
 cards.util = (function() {
   "use strict";
@@ -13,7 +13,8 @@ cards.util = (function() {
   createElements, appendChildren, createElement,
   getPxPerEm,
   formatTmpl,
-  makeAnchorMap, setAnchor
+  makeAnchorMap, setAnchor,
+  $http
   ;
 
   cloneObj = function(obj) {
@@ -92,6 +93,79 @@ cards.util = (function() {
     window.location.hash = '#' + kvs.join('&');
   };
 
+  // https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise
+  // A-> $http function is implemented in order to follow the standard Adapter pattern
+  $http = function(url) {
+    // A small example of object
+    var core = {
+
+      // Method that performs the ajax request
+      ajax : function (method, url, args) {
+
+        // Creating a promise
+        var promise = new Promise( function (resolve, reject) {
+
+          // Instantiates the XMLHttpRequest
+          var
+          client = new XMLHttpRequest(), uri = url,
+          key, argcount = 0
+          ;
+
+          if (args && (method === 'POST' || method === 'PUT')) {
+            uri += '?';
+            for (key in args) {
+              if (args.hasOwnProperty(key)) {
+                if (argcount++) {
+                  uri += '&';
+                }
+                uri += encodeURIComponent(key) + '=' + encodeURIComponent(args[key]);
+              }
+            }
+          }
+
+          //client.open(method, uri);
+          //client.send();
+
+          client.onload = function () {
+            if (this.status >= 200 && this.status < 300) {
+              // Performs the function "resolve" when this.status is equal to 2xx
+              resolve(this.response);
+            } else {
+              // Performs the function "reject" when this.status is different than 2xx
+              reject(this.statusText);
+            }
+          };
+
+          client.onerror = function () {
+            reject(this.statusText);
+          };
+
+          client.open(method, uri);
+          client.send();
+        });
+
+        // Return the promise
+        return promise;
+      }
+    };
+
+    // Adapter pattern
+    return {
+      'get' : function(args) {
+        return core.ajax('GET', url, args);
+      },
+      'post' : function(args) {
+        return core.ajax('POST', url, args);
+      },
+      'put' : function(args) {
+        return core.ajax('PUT', url, args);
+      },
+      'delete' : function(args) {
+        return core.ajax('DELETE', url, args);
+      }
+    };
+  };  // $http
+
   return {
     cloneObj: cloneObj,
     updateObj: updateObj,
@@ -104,6 +178,8 @@ cards.util = (function() {
     formatTmpl: formatTmpl,
 
     makeAnchorMap: makeAnchorMap,
-    setAnchor: setAnchor
+    setAnchor: setAnchor,
+
+    $http: $http
   };
 }());
