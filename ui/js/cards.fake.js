@@ -9,13 +9,13 @@
 cards.fake = (function() {
   "use strict";
   var
-  card_list, coll_list,
+  card_array, coll_array,
   cards_ = {}, colls = {}, updateIdMap,
   getCard, getCards, getCollections,
   saveCard, saveCardPromise
   ;
 
-  card_list = [
+  card_array = [
     {
       title: 'Episode I: The Phantom Menace',
       body: 'Turmoil has engulfed the Galactic Republic. The taxation of trade routes to outlying star systems is in dispute.',
@@ -60,7 +60,7 @@ cards.fake = (function() {
     }
   ];
 
-  coll_list = [
+  coll_array = [
     { name: 'HTML', id: 'tag_01', type: 'tag', card_ids: [] },
     { name: 'CSS', id: 'tag_02', type: 'tag', card_ids: [] },
     { name: 'JavaScript', id: 'tag_03', type: 'tag', card_ids: [] },
@@ -80,7 +80,7 @@ cards.fake = (function() {
       name: 'Rails cheat sheet', id: 'note_02', type: 'note', card_ids: []
     },
     {
-      name: 'サーバ設定ログ（長い長いタイトルを表示するテスト）', id: 'note_03', type: 'note', card_ids: []
+      name: 'サーバ設定ログ（長いタイトルを表示するテスト）', id: 'note_03', type: 'note', card_ids: []
     },
     {
       name: 'Star Wars Opening', id: 'note_04', type: 'note',
@@ -93,42 +93,51 @@ cards.fake = (function() {
 
   updateIdMap = function() {
     cards_ = {};
-    card_list.forEach(function(card) {
+    card_array.forEach(function(card) {
       cards_[card.id] = card;
     });
 
     colls = {};
-    coll_list.forEach(function(coll) {
+    coll_array.forEach(function(coll) {
       colls[coll.id] = coll;
     });
   };
 
   getCollections = function() {
     var i, reversed = [];
-    for (i = coll_list.length - 1; i >= 0; i--) {
-      reversed.push(coll_list[i]);
+    for (i = coll_array.length - 1; i >= 0; i--) {
+      reversed.push(coll_array[i]);
     }
     return reversed;
   };
 
   getCards = function(coll_id) {
-    var i, card_list_ = [];
-    if (coll_id === 'special:all' || colls[coll_id].type === 'tag') {
-      for (i = 0; i < card_list.length; i++) {
-        if (coll_id === 'special:all'
-            || card_list[i].coll_ids.indexOf(coll_id) > -1
-           ) {
-          card_list_.push(card_list[i]);
+    var promise;
+    promise = new Promise(
+      function(resolve, reject) {
+        var i, card_array_ = [];
+        if (coll_id === 'special:all' || colls[coll_id].type === 'tag') {
+          for (i = 0; i < card_array.length; i++) {
+            if (coll_id === 'special:all'
+                || card_array[i].coll_ids.indexOf(coll_id) > -1
+               ) {
+              card_array_.push(card_array[i]);
+            }
+          }
+          card_array_.reverse();
         }
+        else {  // note
+          colls[coll_id].card_ids.forEach(function(card_id) {
+            card_array_.push(cards_[card_id]);
+          });
+        }
+
+        setTimeout(function() {
+          resolve(card_array_);
+        }, 1000);
       }
-      card_list_.reverse();
-    }
-    else {  // note
-      colls[coll_id].card_ids.forEach(function(card_id) {
-        card_list_.push(cards_[card_id]);
-      });
-    }
-    return card_list_;
+    );
+    return promise;
   };
 
   getCard = function(card_id) {
@@ -137,9 +146,9 @@ cards.fake = (function() {
 
   saveCard = function(data) {
     if (!data.id) {
-      data.id = 'card_' + card_list.length;
+      data.id = 'card_' + card_array.length;
     }
-    card_list.push(data);
+    card_array.push(data);
     cards_[data.id] = data;
     
     data.coll_ids.forEach(function(coll_id) {
@@ -156,7 +165,7 @@ cards.fake = (function() {
         data_ = saveCard(data_);
         setTimeout(function() {
           resolve(data_);
-        }, 2000);
+        }, 1000);
       }
     );
     return promise;

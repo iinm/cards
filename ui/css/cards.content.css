@@ -8,3 +8,27 @@
   /*   background: #ccc; */
   overflow-y: scroll;
 }
+
+.cards-content-cards {
+  width: 100%;
+  max-width: 45em;
+  margin: .5em auto;
+}
+
+.cards-content .loading {
+  display: none;
+  width: 100%;
+  max-width: 45em;
+  margin: .5em auto;
+  font-size: 1.5em;
+  text-align: center;
+}
+
+.cards-content.init-loading .loading {
+  position: absolute;
+  bottom: 50%;
+  left: 0;
+  right: 0;
+  display: block;
+  width: initial;
+}

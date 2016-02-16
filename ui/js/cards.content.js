@@ -33,6 +33,7 @@ cards.content = (function() {
 
   init = function(container) {
     dom.self = container.querySelector(config.self_selector);
+    dom.cards = dom.self.querySelector('.cards-content-cards');
   }; 
 
   setColl = function(coll) {
@@ -69,16 +70,23 @@ cards.content = (function() {
     });
     state.card_id2view = {};
     
-    state.coll.get('cards').each(function(card) {
-      var card_view = createCardView(card);
-      dom.self.appendChild(card_view.render().el);
-    });
-
-    state.coll.fetch_cards();
-    dom.self.scrollTop = 0;
-
-    // load more cards when scroll to bottom
-    dom.self.addEventListener('scroll', onScroll, false);
+    if (state.coll.get('fetched')) {
+      state.coll.get('cards').each(function(card) {
+        var card_view = createCardView(card);
+        dom.cards.appendChild(card_view.render().el);
+      });
+      // load more cards when scroll to bottom
+      dom.self.addEventListener('scroll', onScroll, false);
+    }
+    else {
+      dom.self.classList.add('init-loading');
+      state.coll.fetch_cards().then(function() {
+        dom.self.scrollTop = 0;
+        dom.self.classList.remove('init-loading');
+      });
+      // load more cards when scroll to bottom
+      dom.self.addEventListener('scroll', onScroll, false);
+    }
   };
 
   onScroll = function(event) {
@@ -99,11 +107,11 @@ cards.content = (function() {
     card_el = card_view.render().el;
 
     if ((typeof idx) !== 'number') {
-      dom.self.appendChild(card_el);
+      dom.cards.appendChild(card_el);
     } else {
-      sibling = dom.self.querySelector('.cards-item');
+      sibling = dom.cards.querySelector('.cards-item');
       if (sibling) {
-        dom.self.insertBefore(card_el, sibling);
+        dom.cards.insertBefore(card_el, sibling);
       } else {
         dom.self.appendChild(card_el);
       }

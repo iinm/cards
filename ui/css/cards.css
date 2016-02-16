@@ -42,7 +42,6 @@ strong {
   margin: .5em auto;
   min-height: 4em;
   width: 100%;
-  max-width: 45em;
   background: #F9F2E7;
   box-shadow: 0 0 .1em #777;
   transition: box-shadow 200ms;

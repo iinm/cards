@@ -40,22 +40,36 @@ cards.model = (function() {
       var instance = base_model.create(data_);
 
       instance.fetch_cards = function() {
-        console.log('fetch: ' + instance.get('name'));
-        if (instance.get('fetched')) {
-          return;
-        }
-        cards.fake.getCards(instance.get('id')).forEach(function(data_) {
-          var card;
-          if (!data.cards.get(data_.id)) {
-            card = data.cards.create(data_);
-            data_.coll_ids.forEach(function(coll_id) {
-              card.get('colls').add(data.index.get(coll_id));
+        var promise, add_cards;
+        promise = new Promise(
+          function(resolve, reject) {
+            if (instance.get('fetched')) {
+              return;
+            }
+            console.log('fetch: ' + instance.get('name'));
+            cards.fake.getCards(instance.get('id')).then(function(card_array) {
+              add_cards(card_array);
+              resolve();
             });
           }
-          instance.get('cards').add(data.cards.get(data_.id));
-        });
-        instance.set({ fetched: true });
-      };
+        );
+
+        add_cards = function(card_array) {
+          card_array.forEach(function(data_) {
+            var card;
+            if (!data.cards.get(data_.id)) {
+              card = data.cards.create(data_);
+              data_.coll_ids.forEach(function(coll_id) {
+                card.get('colls').add(data.index.get(coll_id));
+              });
+            }
+            instance.get('cards').add(data.cards.get(data_.id));
+          });
+          instance.set({ fetched: true });
+        };
+
+        return promise;
+      };  // .fetch_cards
 
       return instance;
     };
