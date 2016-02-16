@@ -160,6 +160,17 @@
   line-height: 2.5em;
   cursor: pointer;
 }
+
+.cards-editor .cards-editor-control li.saving {
+  display: none;
+}
+.cards-editor.saving .cards-editor-control li.saving {
+  display: inline-block;
+}
+.cards-editor.saving .cards-editor-control li.save {
+  display: none;
+}
+
 /* 
    .cards-editor-sub {
    position: absolute;

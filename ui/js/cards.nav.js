@@ -63,27 +63,23 @@ cards.nav = (function() {
     }, false);
 
     dom.annot_closer.addEventListener('click', function(event) {
-      var
-      save_failed = false, target_array = [];
+      var target_array = [], promises = [];
       event.preventDefault();
 
       // if cards is removed from current coll, annot_targets will change
       state.annot_targets.each(function(card) { target_array.push(card); });
       target_array.forEach(function(card) {
         // save clone
-        card = config.save_card(card);
-        if (!card) {
-          save_failed = true;
-        }
+        promises.push(config.save_card(card));
       });
 
-      if (save_failed) {
-        window.alert('Error: Please try again :(');
-      }
-
-      config.set_nav_anchor(
-        cards.util.cloneUpdateObj(state, { self: 'closed' })
-      );
+      dom.self.classList.add('annot-saving');
+      Promise.all(promises).then(function(card_array) {
+        dom.self.classList.remove('annot-saving');
+        config.set_nav_anchor(
+          cards.util.cloneUpdateObj(state, { self: 'closed' })
+        );
+      });
     }, false);
 
     dom.annot_trigger.querySelector('.remove').addEventListener(

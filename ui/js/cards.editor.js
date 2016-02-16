@@ -149,9 +149,11 @@ cards.editor = (function() {
     //  setEditTarget(null);
     //  config.set_editor_anchor('closed');
     //}
+    dom.self.classList.add('saving');
     config.save_card(data.draft).then(function(card) {
       if (card) {
         setEditTarget(null);
+        dom.self.classList.remove('saving');
         config.set_editor_anchor('closed');
       }
     });

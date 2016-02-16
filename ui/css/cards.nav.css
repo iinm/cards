@@ -54,6 +54,7 @@
 .cards-nav-head .title,
 .cards-nav-head .search-input,
 .cards-nav-head .nav-annot-closer,
+.cards-nav-head .nav-annot-saving,
 .cards-nav-head .annot-trigger-wrapper
 {
   position: absolute;
@@ -75,7 +76,8 @@
 }
 
 .cards-nav-head .nav-trigger,
-.cards-nav-head .nav-annot-closer {
+.cards-nav-head .nav-annot-closer,
+.cards-nav-head .nav-annot-saving {
   left: 0;
   width: 3em;
   cursor: pointer;
@@ -106,7 +108,8 @@
   height: 100%;
 }
 
-.cards-nav-head .nav-annot-closer {
+.cards-nav-head .nav-annot-closer,
+.cards-nav-head .nav-annot-saving {
   left: 0;
   width: 0;
   transition: width 250ms;
@@ -115,6 +118,9 @@
   overflow: hidden;
 }
 .cards-nav.annot-opened .cards-nav-head .nav-annot-closer {
+  width: 3em;
+}
+.cards-nav.annot-opened.annot-saving .cards-nav-head .nav-annot-saving {
   width: 3em;
 }
 
