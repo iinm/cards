@@ -112,7 +112,7 @@ cards.fake = (function() {
         var card = cards_[card_id], idx;
         idx = card.coll_ids.indexOf(coll_id);
         if (idx > -1) {
-          card.coll.splice(idx, 1);
+          card.coll_ids.splice(idx, 1);
         }
       });
       // delete self

@@ -175,6 +175,21 @@ cards.model = (function() {
 
       self.fetch_cards = function() {
         var promise, add_cards;
+
+        add_cards = function(card_array) {
+          card_array.forEach(function(data_) {
+            var card = data.cards.get(data_.id);
+            if (!card) {
+              card = data.cards.create(data_);
+              data_.coll_ids.forEach(function(coll_id) {
+                card.get('colls').add(data.index.get(coll_id));
+              });
+            }
+            self.get('cards').add(card);
+          });
+          self.set({ fetched: true });
+        };
+
         promise = new Promise(function(resolve, reject) {
           if (self.get('fetched')) {
             return;
@@ -186,20 +201,6 @@ cards.model = (function() {
           });
         });
 
-        add_cards = function(card_array) {
-          card_array.forEach(function(data_) {
-            var card;
-            if (!data.cards.get(data_.id)) {
-              card = data.cards.create(data_);
-              data_.coll_ids.forEach(function(coll_id) {
-                card.get('colls').add(data.index.get(coll_id));
-              });
-            }
-            self.get('cards').add(data.cards.get(data_.id));
-          });
-          self.set({ fetched: true });
-        };
-
         return promise;
       };  // .fetch_cards
 
@@ -209,7 +210,10 @@ cards.model = (function() {
           // delete from fake storage
           cards.fake.deleteColl(self.get('id')).then(function(coll_id) {
             // update models
-            self.get('cards').each(function(card) {
+            console.log(coll_id);
+            //self.get('cards').each(function(card) {
+            // TODO: check
+            data.cards.each(function(card) {
               card.get('colls').remove(coll_id);
             });
             data.index.remove(coll_id);

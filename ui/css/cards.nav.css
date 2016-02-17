@@ -284,7 +284,13 @@
   overflow: hidden;
   background: #F9F2E7;
   box-shadow: 0 0 .1em #777;
+  transition: box-shadow 300ms;
 }
+
+.cards-nav-content .nav-index li.nav-index-item.blink-red {
+  box-shadow: 0 0 .6em #CB4040;
+}
+
 .cards-nav-annotator .nav-index li.nav-index-item i,
 .cards-nav-content .nav-index li.nav-index-item i,
 .cards-nav-annotator .nav-index li.nav-index-item-new i,
@@ -342,6 +348,7 @@
 }
 
 .nav-index li.nav-index-item .item-config-trigger i,
+.nav-index li.nav-index-item .syncing i,
 .nav-index li.nav-index-item-new .item-add-trigger i {
   color: #999;
 }
@@ -353,7 +360,8 @@
 .cards-nav-content .nav-index.special li.nav-index-item .item-config-trigger {
   display: none;
 }
-.cards-nav-content .nav-index li.nav-index-item .item-config-trigger {
+.cards-nav-content .nav-index li.nav-index-item .item-config-trigger,
+.cards-nav-content .nav-index li.nav-index-item .syncing {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -364,6 +372,13 @@
   background: inherit;
   cursor: pointer;
 }
+.cards-nav-content .nav-index li.nav-index-item .syncing {
+  display: none;
+}
+.cards-nav-content .nav-index li.nav-index-item.syncing .syncing {
+  display: block;
+}
+
 .nav-index li.nav-index-item .item-config-menu {
   position: absolute;
   top: 0;

@@ -74,10 +74,23 @@ cards.view = (function() {
         self.el.querySelector('.item-config-menu .delete').addEventListener(
           'click',
           function(event) {
+            var yn;
             event.preventDefault();
-            // TODO: remove coll and update models
             self.el.classList.remove('config-menu-opened');
-            console.log('TODO: remove coll ' + model.get('name'));
+            self.el.classList.add('syncing');
+            yn = window.confirm('Delete "' + model.get('name') + '"');
+            if (yn) {
+              model.destroy().then(function(coll) {
+                self.el.classList.add('blink-red');
+                setTimeout(function() {
+                  self.el.classList.remove('blink-red');
+                }, 300);
+                setTimeout(function() { self.el.remove(); }, 600);
+              });
+            }
+            else {
+              self.el.classList.remove('syncing');
+            }
           },
           false
         );
