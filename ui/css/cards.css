@@ -79,7 +79,7 @@ strong {
   font-size: .75em;
 }
 
-.cards-item .item-content .item-meta .date,
+/* .cards-item .item-content .item-meta .date, */
 .cards-item .item-content .item-meta .colls {
   display: inline;
 }
@@ -87,6 +87,10 @@ strong {
 .cards-item .item-content .item-meta li {
   display: inline-block;
   margin: 0 .3em;
+  max-width: 20em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .cards-item .item-content .item-meta li i {
   color: #777;

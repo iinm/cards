@@ -759,6 +759,11 @@ cards.view = (function() {
 
         // render coll
         dom.colls.innerHTML = null;
+        // render date
+        dom.colls.appendChild(
+          cards.util.createElement('<li>01/01</li>')
+        );
+
         // sort: note -> tag
         coll_array = [];
         model.get('colls').each(function(coll) {
