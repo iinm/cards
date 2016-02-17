@@ -130,6 +130,7 @@ cards.content = (function() {
 
   onRemoveItem = function(card) {
     var card_view = state.card_id2view[card.get('id')];
+    card.set({ checked: false });
     // animation
     card_view.el.classList.add('blink-red');
     setTimeout(function() { card_view.el.classList.remove('blink-red'); }, 300);

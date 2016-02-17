@@ -96,7 +96,7 @@ cards.model_util = (function() {
     data = { instances: {}, instance_ids: [] },
     get, at, len, each,
     add, create, remove, reset,  // fetch
-    clone,
+    clone, as_array,
     on, off
     ;
 
@@ -172,6 +172,14 @@ cards.model_util = (function() {
       return collection;
     };
 
+    as_array = function() {
+      var instance_array = [];
+      data.instance_ids.forEach(function(id) {
+        instance_array.push(data.instances[id]);
+      });
+      return instance_array;
+    };
+
     on = function(event, f) {
       if (!config.on[event]) {
         config.on[event] = [];
@@ -188,7 +196,7 @@ cards.model_util = (function() {
 
     return {
       get: get, at: at, len: len, each: each,
-      clone: clone,
+      clone: clone, as_array: as_array,
       add: add, create: create, remove: remove, reset: reset,
       on: on, off: off
     };

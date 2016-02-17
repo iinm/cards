@@ -13,7 +13,7 @@ cards.nav = (function() {
     self_selector: '.cards-nav',
     set_nav_anchor: null,
     set_content_anchor: null,
-    remove_card: null,
+    delete_card: null,
     index: null,  // collection of cards.model/models.coll
     get_current_coll: null,
     save_card: null
@@ -85,7 +85,7 @@ cards.nav = (function() {
     dom.annot_trigger.querySelector('.delete').addEventListener(
       'click',
       function(event) {
-        var yn, card, card_id, coll = config.get_current_coll();
+        var yn, promises = [];
         event.preventDefault();
         yn = window.confirm(
           'Delete ' + state.annot_targets.len() + ' card'
@@ -94,13 +94,15 @@ cards.nav = (function() {
         if (yn !== true) {
           return;
         }
-        while (state.annot_targets.len() > 0) {
-          card_id = state.annot_targets.at(0).get('id');
-          card = coll.get('cards').get(card_id);
-          config.remove_card(card);
-          card.set({ checked: false });
-        }
-      }, false
+        state.annot_targets.as_array().forEach(function(card) {
+          promises.push(config.delete_card(card));
+        });
+        dom.self.classList.add('annot-saving');
+        Promise.all(promises).then(function(card_array) {
+          dom.self.classList.remove('annot-saving');
+        });
+      },
+      false
     );
 
     dom.annot_trigger.querySelector('.add-tag').addEventListener(

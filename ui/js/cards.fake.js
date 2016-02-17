@@ -11,7 +11,7 @@ cards.fake = (function() {
   var
   cards_ = {}, colls = {}, card_ids, coll_ids,
   getCollections,
-  getCards, saveCard
+  getCards, saveCard, deleteCard
   ;
 
   card_ids = [
@@ -175,9 +175,34 @@ cards.fake = (function() {
     return promise;
   };
 
+  deleteCard = function(card_id) {
+    var promise;
+    promise = new Promise(function(resolve, reject) {
+      var idx = card_ids.indexOf(card_id);
+      if (idx > -1) {
+        // update note
+        cards_[card_id].coll_ids.forEach(function(coll_id) {
+          var coll = colls[coll_id];
+          if (coll.type === 'note') {
+            coll.card_ids.splice(coll.card_ids.indexOf(card_id), 1);
+          }
+        });
+        // delete self
+        card_ids.splice(idx, 1);
+        delete cards_[card_id];
+      }
+
+      setTimeout(function() {
+        resolve(card_id);
+      }, 700);
+    });
+    return promise;
+  };
+  
   return {
     getCollections: getCollections,
     getCards: getCards,
-    saveCard: saveCard
+    saveCard: saveCard,
+    deleteCard: deleteCard
   };
 }());

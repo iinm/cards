@@ -125,7 +125,7 @@ cards.shell = (function() {
       cards.nav.configure({
         set_nav_anchor: setNavAnchor,
         set_content_anchor: setContentAnchor,
-        remove_card: cards.model.removeCard,
+        delete_card: cards.model.deleteCard,
         index: data.index,
         save_card: cards.model.saveCard,
         get_current_coll: function() {

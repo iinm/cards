@@ -10,7 +10,7 @@ cards.model = (function() {
   var
   models = {},
   data = { index: null, cards: null, all: null },
-  init, getIndex, getCards, createCard, saveCard, removeCard
+  init, getIndex, getCards, createCard, saveCard, deleteCard
   ;
 
   // define models
@@ -216,17 +216,22 @@ cards.model = (function() {
     return promise;
   };
 
-  removeCard = function(card) {
-    // TODO: remove from fake storage
+  deleteCard = function(card) {
+    var promise;
+    promise = new Promise(function(resolve, reject) {
+      // delete from fake storage
+      cards.fake.deleteCard(card.get('id')).then(function(card_id) {
+        // update models
+        card.get('colls').each(function(coll) {
+          coll.get('cards').remove(card.get('id'));
+        });
+        data.index.get('special:all').get('cards').remove(card.get('id'));
+        data.cards.remove(card.get('id'));
 
-    // update models
-    card.get('colls').each(function(coll) {
-      coll.get('cards').remove(card.get('id'));
+        resolve(card);
+      })
     });
-    data.index.get('special:all').get('cards').remove(card.get('id'));
-    data.cards.remove(card.get('id'));
-    // destroy self
-    //card.destroy();
+    return promise;
   };
 
   return {
@@ -234,6 +239,6 @@ cards.model = (function() {
     models: models,
     getIndex: getIndex, getCards: getCards,
     createCard: createCard, saveCard: saveCard,
-    removeCard: removeCard
+    deleteCard: deleteCard
   };
 }());
