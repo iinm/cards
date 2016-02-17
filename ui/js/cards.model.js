@@ -209,19 +209,29 @@ cards.model = (function() {
         promise = new Promise(function(resolve, reject) {
           var data_, card_ids = [];
 
-          self.get('cards').each(function(card) {
-            card_ids.push(card.get('id'));
-          });
           data_ = {
             id: self.get('id'),
             type: self.get('type'),
-            name: self.get('name'),
-            card_ids: card_ids
+            name: self.get('name')
           };
+
+          if (self.get('type') === 'note' && self.get('fetched')) {
+            // save order
+            self.get('cards').each(function(card) {
+              card_ids.push(card.get('id'));
+            });
+            data_.card_ids = card_ids;
+          }
+
           // save to fake storage
           cards.fake.saveColl(data_).then(function(data_) {
-            self.set(data_);
-            resolve(self);
+            var coll = data.index.get(data_.id);
+            if (!coll) {  // new coll
+              data.index.add(self, 0);
+              coll = self;
+            }
+            coll.set(data_);  // update for clone
+            resolve(coll);
           });
         });
         return promise;

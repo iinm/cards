@@ -34,21 +34,26 @@ cards.content = (function() {
   init = function(container) {
     dom.self = container.querySelector(config.self_selector);
     dom.cards = dom.self.querySelector('.cards-content-cards');
+    // event handler
+    dom.self.removeEventListener('scroll', onScroll);
   }; 
 
   setColl = function(coll) {
     if (state.coll !== null && coll.get('id') === state.coll.get('id')) {
       return;
     }
+
     if (state.coll !== null) {
-      // TODO: これどうにかならない？
       state.coll.get('cards').off('add', onAddItem);
       state.coll.get('cards').off('remove', onRemoveItem);
+      state.coll.off('change:name', render);
     }
+
     state.coll = coll;
     console.log(state.coll.get('name'));
     state.coll.get('cards').on('add', onAddItem);
     state.coll.get('cards').on('remove', onRemoveItem);
+    state.coll.on('change:name', render);
     render();
   };
 
@@ -63,7 +68,6 @@ cards.content = (function() {
   };
 
   render = function() {
-    dom.self.removeEventListener('scroll', onScroll);
     // destroy previous collection
     Object.keys(state.card_id2view).forEach(function(card_id) {
       state.card_id2view[card_id].destroy();

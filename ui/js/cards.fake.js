@@ -110,7 +110,7 @@ cards.fake = (function() {
         data_.id = 'coll_' + coll_ids.length;
         coll_ids.push(data_.id);
       }
-      colls[data_.id] = data_;
+      cards.util.updateObj(colls[data_.id], data_);
       //
       setTimeout(function() { resolve(data_); }, 700);
     });

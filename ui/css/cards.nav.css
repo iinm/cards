@@ -413,7 +413,7 @@ li.nav-index-item .item-config-menu > * {
   overflow: hidden;
 }
 li.nav-index-item.edit-mode .item-config-menu .edit,
-li.nav-index-item.edit-mode .item-config-menu .remove {
+li.nav-index-item.edit-mode .item-config-menu .delete {
   width: 0;
 }
 

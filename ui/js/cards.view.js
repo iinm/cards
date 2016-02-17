@@ -110,6 +110,7 @@ cards.view = (function() {
         self.el.querySelector('.item-config-menu .done').addEventListener(
           'click',
           function(event) {
+            var model_clone;
             event.preventDefault();
             // TODO (?): save coll if title is changed
             state.mode = null;
@@ -117,6 +118,21 @@ cards.view = (function() {
             dom.title.setAttribute('contenteditable', 'false');
             self.el.classList.remove('config-menu-opened');
             self.el.classList.remove('edit-mode');
+
+            if (dom.title.innerText.trim() !== model.get('title')) {
+              model_clone = model.clone();
+              model_clone.set({ name: dom.title.innerText.trim() });
+              self.el.classList.add('syncing');
+              model_clone.save().then(function(coll) {
+                dom.title.innerText = coll.get('name');
+                // animation
+                self.el.classList.remove('syncing');
+                self.el.classList.add('blink');
+                setTimeout(function() {
+                  self.el.classList.remove('blink');
+                }, 300);
+              });
+            }
           },
           false
         );
@@ -350,8 +366,7 @@ cards.view = (function() {
           }
           coll = config.create_coll({ name: title.trim(), type: coll_type });
           coll.save().then(function(coll) {
-            console.log(coll.get('id'));
-            index.add(coll, 0);
+            //index.add(coll, 0);
             //
             resolve(coll);
           });
@@ -597,8 +612,7 @@ cards.view = (function() {
           }
           coll = config.create_coll({ name: title.trim(), type: coll_type });
           coll.save().then(function(coll) {
-            console.log(coll.get('id'));
-            index.add(coll, 0);
+            //index.add(coll, 0);
             //
             resolve(coll);
           });
