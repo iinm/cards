@@ -75,6 +75,7 @@ cards.content = (function() {
         var card_view = createCardView(card);
         dom.cards.appendChild(card_view.render().el);
       });
+      dom.self.scrollTop = 0;
       // load more cards when scroll to bottom
       dom.self.addEventListener('scroll', onScroll, false);
     }

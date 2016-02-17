@@ -137,32 +137,34 @@ cards.model = (function() {
   };
 
   saveCard = function(card) {
-    var promise, update_models;
+    var promise, update_models, is_changed;
 
-    promise = new Promise(
-      function(resolve, reject) {
-        var data_, coll_ids = [];
-
-        // 1. save to (fake) storage
-        card.get('colls').each(function(coll) {
-          coll_ids.push(coll.get('id'));
-        });
-        data_ = {
-          id: card.get('id'),
-          title: card.get('title'),
-          body: card.get('body'),
-          coll_ids: coll_ids
-        };
-
-        cards.fake.saveCardPromise(data_).then(function(data_) {
-          var card = update_models(data_);
-          resolve(card);
-        });
+    is_changed = function(data_) {
+      var card, changed = false;
+      card = data.cards.get(data_.id);
+      if (!card) {  // new
+        changed = true;
       }
-    );
+      else {
+        // check change
+        if (card.get('title') !== data_.title
+            || card.get('body') !== data_.body
+            || card.get('colls').len() !== data_.coll_ids.length
+           ) {
+          changed = true;
+        }
+        for (i = 0; i < data_.coll_ids.length; i++) {
+          if (!card.get('colls').get(data_.coll_ids[i])) {
+            changed = true;
+            break;
+          }
+        }
+      }
+      return changed;
+    };
 
     update_models = function(data_) {
-      var card, changed = false;
+      var card, changed = false; 
       card = data.cards.get(data_.id);
       if (!card) {  // no id -> new card
         data.cards.create(data_);
@@ -171,15 +173,9 @@ cards.model = (function() {
         if (card.get('title') !== data_.title
             || card.get('body') !== data_.body
             // ignore tag change
-            //|| card.get('colls').len() !== data_.coll_ids.length
            ) {
           changed = true;
         }
-        //for (i = 0; i < data_.coll_ids.length; i++) {
-        //  if (!card.get('colls').get(data_.coll_ids[i])) {
-        //    changed = true;
-        //  }
-        //}
         data.cards.get(data_.id).set(data_);
       }
       card = data.cards.get(data_.id);
@@ -213,6 +209,33 @@ cards.model = (function() {
 
       return card;
     };  // update_models
+
+    promise = new Promise(
+      function(resolve, reject) {
+        var data_, coll_ids = [];
+
+        // 1. save to (fake) storage
+        card.get('colls').each(function(coll) {
+          coll_ids.push(coll.get('id'));
+        });
+        data_ = {
+          id: card.get('id'),
+          title: card.get('title'),
+          body: card.get('body'),
+          coll_ids: coll_ids
+        };
+
+        if (is_changed(data_)) {
+          cards.fake.saveCard(data_).then(function(data_) {
+            var card = update_models(data_);
+            resolve(card);
+          });
+        }
+        else {
+          resolve(card);
+        }
+      }
+    );
 
     return promise;
   };

@@ -122,17 +122,19 @@ cards.model_util = (function() {
           && (typeof idx) !== 'number'
          ) {
         // already exists
-        return;
+        // do nothing
       }
-      data.instances[instance.get('id')] = instance;
-      if ((typeof idx) === 'number') {
-        old_idx = data.instance_ids.indexOf(instance.get('id'));
-        if (old_idx > -1) {
-          data.instance_ids.splice(old_idx, 1);
+      else {
+        data.instances[instance.get('id')] = instance;
+        if ((typeof idx) === 'number') {
+          old_idx = data.instance_ids.indexOf(instance.get('id'));
+          if (old_idx > -1) {
+            data.instance_ids.splice(old_idx, 1);
+          }
+          data.instance_ids.splice(idx, 0, instance.get('id'));
+        } else {
+          data.instance_ids.push(instance.get('id'));
         }
-        data.instance_ids.splice(idx, 0, instance.get('id'));
-      } else {
-        data.instance_ids.push(instance.get('id'));
       }
       if (config.on.add) {
         config.on.add.forEach(function(f) { f(instance, idx); });
