@@ -71,7 +71,7 @@ cards.view = (function() {
           false
         );
 
-        self.el.querySelector('.item-config-menu .remove').addEventListener(
+        self.el.querySelector('.item-config-menu .delete').addEventListener(
           'click',
           function(event) {
             event.preventDefault();

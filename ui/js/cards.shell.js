@@ -115,38 +115,44 @@ cards.shell = (function() {
   };
 
   init = function(container) {
-    cards.model.init();
-    data.index = cards.model.getIndex();
+    var nav_el = document.querySelector('.cards-nav');
+    // animate while initializing model
+    nav_el.classList.add('annot-saving');
 
-    cards.nav.configure({
-      set_nav_anchor: setNavAnchor,
-      set_content_anchor: setContentAnchor,
-      remove_card: cards.model.removeCard,
-      index: data.index,
-      save_card: cards.model.saveCard,
-      get_current_coll: function() {
-        return data.index.get(state.anchor_map.content);
-      }
+    cards.model.init().then(function() {
+      data.index = cards.model.getIndex();
+
+      cards.nav.configure({
+        set_nav_anchor: setNavAnchor,
+        set_content_anchor: setContentAnchor,
+        remove_card: cards.model.removeCard,
+        index: data.index,
+        save_card: cards.model.saveCard,
+        get_current_coll: function() {
+          return data.index.get(state.anchor_map.content);
+        }
+      });
+      cards.nav.init(container);
+      nav_el.classList.remove('annot-saving');
+
+      cards.content.configure({
+        set_edit_target: cards.editor.setEditTarget,
+        set_annot_target: cards.nav.setAnnotTarget
+      });
+      cards.content.init(container);
+
+      cards.editor.configure({
+        set_editor_anchor: setEditorAnchor,
+        create_card: createCard,
+        save_card: cards.model.saveCard,
+        request_annot: requestAnnot
+      });
+      cards.editor.init(container);
+
+      //
+      window.addEventListener('hashchange', onHashchange);
+      onHashchange();
     });
-    cards.nav.init(container);
-
-    cards.content.configure({
-      set_edit_target: cards.editor.setEditTarget,
-      set_annot_target: cards.nav.setAnnotTarget
-    });
-    cards.content.init(container);
-
-    cards.editor.configure({
-      set_editor_anchor: setEditorAnchor,
-      create_card: createCard,
-      save_card: cards.model.saveCard,
-      request_annot: requestAnnot
-    });
-    cards.editor.init(container);
-
-    //
-    window.addEventListener('hashchange', onHashchange);
-    onHashchange();
   }; 
 
   return { init: init };

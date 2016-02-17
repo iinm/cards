@@ -41,18 +41,16 @@ cards.model = (function() {
 
       instance.fetch_cards = function() {
         var promise, add_cards;
-        promise = new Promise(
-          function(resolve, reject) {
-            if (instance.get('fetched')) {
-              return;
-            }
-            console.log('fetch: ' + instance.get('name'));
-            cards.fake.getCards(instance.get('id')).then(function(card_array) {
-              add_cards(card_array);
-              resolve();
-            });
+        promise = new Promise(function(resolve, reject) {
+          if (instance.get('fetched')) {
+            return;
           }
-        );
+          console.log('fetch: ' + instance.get('name'));
+          cards.fake.getCards(instance.get('id')).then(function(card_array) {
+            add_cards(card_array);
+            resolve();
+          });
+        });
 
         add_cards = function(card_array) {
           card_array.forEach(function(data_) {
@@ -78,50 +76,30 @@ cards.model = (function() {
   }());
 
   init = function() {
-    // create colls
-    data.index = cards.model_util.createCollection(models.coll);
-    data.cards = cards.model_util.createCollection(models.card);
+    var promise;
+    promise = new Promise(function(resolve, reject) {
+      // create colls
+      data.index = cards.model_util.createCollection(models.coll);
+      data.cards = cards.model_util.createCollection(models.card);
 
-    // create special coll
-    data.all = models.coll.create({
-      id: 'special:all', type: 'special:all', name: 'Cards'
+      // create special coll
+      data.all = models.coll.create({
+        id: 'special:all', type: 'special:all', name: 'Cards'
+      });
+      data.index.add(data.all);
+
+      // create colls (tags and notes)
+      cards.fake.getCollections()
+        .then(function(coll_array) {
+          coll_array.forEach(function(data_) {
+            var coll = models.coll.create(data_);
+            data.index.add(coll);
+          });
+          return Promise.resolve();
+        })
+        .then(resolve);
     });
-    data.index.add(data.all);
-
-    // create colls (tags and notes)
-    cards.fake.getCollections().forEach(function(data_) {
-      var coll = models.coll.create(data_);
-      data.index.add(coll);
-    });
-
-    // add cards to special:all
-    //cards.fake.getCards().forEach(function(data_) {
-    //  var card;
-    //  if (!data.cards.get(data_.id)) {
-    //    card = data.cards.create(data_);
-    //    data_.coll_ids.forEach(function(coll_id) {
-    //      card.get('colls').add(data.index.get(coll_id));
-    //    });
-    //    data.cards.add(card);
-    //  }
-    //  data.index.get('special:all').get('cards').add(data.cards.get(data_.id));
-    //});
-
-    // add cards to colls
-    //cards.fake.getCollections().forEach(function(data_) {
-    //  data_.card_ids.forEach(function(card_id) {
-    //    var card, card_data;
-    //    if (!data.cards.get(card_id)) {
-    //      card_data = cards.fake.getCard(card_id);
-    //      card = data.cards.create(card_data);
-    //      card_data.coll_ids.forEach(function(coll_id) {
-    //        card.get('colls').add(data.index.get(coll_id));
-    //      });
-    //      data.cards.add(card);
-    //    }
-    //    data.index.get(data_.id).get('cards').add(data.cards.get(card_id));
-    //  });
-    //});
+    return promise
   };
 
   getIndex = function() {
@@ -210,32 +188,30 @@ cards.model = (function() {
       return card;
     };  // update_models
 
-    promise = new Promise(
-      function(resolve, reject) {
-        var data_, coll_ids = [];
+    promise = new Promise(function(resolve, reject) {
+      var data_, coll_ids = [];
 
-        // 1. save to (fake) storage
-        card.get('colls').each(function(coll) {
-          coll_ids.push(coll.get('id'));
-        });
-        data_ = {
-          id: card.get('id'),
-          title: card.get('title'),
-          body: card.get('body'),
-          coll_ids: coll_ids
-        };
+      // 1. save to (fake) storage
+      card.get('colls').each(function(coll) {
+        coll_ids.push(coll.get('id'));
+      });
+      data_ = {
+        id: card.get('id'),
+        title: card.get('title'),
+        body: card.get('body'),
+        coll_ids: coll_ids
+      };
 
-        if (is_changed(data_)) {
-          cards.fake.saveCard(data_).then(function(data_) {
-            var card = update_models(data_);
-            resolve(card);
-          });
-        }
-        else {
+      if (is_changed(data_)) {
+        cards.fake.saveCard(data_).then(function(data_) {
+          var card = update_models(data_);
           resolve(card);
-        }
+        });
       }
-    );
+      else {
+        resolve(card);
+      }
+    });
 
     return promise;
   };

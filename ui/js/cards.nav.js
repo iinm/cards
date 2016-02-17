@@ -82,12 +82,15 @@ cards.nav = (function() {
       });
     }, false);
 
-    dom.annot_trigger.querySelector('.remove').addEventListener(
+    dom.annot_trigger.querySelector('.delete').addEventListener(
       'click',
       function(event) {
         var yn, card, card_id, coll = config.get_current_coll();
         event.preventDefault();
-        yn = window.confirm('Remove ' + state.annot_targets.len() + ' cards.');
+        yn = window.confirm(
+          'Delete ' + state.annot_targets.len() + ' card'
+            + ((state.annot_targets.len() > 1) ? 's.' : '.')
+        );
         if (yn !== true) {
           return;
         }
@@ -156,7 +159,9 @@ cards.nav = (function() {
       }
     } else {
       dom.self.classList.remove('annot-trigger-opened');
-      dom.self.classList.remove('content-is-not-note');
+      setTimeout(function() {
+        dom.self.classList.remove('content-is-not-note');
+      }, 250);
     }
   };
 

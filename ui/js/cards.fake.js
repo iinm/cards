@@ -10,8 +10,8 @@ cards.fake = (function() {
   "use strict";
   var
   cards_ = {}, colls = {}, card_ids, coll_ids,
-  getCard, getCards, getCollections,
-  saveCard
+  getCollections,
+  getCards, saveCard
   ;
 
   card_ids = [
@@ -92,96 +92,92 @@ cards.fake = (function() {
   };
 
   getCollections = function() {
-    var i, reversed = [];
-    for (i = coll_ids.length - 1; i >= 0; i--) {
-      reversed.push(colls[coll_ids[i]]);
-    }
-    return reversed;
+    var promise;
+    promise = new Promise(function(resolve, reject) {
+      var i, reversed = [];
+      for (i = coll_ids.length - 1; i >= 0; i--) {
+        reversed.push(colls[coll_ids[i]]);
+      }
+      setTimeout(function() { resolve(reversed); }, 700);
+    });
+    return promise;
   };
 
   getCards = function(coll_id) {
     var promise;
-    promise = new Promise(
-      function(resolve, reject) {
-        var i, card_array_ = [];
-        if (coll_id === 'special:all' || colls[coll_id].type === 'tag') {
-          for (i = 0; i < card_ids.length; i++) {
-            if (coll_id === 'special:all'
-                || cards_[card_ids[i]].coll_ids.indexOf(coll_id) > -1
-               ) {
-              card_array_.push(cards_[card_ids[i]]);
-            }
+    promise = new Promise(function(resolve, reject) {
+      var i, card_array_ = [];
+      if (coll_id === 'special:all' || colls[coll_id].type === 'tag') {
+        for (i = 0; i < card_ids.length; i++) {
+          if (coll_id === 'special:all'
+              || cards_[card_ids[i]].coll_ids.indexOf(coll_id) > -1
+             ) {
+            card_array_.push(cards_[card_ids[i]]);
           }
-          card_array_.reverse();
         }
-        else {  // note
-          colls[coll_id].card_ids.forEach(function(card_id) {
-            card_array_.push(cards_[card_id]);
-          });
-        }
-
-        setTimeout(function() {
-          resolve(card_array_);
-        }, 1000);
+        card_array_.reverse();
       }
-    );
-    return promise;
-  };
+      else {  // note
+        colls[coll_id].card_ids.forEach(function(card_id) {
+          card_array_.push(cards_[card_id]);
+        });
+      }
 
-  getCard = function(card_id) {
-    return cards_[card_id];
+      setTimeout(function() {
+        resolve(card_array_);
+      }, 700);
+    });
+    return promise;
   };
 
   saveCard = function(data_) {
     var promise;
-    promise = new Promise(
-      function(resolve, reject) {
-        // TODO: handle error
-        if (!data_.id) {  // new card
-          data_.id = 'card_' + card_ids.length;
-          card_ids.push(data_);
+    promise = new Promise(function(resolve, reject) {
+      // TODO: handle error
+      if (!data_.id) {  // new card
+        data_.id = 'card_' + card_ids.length;
+        card_ids.push(data_);
+      }
+      else {  // update
+        // if title or body is changed -> change order
+        if (data_.title !== cards_[data_.id].title
+            || data_.body !== cards_[data_.id].body
+           ) {
+          card_ids.splice(card_ids.indexOf(data_.id), 1);
+          card_ids.push(data_.id);
         }
-        else {  // update
-          // if title or body is changed -> change order
-          if (data_.title !== cards_[data_.id].title
-              || data_.body !== cards_[data_.id].body
+        //
+        cards_[data_.id].coll_ids.forEach(function(coll_id) {
+          if (colls[coll_id].type === 'note'
+              && data_.coll_ids.indexOf(coll_id) === -1
              ) {
-            card_ids.splice(card_ids.indexOf(data_.id), 1);
-            card_ids.push(data_.id);
-          }
-          //
-          cards_[data_.id].coll_ids.forEach(function(coll_id) {
-            if (colls[coll_id].type === 'note'
-                && data_.coll_ids.indexOf(coll_id) === -1
-               ) {
-              // remove card from note
-              colls[coll_id].card_ids.splice(
-                colls[coll_id].card_ids.indexOf(data_.id), 1
-              );
-            }
-          });
-        }
-        cards_[data_.id] = data_;
-
-        // update notes
-        data_.coll_ids.forEach(function(coll_id) {
-          var coll = colls[coll_id];
-          if (coll.type === 'note' && coll.card_ids.indexOf(data_.id) === -1) {
-            coll.card_ids.push(data_.id);
+            // remove card from note
+            colls[coll_id].card_ids.splice(
+              colls[coll_id].card_ids.indexOf(data_.id), 1
+            );
           }
         });
-
-        setTimeout(function() {
-          resolve(data_);
-        }, 1000);
       }
-    );
+      cards_[data_.id] = data_;
+
+      // update notes
+      data_.coll_ids.forEach(function(coll_id) {
+        var coll = colls[coll_id];
+        if (coll.type === 'note' && coll.card_ids.indexOf(data_.id) === -1) {
+          coll.card_ids.push(data_.id);
+        }
+      });
+
+      setTimeout(function() {
+        resolve(data_);
+      }, 700);
+    });
     return promise;
   };
 
   return {
-    getCard: getCard, getCards: getCards,
     getCollections: getCollections,
+    getCards: getCards,
     saveCard: saveCard
   };
 }());
