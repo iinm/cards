@@ -125,9 +125,7 @@ cards.shell = (function() {
       cards.nav.configure({
         set_nav_anchor: setNavAnchor,
         set_content_anchor: setContentAnchor,
-        delete_card: cards.model.deleteCard,
         index: data.index,
-        save_card: cards.model.saveCard,
         get_current_coll: function() {
           return data.index.get(state.anchor_map.content);
         }
@@ -144,7 +142,6 @@ cards.shell = (function() {
       cards.editor.configure({
         set_editor_anchor: setEditorAnchor,
         create_card: createCard,
-        save_card: cards.model.saveCard,
         request_annot: requestAnnot
       });
       cards.editor.init(container);

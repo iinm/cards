@@ -13,8 +13,9 @@ cards.model_util = (function() {
     var create;
     create = function(data) {
       var
-      config = { on: {} },
-      get, set, destroy,  // fetch, save
+      config = { on: {}, create: create },
+      set_create,
+      get, set, //destroy, fetch, save
       clone,
       on, off
       ;
@@ -24,6 +25,11 @@ cards.model_util = (function() {
       } else if ((typeof data_tmpl) === 'function') {
         data = cards.util.cloneUpdateObj(data_tmpl(), data);
       }
+
+      set_create = function(create_f) {
+        // set constructor for .clone()
+        config.create = create_f;
+      };
 
       get = function(key) { return data[key]; };
       set = function(kvs) {
@@ -44,12 +50,12 @@ cards.model_util = (function() {
         }
       };
 
-      destroy = function() {
-        config.on.destroy.forEach(function(f) { f(); });
-      };
+      //destroy = function() {
+      //  config.on.destroy.forEach(function(f) { f(); });
+      //};
 
       clone = function() {
-        var instance = create(data), modifications = {};
+        var instance = config.create(data), modifications = {};
 
         Object.keys(data).forEach(function(key) {
           if (data[key] !== null && (typeof data[key].clone) === 'function') {
@@ -80,7 +86,8 @@ cards.model_util = (function() {
       };
 
       return {
-        get: get, set: set, destroy: destroy,
+        set_create: set_create,
+        get: get, set: set,
         clone: clone,
         on: on, off: off
       };

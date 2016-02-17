@@ -13,7 +13,6 @@ cards.editor = (function() {
     self_selector: '.cards-editor',
     set_editor_anchor: null,
     create_card: null,
-    save_card: null,
     request_annot: null
   },
 
@@ -144,7 +143,7 @@ cards.editor = (function() {
     });
 
     dom.self.classList.add('saving');
-    config.save_card(data.draft).then(function(card) {
+    data.draft.save().then(function(card) {
       if (card) {
         setEditTarget(null);
         dom.self.classList.remove('saving');

@@ -13,10 +13,8 @@ cards.nav = (function() {
     self_selector: '.cards-nav',
     set_nav_anchor: null,
     set_content_anchor: null,
-    delete_card: null,
     index: null,  // collection of cards.model/models.coll
-    get_current_coll: null,
-    save_card: null
+    get_current_coll: null
   },
 
   state = {
@@ -63,14 +61,11 @@ cards.nav = (function() {
     }, false);
 
     dom.annot_closer.addEventListener('click', function(event) {
-      var target_array = [], promises = [];
+      var promises = [];
       event.preventDefault();
 
-      // if cards is removed from current coll, annot_targets will change
-      state.annot_targets.each(function(card) { target_array.push(card); });
-      target_array.forEach(function(card) {
-        // save clone
-        promises.push(config.save_card(card));
+      state.annot_targets.as_array().forEach(function(card_clone) {
+        promises.push(card_clone.save());
       });
 
       dom.self.classList.add('annot-saving');
@@ -94,8 +89,8 @@ cards.nav = (function() {
         if (yn !== true) {
           return;
         }
-        state.annot_targets.as_array().forEach(function(card) {
-          promises.push(config.delete_card(card));
+        state.annot_targets.as_array().forEach(function(card_clone) {
+          promises.push(card_clone.destroy());
         });
         dom.self.classList.add('annot-saving');
         Promise.all(promises).then(function(card_array) {

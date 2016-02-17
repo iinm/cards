@@ -10,7 +10,7 @@ cards.fake = (function() {
   "use strict";
   var
   cards_ = {}, colls = {}, card_ids, coll_ids,
-  getCollections,
+  getCollections, deleteColl,
   getCards, saveCard, deleteCard
   ;
 
@@ -99,6 +99,29 @@ cards.fake = (function() {
         reversed.push(colls[coll_ids[i]]);
       }
       setTimeout(function() { resolve(reversed); }, 700);
+    });
+    return promise;
+  };
+
+  deleteColl = function(coll_id) {
+    var promise;
+    promise = new Promise(function(resolve, reject) {
+      var coll_idx = coll_ids.indexOf(coll_id);
+      // update cards
+      card_ids.forEach(function(card_id) {
+        var card = cards_[card_id], idx;
+        idx = card.coll_ids.indexOf(coll_id);
+        if (idx > -1) {
+          card.coll.splice(idx, 1);
+        }
+      });
+      // delete self
+      coll_ids.splice(coll_idx, 1);
+      delete colls[coll_id];
+
+      setTimeout(function() {
+        resolve(coll_id);
+      }, 700);
     });
     return promise;
   };
@@ -201,6 +224,7 @@ cards.fake = (function() {
   
   return {
     getCollections: getCollections,
+    deleteColl: deleteColl,
     getCards: getCards,
     saveCard: saveCard,
     deleteCard: deleteCard
