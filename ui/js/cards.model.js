@@ -225,12 +225,16 @@ cards.model = (function() {
 
           // save to fake storage
           cards.fake.saveColl(data_).then(function(data_) {
+            // update models
             var coll = data.index.get(data_.id);
-            if (!coll) {  // new coll
-              data.index.add(self, 0);
+            if (coll) {
+              coll.set(data_);
+            } else {  // new coll
               coll = self;
+              coll.set(data_);
+              data.index.add(self, 0);
             }
-            coll.set(data_);  // update for clone
+            //
             resolve(coll);
           });
         });

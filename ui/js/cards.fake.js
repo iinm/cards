@@ -109,8 +109,13 @@ cards.fake = (function() {
       if (!data_.id) {  // new coll
         data_.id = 'coll_' + coll_ids.length;
         coll_ids.push(data_.id);
+        if (data_.type === 'note') {
+          data_.card_ids = [];
+        }
+        colls[data_.id] = data_;
+      } else {
+        cards.util.updateObj(colls[data_.id], data_);
       }
-      cards.util.updateObj(colls[data_.id], data_);
       //
       setTimeout(function() { resolve(data_); }, 700);
     });
