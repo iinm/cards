@@ -23,6 +23,7 @@ cards.editor = (function() {
   init, configure, setDomMap,
   setEditorState, onClickToggleEditor,
   onClickSaveCard, setEditTarget,
+  removeColl,
   renderMeta
   ;  // var
 
@@ -71,6 +72,14 @@ cards.editor = (function() {
         config.request_annot(annot_targets, 'note');
       }, false
     );
+  };
+
+  removeColl = function(coll_id) {
+    // draftはcollから見えないので，collが削除，変更された時にこれを使って，
+    // draft.get('colls')を更新する．
+    if (data.draft) {
+      data.draft.get('colls').remove(coll_id);
+    }
   };
 
   setEditTarget = function(card) {
@@ -134,6 +143,7 @@ cards.editor = (function() {
         && dom.content_body.innerHTML.trim().length === 0
        ) {
       // skip if body is empty
+      config.set_editor_anchor('closed');
       return;
     }
 
@@ -204,6 +214,7 @@ cards.editor = (function() {
     configure: configure,
     init: init,
     setEditorState: setEditorState,
-    setEditTarget: setEditTarget
+    setEditTarget: setEditTarget,
+    removeColl: removeColl
   };
 }());

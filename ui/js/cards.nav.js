@@ -15,6 +15,7 @@ cards.nav = (function() {
     set_content_anchor: null,
     index: null,  // collection of cards.model/models.coll
     create_coll: null,
+    remove_editor_coll: null,
     get_current_coll: null
   },
 
@@ -135,7 +136,8 @@ cards.nav = (function() {
     view.index = cards.view.index.create(config.index);
     view.index.configure({
       set_content_anchor: config.set_content_anchor,
-      create_coll: config.create_coll
+      create_coll: config.create_coll,
+      remove_editor_coll: config.remove_editor_coll
     });
     dom.content.appendChild(view.index.render().el);
 

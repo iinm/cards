@@ -4,7 +4,7 @@
   regexp : true, sloppy  : true, vars     : false,
   white  : true
 */
-/*global cards */
+/*global cards, Promise */
 
 cards.view = (function() {
   "use strict";
@@ -19,7 +19,7 @@ cards.view = (function() {
     create = function(model) {  // model: cards.model/models.coll
       var
       self = { el: null, render: null, configure: null },
-      config = { set_content_anchor: null },
+      config = { set_content_anchor: null, remove_editor_coll: null },
       state = { mode: null },
       dom = {},
       onClickSetContentAnchor
@@ -81,6 +81,9 @@ cards.view = (function() {
             yn = window.confirm('Delete "' + model.get('name') + '"');
             if (yn) {
               model.destroy().then(function(coll) {
+                // modify colls in draft
+                config.remove_editor_coll(coll.get('id'));
+                // animation
                 self.el.classList.add('blink-red');
                 setTimeout(function() {
                   self.el.classList.remove('blink-red');
@@ -112,18 +115,20 @@ cards.view = (function() {
           function(event) {
             var model_clone;
             event.preventDefault();
-            // TODO (?): save coll if title is changed
+
             state.mode = null;
             dom.title.focus();
             dom.title.setAttribute('contenteditable', 'false');
             self.el.classList.remove('config-menu-opened');
             self.el.classList.remove('edit-mode');
 
-            if (dom.title.innerText.trim() !== model.get('title')) {
+            if (dom.title.innerText.trim() !== model.get('name')) {
               model_clone = model.clone();
               model_clone.set({ name: dom.title.innerText.trim() });
               self.el.classList.add('syncing');
               model_clone.save().then(function(coll) {
+                // modify draft coll
+                config.remove_editor_coll(null);
                 dom.title.innerText = coll.get('name');
                 // animation
                 self.el.classList.remove('syncing');
@@ -221,7 +226,11 @@ cards.view = (function() {
     create = function(index) {  // index: cards.model.index
       var
       self = { el: null, render: null, configure: null },
-      config = { set_content_anchor: null, create_coll: null },
+      config = {
+        set_content_anchor: null,
+        create_coll: null,
+        remove_editor_coll: null
+      },
       dom = {
         special_sec: null, special_sec_ul: null,
         tag_sec: null, tag_sec_ul: null,
@@ -285,7 +294,8 @@ cards.view = (function() {
         index.each(function(coll) {
           index_item_view = index_item.create(coll);
           index_item_view.configure({
-            set_content_anchor: config.set_content_anchor
+            set_content_anchor: config.set_content_anchor,
+            remove_editor_coll: config.remove_editor_coll
           });
 
           switch (coll.get('type')) {
@@ -387,10 +397,7 @@ cards.view = (function() {
     create = function(model) {  // model: cards.model/models.coll
       var
       self = { el: null, render: null, configure: null },
-      config = {
-        on_change_annot_check: null,
-        create_coll: null
-      }
+      config = { on_change_annot_check: null }
       ;
 
       if (!tmpl) {

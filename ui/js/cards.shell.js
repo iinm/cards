@@ -127,6 +127,7 @@ cards.shell = (function() {
         set_content_anchor: setContentAnchor,
         index: data.index,
         create_coll: cards.model.createColl,
+        remove_editor_coll: cards.editor.removeColl,
         get_current_coll: function() {
           return data.index.get(state.anchor_map.content);
         }

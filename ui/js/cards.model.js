@@ -247,12 +247,13 @@ cards.model = (function() {
           // delete from fake storage
           cards.fake.deleteColl(self.get('id')).then(function(coll_id) {
             // update models
-            console.log(coll_id);
             //self.get('cards').each(function(card) {
             // TODO: check
             data.cards.each(function(card) {
               card.get('colls').remove(coll_id);
             });
+            //
+            self.set({ annot_check: null });
             data.index.remove(coll_id);
 
             resolve(self);
