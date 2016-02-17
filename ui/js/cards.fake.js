@@ -10,7 +10,7 @@ cards.fake = (function() {
   "use strict";
   var
   cards_ = {}, colls = {}, card_ids, coll_ids,
-  getCollections, deleteColl,
+  getCollections, saveColl, deleteColl,
   getCards, saveCard, deleteCard
   ;
 
@@ -103,6 +103,20 @@ cards.fake = (function() {
     return promise;
   };
 
+  saveColl = function(data_) {
+    var promise;
+    promise = new Promise(function(resolve, reject) {
+      if (!data_.id) {  // new coll
+        data_.id = 'coll_' + coll_ids.length;
+        coll_ids.push(data_.id);
+      }
+      colls[data_.id] = data_;
+      //
+      setTimeout(function() { resolve(data_); }, 700);
+    });
+    return promise;
+  };
+
   deleteColl = function(coll_id) {
     var promise;
     promise = new Promise(function(resolve, reject) {
@@ -119,9 +133,7 @@ cards.fake = (function() {
       coll_ids.splice(coll_idx, 1);
       delete colls[coll_id];
 
-      setTimeout(function() {
-        resolve(coll_id);
-      }, 700);
+      setTimeout(function() { resolve(coll_id); }, 700);
     });
     return promise;
   };
@@ -146,9 +158,7 @@ cards.fake = (function() {
         });
       }
 
-      setTimeout(function() {
-        resolve(card_array_);
-      }, 700);
+      setTimeout(function() { resolve(card_array_); }, 700);
     });
     return promise;
   };
@@ -159,7 +169,7 @@ cards.fake = (function() {
       // TODO: handle error
       if (!data_.id) {  // new card
         data_.id = 'card_' + card_ids.length;
-        card_ids.push(data_);
+        card_ids.push(data_.id);
       }
       else {  // update
         // if title or body is changed -> change order
@@ -191,9 +201,7 @@ cards.fake = (function() {
         }
       });
 
-      setTimeout(function() {
-        resolve(data_);
-      }, 700);
+      setTimeout(function() { resolve(data_); }, 700);
     });
     return promise;
   };
@@ -215,15 +223,14 @@ cards.fake = (function() {
         delete cards_[card_id];
       }
 
-      setTimeout(function() {
-        resolve(card_id);
-      }, 700);
+      setTimeout(function() { resolve(card_id); }, 700);
     });
     return promise;
   };
   
   return {
     getCollections: getCollections,
+    saveColl: saveColl,
     deleteColl: deleteColl,
     getCards: getCards,
     saveCard: saveCard,

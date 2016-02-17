@@ -145,7 +145,8 @@ cards.view = (function() {
     create = function(coll_type) {
       var
       self = { el: null, render: null, config: null },
-      config = { create_coll: null }
+      config = { create_coll: null },
+      dom = {}
       ;
 
       if (!tmpl) {
@@ -171,15 +172,19 @@ cards.view = (function() {
         self.el = cards.util.createElement(
           cards.util.formatTmpl(tmpl, { icon: icon_html })
         );
+        dom.title = self.el.querySelector('.title');
 
         // set event handler
         self.el.querySelector('.item-add-trigger').addEventListener(
           'click',
           function(event) {
             event.preventDefault();
-            config.create_coll(
-              self.el.querySelector('.title').innerText, coll_type
-            );
+            self.el.classList.add('syncing');
+            config.create_coll(dom.title.innerText, coll_type)
+              .then(function(coll) {
+                if (coll) { dom.title.innerText = ''; }
+                self.el.classList.remove('syncing');
+              });
           },
           false
         );
@@ -200,7 +205,7 @@ cards.view = (function() {
     create = function(index) {  // index: cards.model.index
       var
       self = { el: null, render: null, configure: null },
-      config = { set_content_anchor: null },
+      config = { set_content_anchor: null, create_coll: null },
       dom = {
         special_sec: null, special_sec_ul: null,
         tag_sec: null, tag_sec_ul: null,
@@ -287,15 +292,71 @@ cards.view = (function() {
           }
         });
 
+        // add event handler
+        index.on('add', function(coll, idx) {
+          var first_item;
+          index_item_view = index_item.create(coll);
+          index_item_view.configure({
+            set_content_anchor: config.set_content_anchor
+          });
+
+          switch (coll.get('type')) {
+          case 'tag':
+            first_item = dom.tag_sec_ul.querySelector('.nav-index-item');
+            if (first_item) {
+              dom.tag_sec_ul.insertBefore(
+                index_item_view.render().el, first_item
+              );
+            } else {
+              dom.tag_sec_ul.insertBefore(
+                index_item_view.render().el, dom.new_tag
+              );
+            }
+            break;
+
+          case 'note':
+            first_item = dom.note_sec_ul.querySelector('.nav-index-item');
+            if (first_item) {
+              dom.note_sec_ul.insertBefore(
+                index_item_view.render().el, first_item
+              );
+            } else {
+              dom.note_sec_ul.insertBefore(
+                index_item_view.render().el, dom.new_note
+              );
+            }
+            break;
+
+          default:
+            //
+          }
+          // animation
+          index_item_view.el.scrollIntoView();
+          index_item_view.el.classList.add('blink');
+          setTimeout(function() {
+            index_item_view.el.classList.remove('blink');
+          }, 300);
+        });  // index.on('add',
+
         return self;
       };  // render
 
       createColl = function(title, coll_type) {
-        if (title.trim().length === 0) {
-          return;
-        }
-        // TODO
-        console.log('create ' + coll_type + ' ' + title);
+        var promise;
+        promise = new Promise(function(resolve, reject) {
+          var coll;
+          if (title.trim().length === 0) {
+            return Promise.resolve();
+          }
+          coll = config.create_coll({ name: title.trim(), type: coll_type });
+          coll.save().then(function(coll) {
+            console.log(coll.get('id'));
+            index.add(coll, 0);
+            //
+            resolve(coll);
+          });
+        });
+        return promise;
       };
 
       return self;
@@ -387,6 +448,7 @@ cards.view = (function() {
     create = function(index) {  // index: cards.model.index
       var
       self = { el: null, render: null, setState: null },
+      config = { create_coll: null },
       state = { target: null, checked_colls: {} },
       dom = {
         tag_sec: null, tag_sec_ul: null,
@@ -416,6 +478,10 @@ cards.view = (function() {
             }
           });
         }
+      };
+
+      self.configure = function(kv_map) {
+        cards.util.updateObj(config, kv_map);
       };
 
       self.render = function() {
@@ -473,15 +539,71 @@ cards.view = (function() {
           }
         });
 
+        // add event handler
+        index.on('add', function(coll, idx) {
+          var first_item;
+          index_item_view = annot_index_item.create(coll);
+          index_item_view.configure({
+            on_change_annot_check: onChangeAnnotCheck
+          });
+
+          switch (coll.get('type')) {
+          case 'tag':
+            first_item = dom.tag_sec_ul.querySelector('.nav-index-item');
+            if (first_item) {
+              dom.tag_sec_ul.insertBefore(
+                index_item_view.render().el, first_item
+              );
+            } else {
+              dom.tag_sec_ul.insertBefore(
+                index_item_view.render().el, dom.new_tag
+              );
+            }
+            break;
+
+          case 'note':
+            first_item = dom.note_sec_ul.querySelector('.nav-index-item');
+            if (first_item) {
+              dom.note_sec_ul.insertBefore(
+                index_item_view.render().el, first_item
+              );
+            } else {
+              dom.note_sec_ul.insertBefore(
+                index_item_view.render().el, dom.new_note
+              );
+            }
+            break;
+
+          default:
+            //
+          }
+          // animation
+          index_item_view.el.scrollIntoView();
+          index_item_view.el.classList.add('blink');
+          setTimeout(function() {
+            index_item_view.el.classList.remove('blink');
+          }, 300);
+        });  // index.on('add',
+
         return self;
       };  // self.render
 
       createColl = function(title, coll_type) {
-        if (title.trim().length === 0) {
-          return;
-        }
-        // TODO
-        console.log('create ' + coll_type + ' ' + title);
+        var promise;
+        promise = new Promise(function(resolve, reject) {
+          var coll;
+          if (title.trim().length === 0) {
+            return Promise.resolve();
+          }
+          coll = config.create_coll({ name: title.trim(), type: coll_type });
+          coll.save().then(function(coll) {
+            console.log(coll.get('id'));
+            index.add(coll, 0);
+            //
+            resolve(coll);
+          });
+        });
+        return promise;
       };
 
       self.setState = function(cards_, annot_type) {

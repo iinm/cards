@@ -10,7 +10,7 @@ cards.model = (function() {
   var
   models = {},
   data = { index: null, cards: null, all: null },
-  init, getIndex, createCard
+  init, getIndex, createCard, createColl
   ;
 
   // define models
@@ -204,6 +204,29 @@ cards.model = (function() {
         return promise;
       };  // .fetch_cards
 
+      self.save = function() {
+        var promise;
+        promise = new Promise(function(resolve, reject) {
+          var data_, card_ids = [];
+
+          self.get('cards').each(function(card) {
+            card_ids.push(card.get('id'));
+          });
+          data_ = {
+            id: self.get('id'),
+            type: self.get('type'),
+            name: self.get('name'),
+            card_ids: card_ids
+          };
+          // save to fake storage
+          cards.fake.saveColl(data_).then(function(data_) {
+            self.set(data_);
+            resolve(self);
+          });
+        });
+        return promise;
+      };  // .save
+
       self.destroy = function() {
         var promise;
         promise = new Promise(function(resolve, reject) {
@@ -268,10 +291,15 @@ cards.model = (function() {
     return models.card.create(data_);
   };
 
+  createColl = function(data_) {
+    return models.coll.create(data_);
+  };
+
   return {
     init: init,
     models: models,
     getIndex: getIndex,
-    createCard: createCard
+    createCard: createCard,
+    createColl: createColl
   };
 }());

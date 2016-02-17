@@ -286,7 +286,9 @@
   box-shadow: 0 0 .1em #777;
   transition: box-shadow 300ms;
 }
-
+.nav-index li.nav-index-item.blink {
+  box-shadow: 0 0 .6em #40C0CB;
+}
 .cards-nav-content .nav-index li.nav-index-item.blink-red {
   box-shadow: 0 0 .6em #CB4040;
 }
@@ -335,7 +337,8 @@
   content: attr(data-text);
   color: #aaa;
 }
-.nav-index li.nav-index-item-new .item-add-trigger {
+.nav-index li.nav-index-item-new .item-add-trigger,
+.nav-index li.nav-index-item-new .syncing {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -345,6 +348,13 @@
   line-height: 2.5em;
   background: inherit;
   cursor: pointer;
+}
+
+.nav-index li.nav-index-item-new .syncing {
+  display: none;
+}
+.nav-index li.nav-index-item-new.syncing .syncing {
+  display: block;
 }
 
 .nav-index li.nav-index-item .item-config-trigger i,
@@ -372,7 +382,7 @@
   background: inherit;
   cursor: pointer;
 }
-.cards-nav-content .nav-index li.nav-index-item .syncing {
+.nav-index li.nav-index-item .syncing {
   display: none;
 }
 .cards-nav-content .nav-index li.nav-index-item.syncing .syncing {

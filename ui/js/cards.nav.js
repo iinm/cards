@@ -14,6 +14,7 @@ cards.nav = (function() {
     set_nav_anchor: null,
     set_content_anchor: null,
     index: null,  // collection of cards.model/models.coll
+    create_coll: null,
     get_current_coll: null
   },
 
@@ -132,11 +133,15 @@ cards.nav = (function() {
 
     // render index
     view.index = cards.view.index.create(config.index);
-    view.index.configure({ set_content_anchor: config.set_content_anchor });
+    view.index.configure({
+      set_content_anchor: config.set_content_anchor,
+      create_coll: config.create_coll
+    });
     dom.content.appendChild(view.index.render().el);
 
     // render annotator's index
     view.annot_index = cards.view.annot_index.create(config.index);
+    view.annot_index.configure({ create_coll: config.create_coll });
     dom.annotator.appendChild(view.annot_index.render().el);
 
     // init annot targets

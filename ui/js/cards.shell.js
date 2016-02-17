@@ -126,6 +126,7 @@ cards.shell = (function() {
         set_nav_anchor: setNavAnchor,
         set_content_anchor: setContentAnchor,
         index: data.index,
+        create_coll: cards.model.createColl,
         get_current_coll: function() {
           return data.index.get(state.anchor_map.content);
         }
