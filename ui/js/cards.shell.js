@@ -137,7 +137,9 @@ cards.shell = (function() {
         cancel_move: cards.content.endMove,
         get_current_coll: function() {
           return data.index.get(state.anchor_map.content);
-        }
+        },
+        search_model: cards.model.getSearch(),
+        set_edit_target: cards.editor.setEditTarget
       });
       cards.nav.init(container);
       nav_el.classList.remove('annot-saving');

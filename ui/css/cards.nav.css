@@ -497,3 +497,21 @@ li.nav-index-item.edit-mode .item-config-menu .delete {
   /*   box-shadow: 0 0 .5em #40C0CB; */
 }
 
+.cards-nav-content .search-result {
+  padding: 0 .5em;
+}
+
+.cards-nav-content .search-result .searching {
+  font-size: 1.5em;
+  height: 0;
+  width: 100%;
+  transition: height 250ms ease;
+  text-align: center;
+  line-height: 1.5em;
+  color: #888;
+  overflow: hidden;
+}
+.cards-nav-content .search-result.searching .searching {
+  margin-top: calc(.5em / 1.5);
+  height: 1.5em;
+}

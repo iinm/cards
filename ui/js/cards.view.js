@@ -11,7 +11,7 @@ cards.view = (function() {
   var
   index_item, index_item_new, index,
   annot_index_item, annot_index,
-  card;
+  search, card;
 
   index_item = (function() {
     var tmpl_id = 'tmpl-nav-index-item', tmpl = null, create;
@@ -829,10 +829,80 @@ cards.view = (function() {
 
     return { create: create };
   }());  // card
+
+  search = (function() {
+    var tmpl_id = 'tmpl-search', tmpl = null, create;
+
+    create = function(model) {  // cards.models/search
+      var
+      self = { el: null, render: null, configure: null },
+      config = { set_edit_target: null, set_annot_target: null },
+      state = { card_id2view: {} },
+      onAddItem, onRemoveItem, onChangeState
+      ;
+
+      if (!tmpl) {
+        tmpl = document.getElementById(tmpl_id).text.trim();
+      }
+
+      self.configure = function(kv_map) {
+        cards.util.updateObj(config, kv_map);
+      };
+
+      self.render = function() {
+        if (!self.el) {
+          self.el = cards.util.createElement(tmpl);
+        }
+
+        model.on('change:searching', onChangeState);
+        model.get('cards').on('add', onAddItem);
+        model.get('cards').on('remove', onRemoveItem);
+
+        return self;
+      };  // render
+
+      onChangeState = function() {
+        if (model.get('searching')) {
+          self.el.classList.add('searching');
+        } else {
+          self.el.classList.remove('searching');
+        }
+      };
+
+      onAddItem = function(card) {
+        var card_view = cards.view.card.create(card);
+        state.card_id2view[card.get('id')] = card_view;
+        card_view.configure({
+          set_edit_target: config.set_edit_target,
+          set_annot_target: config.set_annot_target
+        });
+        //card.on('destroy', function() { onRemoveItem(card); });
+        self.el.appendChild(card_view.render().el);
+      };
+
+      onRemoveItem = function(card) {
+        var card_view = state.card_id2view[card.get('id')];
+        card.set({ checked: false });
+        // animation
+        card_view.el.classList.add('blink-red');
+        setTimeout(function() {
+          card_view.el.classList.remove('blink-red');
+        }, 300);
+        setTimeout(function() {
+          card_view.destroy();
+          delete state.card_id2view[card.get('id')];
+        }, 600);
+      };
+
+      return self;
+    };  // create
+ 
+    return { create: create };
+  }());
   
   return {
     index: index, index_item: index_item,
     annot_index: annot_index,
-    card: card
+    search, card: card
   };
 }());

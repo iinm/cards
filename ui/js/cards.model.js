@@ -10,7 +10,7 @@ cards.model = (function() {
   var
   models = {},
   data = { index: null, cards: null, all: null },
-  init, getIndex, createCard, createColl
+  init, getIndex, createCard, createColl, getSearch
   ;
 
   // define models
@@ -161,7 +161,7 @@ cards.model = (function() {
     };  // create
 
     return { create: create };
-  }());  // model.card
+  }());  // models.card
 
   models.coll = (function() {
     var base_model, create;
@@ -286,7 +286,62 @@ cards.model = (function() {
     };  // create
 
     return { create: create };
-  }());  // model.coll
+  }());  // models.coll
+
+  models.search = (function() {
+    var base_model, create;
+    base_model = cards.model_util.createModel(function() {
+      return {
+        searching: false,
+        query: null,
+        cards: cards.model_util.createCollection(models.card)
+      };
+    });
+
+    create = function(data_) {
+      var self = base_model.create(data_);
+
+      self.search = function(query) {
+        var promise;
+        promise = new Promise(function(resolve, reject) {
+          if (query === self.get('query')) {
+            resolve();
+          }
+          else if (query === null) {
+            self.get('cards').reset();
+            self.set({ query: query });
+            resolve();
+          }
+          else {
+            self.set({ searching: true });
+            self.get('cards').reset();
+            cards.fake.search(query).then(function(data_array) {
+              self.set({ searching: false });
+              self.set({ query: query });
+              data_array.forEach(function(data_) {
+                var card = data.cards.get(data_.id);
+                if (card) {
+                  self.get('cards').add(card);
+                }
+                else {
+                  card = self.get('cards').create(data_);
+                  data_.coll_ids.forEach(function(coll_id) {
+                    card.get('colls').add(data.index.get(coll_id));
+                  });
+                }
+              });
+              resolve();
+            });
+          }
+        });
+        return promise;
+      };
+      
+      return self;
+    };
+
+    return { create: create };
+  }());  // models.search
 
   init = function() {
     var promise;
@@ -294,6 +349,8 @@ cards.model = (function() {
       // create colls
       data.index = cards.model_util.createCollection(models.coll);
       data.cards = cards.model_util.createCollection(models.card);
+      // create search model
+      data.search = models.search.create();
 
       // create special coll
       data.all = models.coll.create({
@@ -319,6 +376,10 @@ cards.model = (function() {
     return data.index;
   };
 
+  getSearch = function() {
+    return data.search;
+  };
+
   createCard = function(data_) {
     return models.card.create(data_);
   };
@@ -331,6 +392,7 @@ cards.model = (function() {
     init: init,
     models: models,
     getIndex: getIndex,
+    getSearch: getSearch,
     createCard: createCard,
     createColl: createColl
   };

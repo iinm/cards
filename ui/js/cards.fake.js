@@ -11,7 +11,7 @@ cards.fake = (function() {
   var
   cards_ = {}, colls = {}, card_ids, coll_ids, num_card, num_coll,
   getCollections, saveColl, deleteColl,
-  getCards, saveCard, deleteCard
+  getCards, saveCard, deleteCard, search
   ;
 
   card_ids = [
@@ -237,12 +237,31 @@ cards.fake = (function() {
     return promise;
   };
 
+  search = function(query) {
+    var promise;
+    promise = new Promise(function(resolve, reject) {
+      var i, result = [], card;
+      query = query.toLowerCase();
+      for (i = card_ids.length - 1; i >= 0; i--) {
+        card = cards_[card_ids[i]];
+        if (card.title.toLowerCase().indexOf(query) > -1
+            || card.body.toLowerCase().indexOf(query) > -1
+           ) {
+          result.push(card);
+        }
+      }
+      setTimeout(function() { resolve(result); }, 700);
+    });
+    return promise;
+  };
+
   return {
     getCollections: getCollections,
     saveColl: saveColl,
     deleteColl: deleteColl,
     getCards: getCards,
     saveCard: saveCard,
-    deleteCard: deleteCard
+    deleteCard: deleteCard,
+    search: search
   };
 }());

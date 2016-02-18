@@ -17,7 +17,9 @@ cards.nav = (function() {
     create_coll: null,
     remove_editor_coll: null,
     request_move: null, cancel_move: null,
-    get_current_coll: null
+    get_current_coll: null,
+    search_model: null,
+    set_content_anchor: null
   },
 
   state = {
@@ -76,6 +78,14 @@ cards.nav = (function() {
     );
     state.annot_targets.on('add', updateAnnotTrigger);
     state.annot_targets.on('remove', updateAnnotTrigger);
+
+    // render search result
+    view.search = cards.view.search.create(config.search_model);
+    view.search.configure({
+      set_content_anchor: config.set_content_anchor,
+      set_annot_target: setAnnotTarget
+    });
+    dom.content.appendChild(view.search.render().el);
 
     // set event handlers
     dom.nav_trigger.addEventListener('click', onClickToggleNav);
@@ -188,7 +198,7 @@ cards.nav = (function() {
 
     dom.search_input.addEventListener('keyup', function(event) {
       var input = dom.search_input.value.trim().toLowerCase();
-      console.log('keyCode:', event.keyCode);
+      //console.log('keyCode:', event.keyCode);
       if (input.length > 0) {
         dom.search_input.classList.add('not-empty');
         filterIndex(input);
@@ -196,14 +206,16 @@ cards.nav = (function() {
           setTimeout(function() {
             if (state.search_input === input) {
               console.log('search:', input);
+              config.search_model.search(input).then(function() {});
             }
           }, 800);
           state.search_input = input;
         }
       } else {
         dom.search_input.classList.remove('not-empty');
-        filterIndex(null);
         state.search_input = '';
+        filterIndex(null);
+        config.search_model.search(null).then(function() {});
       }
     }, false);
 
@@ -212,7 +224,9 @@ cards.nav = (function() {
       function(event) {
         dom.search_input.value = '';
         dom.search_input.classList.remove('not-empty');
+        state.search_input = '';
         filterIndex(null);
+        config.search_model.search(null).then(function() {});
       },
       false
     );
