@@ -4,7 +4,7 @@
   left: .5em;
   right: .5em;
   height: 3em;
-  transition: height 250ms;
+  transition: height 250ms ease;
   margin: 0 auto;
   max-width: 45.5em;
   background: #F9F2E7;
@@ -43,7 +43,7 @@
   position: absolute;
   width: 100%;
   /*   border-radius: 50%; */
-  transition: height 250ms;
+  transition: height 250ms ease;
   line-height: 3em;
   text-align: center;
   overflow: hidden;
@@ -129,7 +129,7 @@
   left: 0;
   right: 0;
   height: 0;
-  transition: height 250ms;
+  transition: height 250ms ease;
   overflow: hidden;
 }
 
