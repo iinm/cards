@@ -9,7 +9,7 @@
 cards.fake = (function() {
   "use strict";
   var
-  cards_ = {}, colls = {}, card_ids, coll_ids,
+  cards_ = {}, colls = {}, card_ids, coll_ids, num_card, num_coll,
   getCollections, saveColl, deleteColl,
   getCards, saveCard, deleteCard
   ;
@@ -17,6 +17,7 @@ cards.fake = (function() {
   card_ids = [
     'card_01', 'card_02', 'card_03', 'card_04', 'card_05', 'card_06', 'card_07'
   ];
+  num_card = card_ids.length;
   cards_ = {
     card_01: {
       title: 'Episode I: The Phantom Menace',
@@ -66,6 +67,7 @@ cards.fake = (function() {
     'tag_01', 'tag_02', 'tag_03', 'tag_04', 'tag_05', 'tag_06',
     'note_01', 'note_02', 'note_03', 'note_04'
   ];
+  num_coll = coll_ids.length;
   colls = {
     tag_01: { name: 'HTML', id: 'tag_01', type: 'tag' },
     tag_02: { name: 'CSS', id: 'tag_02', type: 'tag' },
@@ -107,7 +109,8 @@ cards.fake = (function() {
     var promise;
     promise = new Promise(function(resolve, reject) {
       if (!data_.id) {  // new coll
-        data_.id = 'coll_' + coll_ids.length;
+        data_.id = 'coll_' + num_coll;
+        num_coll += 1;
         coll_ids.push(data_.id);
         if (data_.type === 'note') {
           data_.card_ids = [];
@@ -173,7 +176,8 @@ cards.fake = (function() {
     promise = new Promise(function(resolve, reject) {
       // TODO: handle error
       if (!data_.id) {  // new card
-        data_.id = 'card_' + card_ids.length;
+        data_.id = 'card_' + num_card;
+        num_card += 1;
         card_ids.push(data_.id);
       }
       else {  // update
@@ -232,7 +236,7 @@ cards.fake = (function() {
     });
     return promise;
   };
-  
+
   return {
     getCollections: getCollections,
     saveColl: saveColl,
