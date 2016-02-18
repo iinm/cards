@@ -86,12 +86,15 @@ cards.model = (function() {
             var idx, coll;
             coll = data.index.get(coll_id);
             if (!coll.get('cards').get(card.get('id')) || changed) {
+              // Note: when body is changed, bring card to the top of coll
               // add card to coll
               idx = ((coll.get('type') === 'tag') ? 0 : null);
               coll.get('cards').add(card, idx);
               // add coll to card
               card.get('colls').add(coll);
             }
+            // bring to top of index
+            data.index.add(coll, 0);
           });
 
           if (!data.all.get('cards').get(card.get('id')) || changed) {
@@ -148,7 +151,7 @@ cards.model = (function() {
         return promise;
       };
 
-      // update constructor
+      // override constructor for clone method
       self.set_create(create);
 
       return self;
@@ -256,8 +259,6 @@ cards.model = (function() {
             data.cards.each(function(card) {
               card.get('colls').remove(coll_id);
             });
-            //
-            self.set({ annot_check: null });
             data.index.remove(coll_id);
 
             resolve(self);
@@ -266,7 +267,7 @@ cards.model = (function() {
         return promise;
       };  // .destroy
 
-      // update constructor
+      // override constructor for clone method
       self.set_create(create);
 
       return self;

@@ -431,7 +431,7 @@ cards.view = (function() {
         });
 
         model.on('destroy', function() {
-          model.off('*');
+          model.set({ annot_check: null });
           self.el.remove();
         });
 
@@ -477,23 +477,6 @@ cards.view = (function() {
         );
       }
 
-      onChangeAnnotCheck = function(coll) {
-        // update card. coll is updated in cards.model.saveCard
-        if (coll.get('annot_check') === 'checked') {
-          state.checked_colls[coll.get('id')] = coll;
-          state.target.each(function(card) {
-            card.get('colls').add(coll);
-          });
-        } else {
-          delete state.checked_colls[coll.get('id')];
-          state.target.each(function(card) {
-            if (card.get('colls').get(coll.get('id'))) {
-              card.get('colls').remove(coll.get('id'));
-            }
-          });
-        }
-      };
-
       self.configure = function(kv_map) {
         cards.util.updateObj(config, kv_map);
       };
@@ -536,6 +519,23 @@ cards.view = (function() {
       
         return self;
       };  // self.render
+
+      onChangeAnnotCheck = function(coll) {
+        // update card. coll is updated in cards.model.saveCard
+        if (coll.get('annot_check') === 'checked') {
+          state.checked_colls[coll.get('id')] = coll;
+          state.target.each(function(card) {
+            card.get('colls').add(coll);
+          });
+        } else {
+          delete state.checked_colls[coll.get('id')];
+          state.target.each(function(card) {
+            if (card.get('colls').get(coll.get('id'))) {
+              card.get('colls').remove(coll.get('id'));
+            }
+          });
+        }
+      };
 
       addItem = function(coll, idx) {
         var item_view, item_el, first_item_el;

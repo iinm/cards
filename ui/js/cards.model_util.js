@@ -54,6 +54,7 @@ cards.model_util = (function() {
         if (config.on.destroy) {
           config.on.destroy.forEach(function(f) { f(); });
         }
+        off('*');
       };
 
       clone = function() {
