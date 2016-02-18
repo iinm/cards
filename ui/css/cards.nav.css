@@ -53,6 +53,7 @@
 .cards-nav-head .nav-trigger,
 .cards-nav-head .title,
 .cards-nav-head .search-input,
+.cards-nav-head .clear-search-input,
 .cards-nav-head .nav-annot-closer,
 .cards-nav-head .nav-annot-saving,
 .cards-nav-head .annot-trigger-wrapper,
@@ -65,13 +66,13 @@
 }
 
 .cards-nav-head .search-input:placeholder-shown {
-  color: #dadada;
+  color: #dfdfdf;
 }
 .cards-nav-head .search-input::-webkit-input-placeholder {
-  color: #dadada;
+  color: #dfdfdf;
 }
 .cards-nav-head .search-input::-moz-placeholder {  /* firefox */
-  color: #dadada;
+  color: #dfdfdf;
   opacity: 1;
 }
 
@@ -138,7 +139,7 @@
 }
 
 .cards-nav-head .search-input {
-  transition: width 250ms ease;
+  transition: width 250ms ease, right 250ms ease;
   right: 0;
   width: 0;
   border: 0;
@@ -150,6 +151,22 @@
 .cards-nav.opened .cards-nav-head .search-input {
   padding: 0 .5em;
   width: calc(100% - 3em);
+}
+.cards-nav.opened .cards-nav-head .search-input.not-empty {
+  right: 3em;
+  width: calc(100% - 6em);
+}
+
+.cards-nav-head .clear-search-input {
+  right: 0;
+  width: 0;
+  transition: width 250ms ease;
+  text-align: center;
+  line-height: 3em;
+  cursor: pointer;
+}
+.cards-nav-head .search-input.not-empty + .clear-search-input {
+  width: 3em;
 }
 
 .cards-nav-head .annot-trigger-wrapper {

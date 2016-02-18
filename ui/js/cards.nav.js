@@ -37,10 +37,11 @@ cards.nav = (function() {
 
   setDomMap = function(container) {
     dom.self = container.querySelector(config.self_selector);
+    dom.head = container.querySelector('.cards-nav-head');
     dom.title = container.querySelector('.cards-nav-head .title');
     dom.nav_trigger = dom.self.querySelector('.nav-trigger');
     dom.annot_closer = dom.self.querySelector('.nav-annot-closer');
-    dom.search_box = dom.self.querySelector('.search-input');
+    dom.search_input = dom.self.querySelector('.search-input');
     dom.content = dom.self.querySelector('.cards-nav-content');
     dom.annotator = dom.self.querySelector('.cards-nav-annotator');
     dom.target_indicator = dom.self.querySelector('.annot-target-indicator');
@@ -55,6 +56,27 @@ cards.nav = (function() {
     // set dom map
     setDomMap(container);
 
+    // render index
+    view.index = cards.view.index.create(config.index);
+    view.index.configure({
+      set_content_anchor: config.set_content_anchor,
+      create_coll: config.create_coll,
+      remove_editor_coll: config.remove_editor_coll
+    });
+    dom.content.appendChild(view.index.render().el);
+
+    // render annotator's index
+    view.annot_index = cards.view.annot_index.create(config.index);
+    view.annot_index.configure({ create_coll: config.create_coll });
+    dom.annotator.appendChild(view.annot_index.render().el);
+
+    // init annot targets
+    state.annot_targets = cards.model_util.createCollection(
+      cards.model.models.card
+    );
+    state.annot_targets.on('add', updateAnnotTrigger);
+    state.annot_targets.on('remove', updateAnnotTrigger);
+
     // set event handlers
     dom.nav_trigger.addEventListener('click', onClickToggleNav);
     dom.title.addEventListener('click', function(event) {
@@ -67,7 +89,6 @@ cards.nav = (function() {
     dom.annot_closer.addEventListener('click', function(event) {
       var promises = [];
       event.preventDefault();
-
       state.annot_targets.as_array().forEach(function(card_clone) {
         promises.push(card_clone.save());
       });
@@ -155,26 +176,30 @@ cards.nav = (function() {
       }, false
     );
 
-    // render index
-    view.index = cards.view.index.create(config.index);
-    view.index.configure({
-      set_content_anchor: config.set_content_anchor,
-      create_coll: config.create_coll,
-      remove_editor_coll: config.remove_editor_coll
-    });
-    dom.content.appendChild(view.index.render().el);
+    dom.search_input.addEventListener('keydown', function(event) {
+      // Note: 'keyCode' is deprecated
+      // https://developer.mozilla.org/en-US/docs/Web/Events/keydown
+      if (event.keyCode === 13) {
+        console.log('search input:', dom.search_input.value);
+      }
+    }, false);
 
-    // render annotator's index
-    view.annot_index = cards.view.annot_index.create(config.index);
-    view.annot_index.configure({ create_coll: config.create_coll });
-    dom.annotator.appendChild(view.annot_index.render().el);
+    dom.search_input.addEventListener('keyup', function(event) {
+      if (dom.search_input.value.trim().length > 0) {
+        dom.search_input.classList.add('not-empty');
+      } else {
+        dom.search_input.classList.remove('not-empty');
+      }
+    }, false);
 
-    // init annot targets
-    state.annot_targets = cards.model_util.createCollection(
-      cards.model.models.card
+    dom.head.querySelector('.clear-search-input').addEventListener(
+      'click',
+      function(event) {
+        dom.search_input.value = '';
+        dom.search_input.classList.remove('not-empty');
+      },
+      false
     );
-    state.annot_targets.on('add', updateAnnotTrigger);
-    state.annot_targets.on('remove', updateAnnotTrigger);
   };
 
   updateAnnotTrigger = function() {
