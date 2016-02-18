@@ -85,7 +85,9 @@ cards.model = (function() {
           data_.coll_ids.forEach(function(coll_id) {
             var idx, coll;
             coll = data.index.get(coll_id);
-            if (!coll.get('cards').get(card.get('id')) || changed) {
+            if (!coll.get('cards').get(card.get('id'))
+                || (changed && coll.get('type') !== 'note')
+               ) {
               // Note: when body is changed, bring card to the top of coll
               // add card to coll
               idx = ((coll.get('type') === 'tag') ? 0 : null);
