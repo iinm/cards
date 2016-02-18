@@ -31,7 +31,8 @@ cards.nav = (function() {
 
   init, configure, setDomMap,
   setTitle, setNavState, onClickToggleNav,
-  updateAnnotTrigger, setAnnotTarget, annotate
+  updateAnnotTrigger, setAnnotTarget, annotate,
+  resetAnnotTargets
   ;  // var
 
   setDomMap = function(container) {
@@ -149,13 +150,8 @@ cards.nav = (function() {
     dom.annot_trigger.querySelector('.clear-check').addEventListener(
       'click',
       function(event) {
-        var coll = config.get_current_coll(), card_id;
         event.preventDefault();
-        while (state.annot_targets.len() > 0) {
-          //state.annot_targets.at(0).set({ checked: false });
-          card_id = state.annot_targets.at(0).get('id');
-          coll.get('cards').get(card_id).set({ checked: false });
-        }
+        resetAnnotTargets();
       }, false
     );
 
@@ -196,12 +192,24 @@ cards.nav = (function() {
     }
   };
 
+  resetAnnotTargets = function() {
+    var coll = config.get_current_coll(), card_id;
+    // Note: cards in annot_targets is clones
+    while (state.annot_targets.len() > 0) {
+      //state.annot_targets.at(0).set({ checked: false });
+      card_id = state.annot_targets.at(0).get('id');
+      coll.get('cards').get(card_id).set({ checked: false });
+    }
+  };
+
   setAnnotTarget = function(card) {
     if (card.get('checked')) {
       // use clone
       state.annot_targets.add(card.clone());
+      config.set_nav_anchor(state);
     } else {
       state.annot_targets.remove(card.get('id'));
+      config.set_nav_anchor(state);
     }
   };
 
@@ -227,7 +235,14 @@ cards.nav = (function() {
     config.set_nav_anchor(new_state);
   };
 
-  setNavState = function(nav_state) {
+  setNavState = function(nav_state, annot_targets) {
+    if (annot_targets === 'false') {
+      // reset targets
+      resetAnnotTargets();
+      dom.self.classList.remove('annot-move-mode');
+      config.cancel_move();
+    }
+
     if (nav_state === state.self) {
       return;
     }
