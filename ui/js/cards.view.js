@@ -26,7 +26,7 @@ cards.view = (function() {
       },
       state = { mode: null },
       dom = {},
-      onClickDone
+      onClickDone, onMatchSearchInput
       ;
 
       if (!tmpl) {
@@ -97,7 +97,11 @@ cards.view = (function() {
                 setTimeout(function() {
                   self.el.classList.remove('blink-red');
                 }, 300);
-                setTimeout(function() { self.el.remove(); }, 600);
+                setTimeout(function() {
+                  // off
+                  model.off('change:match_search_input', onMatchSearchInput);
+                  self.el.remove();
+                }, 600);
               });
             }
             else {
@@ -119,33 +123,6 @@ cards.view = (function() {
           false
         );
 
-        onClickDone = function(event) {
-          var model_clone;
-          event.preventDefault();
-          state.mode = null;
-          dom.title.focus();
-          dom.title.setAttribute('contenteditable', 'false');
-          self.el.classList.remove('config-menu-opened');
-          self.el.classList.remove('edit-mode');
-
-          if (dom.title.innerHTML.trim() !== model.get('name')) {
-            model_clone = model.clone();
-            model_clone.set({ name: dom.title.innerHTML.trim() });
-            self.el.classList.add('syncing');
-            model_clone.save().then(function(coll) {
-              // modify draft coll
-              config.remove_editor_coll(null);
-              dom.title.innerHTML = coll.get('name');
-              // animation
-              self.el.classList.remove('syncing');
-              self.el.classList.add('blink');
-              setTimeout(function() {
-                self.el.classList.remove('blink');
-              }, 300);
-            });
-          }
-        };
-
         dom.title.addEventListener('keydown', function(event) {
           // Note: 'keyCode' is deprecated
           // https://developer.mozilla.org/en-US/docs/Web/Events/keydown
@@ -158,8 +135,46 @@ cards.view = (function() {
           'click', onClickDone, false
         );
 
+        model.on('change:match_search_input', onMatchSearchInput);
+
         return self;
       };  // render
+
+      onMatchSearchInput = function() {
+        var match = model.get('match_search_input');
+        if (match === null || match === true) {
+          self.el.classList.remove('cards-util-hide');
+        } else if (match === false) {
+          self.el.classList.add('cards-util-hide');
+        }
+      };
+
+      onClickDone = function(event) {
+        var model_clone;
+        event.preventDefault();
+        state.mode = null;
+        dom.title.focus();
+        dom.title.setAttribute('contenteditable', 'false');
+        self.el.classList.remove('config-menu-opened');
+        self.el.classList.remove('edit-mode');
+
+        if (dom.title.innerHTML.trim() !== model.get('name')) {
+          model_clone = model.clone();
+          model_clone.set({ name: dom.title.innerHTML.trim() });
+          self.el.classList.add('syncing');
+          model_clone.save().then(function(coll) {
+            // modify draft coll
+            config.remove_editor_coll(null);
+            dom.title.innerHTML = coll.get('name');
+            // animation
+            self.el.classList.remove('syncing');
+            self.el.classList.add('blink');
+            setTimeout(function() {
+              self.el.classList.remove('blink');
+            }, 300);
+          });
+        }
+      };
 
       return self;
     };
@@ -398,7 +413,8 @@ cards.view = (function() {
       var
       self = { el: null, render: null, configure: null },
       config = { on_change_annot_check: null },
-      dom = {}
+      dom = {},
+      onChangeName, onMatchSearchInput
       ;
 
       if (!tmpl) {
@@ -446,12 +462,14 @@ cards.view = (function() {
           }
         });
 
-        model.on('change:name', function() {
-          dom.name.innerHTML = model.get('name');
-        });
+        model.on('change:name', onChangeName)
+        model.on('change:match_search_input', onMatchSearchInput);
 
         model.on('destroy', function() {
           model.set({ annot_check: null });
+          // Note: doesn't need 'off', see model_util/model/destroy
+          model.off('change:name', onChangeName)
+          model.off('change:match_search_input', onMatchSearchInput);
           self.el.remove();
         });
 
@@ -467,6 +485,19 @@ cards.view = (function() {
         );
 
         return self;
+      };  // render
+
+      onChangeName = function() {
+        dom.name.innerHTML = model.get('name');
+      };
+
+      onMatchSearchInput = function() {
+        var match = model.get('match_search_input');
+        if (match === null || match === true) {
+          self.el.classList.remove('cards-util-hide');
+        } else if (match === false) {
+          self.el.classList.add('cards-util-hide');
+        }
       };
 
       return self;
@@ -536,7 +567,7 @@ cards.view = (function() {
 
         // add event handler
         index.on('add', addItem);
-      
+     
         return self;
       };  // self.render
 

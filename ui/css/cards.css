@@ -26,6 +26,11 @@ strong {
 }
 /** End standard selectors */
 
+/* utility */
+.cards-util-hide {
+  display: none !important;
+}
+
 #cards {
   font-size: 1.05em;
   position: absolute;

@@ -31,8 +31,8 @@ cards.nav = (function() {
 
   init, configure, setDomMap,
   setTitle, setNavState, onClickToggleNav,
-  updateAnnotTrigger, setAnnotTarget, annotate,
-  resetAnnotTargets
+  updateAnnotTrigger, setAnnotTarget, annotate, resetAnnotTargets,
+  filterIndex
   ;  // var
 
   setDomMap = function(container) {
@@ -176,19 +176,32 @@ cards.nav = (function() {
       }, false
     );
 
-    dom.search_input.addEventListener('keydown', function(event) {
-      // Note: 'keyCode' is deprecated
-      // https://developer.mozilla.org/en-US/docs/Web/Events/keydown
-      if (event.keyCode === 13) {
-        console.log('search input:', dom.search_input.value);
-      }
-    }, false);
+    //dom.search_input.addEventListener('keydown', function(event) {
+    //  // Note: 'keyCode' is deprecated
+    //  // https://developer.mozilla.org/en-US/docs/Web/Events/keydown
+    //  var input = dom.search_input.value.trim().toLowerCase();
+    //  if (event.keyCode === 13 && input.length > 0) {
+    //    console.log('search input:', input);
+    //    filterIndex(input);
+    //  }
+    //}, false);
 
     dom.search_input.addEventListener('keyup', function(event) {
-      if (dom.search_input.value.trim().length > 0) {
+      var input = dom.search_input.value.trim().toLowerCase();
+      if (input.length > 0) {
         dom.search_input.classList.add('not-empty');
+        filterIndex(input);
+        if (state.search_input !== input) {
+          setTimeout(function() {
+            if (state.search_input === input) {
+              console.log('search:', input);
+            }
+          }, 800);
+          state.search_input = input;
+        }
       } else {
         dom.search_input.classList.remove('not-empty');
+        filterIndex(null);
       }
     }, false);
 
@@ -197,9 +210,25 @@ cards.nav = (function() {
       function(event) {
         dom.search_input.value = '';
         dom.search_input.classList.remove('not-empty');
+        filterIndex(null);
       },
       false
     );
+  };
+
+  filterIndex = function(keyword) {
+    config.index.each(function(coll) {
+      if (keyword === null) {
+        coll.set({ match_search_input: null });
+      }
+      else if (coll.get('name').toLowerCase().indexOf(keyword) > -1) {
+        //console.log('match', coll.get('name'));
+        coll.set({ match_search_input: true });
+      }
+      else {
+        coll.set({ match_search_input: false });
+      }
+    });
   };
 
   updateAnnotTrigger = function() {

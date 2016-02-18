@@ -172,7 +172,8 @@ cards.model = (function() {
         name: '',
         annot_check: null,  // used by annotator, 'checked' or 'partial'
         cards: cards.model_util.createCollection(models.card),
-        fetched: false
+        fetched: false,
+        match_search_input: null
       };
     });
 
