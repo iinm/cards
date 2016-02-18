@@ -188,6 +188,7 @@ cards.nav = (function() {
 
     dom.search_input.addEventListener('keyup', function(event) {
       var input = dom.search_input.value.trim().toLowerCase();
+      console.log('keyCode:', event.keyCode);
       if (input.length > 0) {
         dom.search_input.classList.add('not-empty');
         filterIndex(input);
@@ -202,6 +203,7 @@ cards.nav = (function() {
       } else {
         dom.search_input.classList.remove('not-empty');
         filterIndex(null);
+        state.search_input = '';
       }
     }, false);
 
