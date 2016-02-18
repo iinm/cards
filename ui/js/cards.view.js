@@ -321,6 +321,7 @@ cards.view = (function() {
         // add event handler
         index.on('add', function(coll, idx) {
           var first_item;
+          // TODO: if coll has aleady rendered, remove
           index_item_view = index_item.create(coll);
           index_item_view.configure({
             set_content_anchor: config.set_content_anchor
@@ -397,7 +398,8 @@ cards.view = (function() {
     create = function(model) {  // model: cards.model/models.coll
       var
       self = { el: null, render: null, configure: null },
-      config = { on_change_annot_check: null }
+      config = { on_change_annot_check: null },
+      dom = {}
       ;
 
       if (!tmpl) {
@@ -425,6 +427,7 @@ cards.view = (function() {
             id: model.get('id'), name: model.get('name'), icon: icon_html
           })
         );
+        dom.name = self.el.querySelector('.title');
 
         model.on('change:annot_check', function() {
           config.on_change_annot_check(model);
@@ -441,6 +444,10 @@ cards.view = (function() {
             self.el.classList.remove('checked');
             self.el.classList.remove('partial');
           }
+        });
+
+        model.on('change:name', function() {
+          dom.name.innerText = model.get('name');
         });
 
         self.el.querySelector('.item-check-trigger').addEventListener(
