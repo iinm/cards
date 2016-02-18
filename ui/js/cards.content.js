@@ -24,7 +24,7 @@ cards.content = (function() {
   dom = {},
 
   init, configure,
-  setColl, render, createCardView, onAddItem, onRemoveItem,
+  setColl, render, renderNoScroll, createCardView, onAddItem, onRemoveItem,
   moveCards, endMove,
   onScroll
   ;  // var
@@ -51,14 +51,14 @@ cards.content = (function() {
     if (state.coll !== null) {
       state.coll.get('cards').off('add', onAddItem);
       state.coll.get('cards').off('remove', onRemoveItem);
-      state.coll.off('change:name', render);
+      state.coll.off('change:name', renderNoScroll);
     }
 
     state.coll = coll;
     console.log(state.coll.get('name'));
     state.coll.get('cards').on('add', onAddItem);
     state.coll.get('cards').on('remove', onRemoveItem);
-    state.coll.on('change:name', render);
+    state.coll.on('change:name', renderNoScroll);
     render();
   };
 
@@ -71,6 +71,8 @@ cards.content = (function() {
     });
     return card_view;
   };
+
+  renderNoScroll = function() { render(false); };
 
   render = function(scroll_top) {
     if (scroll_top === undefined) {
