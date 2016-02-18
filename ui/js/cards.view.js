@@ -19,7 +19,10 @@ cards.view = (function() {
     create = function(model) {  // model: cards.model/models.coll
       var
       self = { el: null, render: null, configure: null },
-      config = { set_content_anchor: null, remove_editor_coll: null },
+      config = {
+        set_content_anchor: null,
+        remove_coll: null
+      },
       state = { mode: null },
       dom = {}
       ;
@@ -86,9 +89,7 @@ cards.view = (function() {
             self.el.classList.add('syncing');
             yn = window.confirm('Delete "' + model.get('name') + '"');
             if (yn) {
-              model.destroy().then(function(coll) {
-                // modify colls in draft
-                config.remove_editor_coll(coll.get('id'));
+              config.remove_coll(model).then(function(coll) {
                 // animation
                 self.el.classList.add('blink-red');
                 setTimeout(function() {
@@ -233,7 +234,7 @@ cards.view = (function() {
         tag_sec: null, tag_sec_ul: null,
         note_sec: null, note_sec_ul: null
       },
-      createColl
+      addItem, createColl, removeColl
       ;
 
       if (!tmpl_sec) {
@@ -247,7 +248,7 @@ cards.view = (function() {
       };
 
       self.render = function() {
-        var index_item_view;
+        var item_view;
         self.el = document.createElement('div');
 
         // special index
@@ -257,11 +258,11 @@ cards.view = (function() {
         dom.special_sec_ul = dom.special_sec.querySelector('ul');
         dom.special_sec.classList.add('special');
         self.el.appendChild(dom.special_sec);
-        index_item_view = index_item.create(index.get('special:all'));
-        index_item_view.configure({
+        item_view = index_item.create(index.get('special:all'));
+        item_view.configure({
           set_content_anchor: config.set_content_anchor
         });
-        dom.special_sec_ul.appendChild(index_item_view.render().el);
+        dom.special_sec_ul.appendChild(item_view.render().el);
 
         // notes
         dom.note_sec = cards.util.createElement(
@@ -270,9 +271,9 @@ cards.view = (function() {
         dom.note_sec_ul = dom.note_sec.querySelector('ul');
         self.el.appendChild(dom.note_sec);
         // new item
-        index_item_view = index_item_new.create('note');
-        index_item_view.configure({ create_coll: createColl });
-        dom.new_note = index_item_view.render().el;
+        item_view = index_item_new.create('note');
+        item_view.configure({ create_coll: createColl });
+        dom.new_note = item_view.render().el;
         dom.note_sec_ul.appendChild(dom.new_note);
 
         // tags
@@ -282,91 +283,62 @@ cards.view = (function() {
         dom.tag_sec_ul = dom.tag_sec.querySelector('ul');
         self.el.appendChild(dom.tag_sec);
         // new item
-        index_item_view = index_item_new.create('tag');
-        index_item_view.configure({ create_coll: createColl });
-        dom.new_tag = index_item_view.render().el;
+        item_view = index_item_new.create('tag');
+        item_view.configure({ create_coll: createColl });
+        dom.new_tag = item_view.render().el;
         dom.tag_sec_ul.appendChild(dom.new_tag);
 
         // add to index
         index.each(function(coll) {
-          index_item_view = index_item.create(coll);
-          index_item_view.configure({
-            set_content_anchor: config.set_content_anchor,
-            remove_editor_coll: config.remove_editor_coll
-          });
-
-          switch (coll.get('type')) {
-          case 'tag':
-            //dom.tag_sec_ul.appendChild(index_item_view.render().el);
-            dom.tag_sec_ul.insertBefore(
-              index_item_view.render().el, dom.new_tag
-            );
-            break;
-
-          case 'note':
-            //dom.note_sec_ul.appendChild(index_item_view.render().el);
-            dom.note_sec_ul.insertBefore(
-              index_item_view.render().el, dom.new_note
-            );
-            break;
-
-          default:
-            //
-          }
+          addItem(coll, null);
         });
 
         // add event handler
-        index.on('add', function(coll, idx) {
-          var first_item, old_view_el;
-          // TODO: if coll has aleady rendered, remove
-          old_view_el = self.el.querySelector('#' + coll.get('id'));
-
-          index_item_view = index_item.create(coll);
-          index_item_view.configure({
-            set_content_anchor: config.set_content_anchor,
-            remove_editor_coll: config.remove_editor_coll
-          });
-
-          switch (coll.get('type')) {
-          case 'tag':
-            first_item = dom.tag_sec_ul.querySelector('.nav-index-item');
-            if (first_item) {
-              dom.tag_sec_ul.insertBefore(
-                index_item_view.render().el, first_item
-              );
-            } else {
-              dom.tag_sec_ul.insertBefore(
-                index_item_view.render().el, dom.new_tag
-              );
-            }
-            break;
-
-          case 'note':
-            first_item = dom.note_sec_ul.querySelector('.nav-index-item');
-            if (first_item) {
-              dom.note_sec_ul.insertBefore(
-                index_item_view.render().el, first_item
-              );
-            } else {
-              dom.note_sec_ul.insertBefore(
-                index_item_view.render().el, dom.new_note
-              );
-            }
-            break;
-
-          default:
-            //
-          }
-          // animation
-          index_item_view.el.scrollIntoView();
-          index_item_view.el.classList.add('blink');
-          setTimeout(function() {
-            index_item_view.el.classList.remove('blink');
-          }, 300);
-        });  // index.on('add',
+        index.on('add', addItem);
 
         return self;
       };  // render
+
+      addItem = function(coll, idx) {
+        var item_view, item_el, first_item_el;
+
+        item_el = self.el.querySelector(
+          cards.util.formatTmpl('li[coll-id="{{id}}"]', { id: coll.get('id') })
+        );
+        if (!item_el) {
+          item_view = index_item.create(coll);
+          item_view.configure({
+            set_content_anchor: config.set_content_anchor,
+            remove_coll: removeColl
+          });
+          item_el = item_view.render().el;
+        }
+
+        switch (coll.get('type')) {
+        case 'tag':
+          first_item_el = dom.tag_sec_ul.querySelector('.nav-index-item');
+          if (idx === 0 && first_item_el) {
+            dom.tag_sec_ul.insertBefore(item_el, first_item_el);
+          } else {
+            dom.tag_sec_ul.insertBefore(item_el, dom.new_tag);
+          }
+          break;
+        case 'note':
+          first_item_el = dom.note_sec_ul.querySelector('.nav-index-item');
+          if (idx === 0 && first_item_el) {
+            dom.note_sec_ul.insertBefore(item_el, first_item_el);
+          } else {
+            dom.note_sec_ul.insertBefore(item_el, dom.new_note);
+          }
+          break;
+        default:
+          //
+        }
+        // animation
+        //item_el.scrollIntoView();
+        item_el.classList.add('blink');
+        setTimeout(function() { item_el.classList.remove('blink'); }, 300);
+      };
 
       createColl = function(title, coll_type) {
         var promise;
@@ -376,9 +348,16 @@ cards.view = (function() {
             return Promise.resolve();
           }
           coll = config.create_coll({ name: title.trim(), type: coll_type });
-          coll.save().then(function(coll) {
-            //index.add(coll, 0);
-            //
+          coll.save().then(resolve);
+        });
+        return promise;
+      };
+
+      removeColl = function(coll) {
+        var promise;
+        promise = new Promise(function(resolve, reject) {
+          coll.destroy().then(function(coll) {
+            config.remove_editor_coll(coll.get('id'));
             resolve(coll);
           });
         });
@@ -489,7 +468,7 @@ cards.view = (function() {
         tag_sec: null, tag_sec_ul: null,
         note_sec: null, note_sec_ul: null
       },
-      onChangeAnnotCheck, createColl
+      addItem, onChangeAnnotCheck, createColl
       ;
 
       if (!tmpl_sec) {
@@ -520,7 +499,7 @@ cards.view = (function() {
       };
 
       self.render = function() {
-        var index_item_view;
+        var item_view;
         self.el = document.createElement('div');
 
         // notes
@@ -530,9 +509,9 @@ cards.view = (function() {
         dom.note_sec_ul = dom.note_sec.querySelector('ul');
         self.el.appendChild(dom.note_sec);
         // new item
-        index_item_view = index_item_new.create('note');
-        index_item_view.configure({ create_coll: createColl });
-        dom.new_note = index_item_view.render().el;
+        item_view = index_item_new.create('note');
+        item_view.configure({ create_coll: createColl });
+        dom.new_note = item_view.render().el;
         dom.note_sec_ul.appendChild(dom.new_note);
 
         // tags
@@ -542,86 +521,61 @@ cards.view = (function() {
         dom.tag_sec_ul = dom.tag_sec.querySelector('ul');
         self.el.appendChild(dom.tag_sec);
         // new item
-        index_item_view = index_item_new.create('tag');
-        index_item_view.configure({ create_coll: createColl });
-        dom.new_tag = index_item_view.render().el;
+        item_view = index_item_new.create('tag');
+        item_view.configure({ create_coll: createColl });
+        dom.new_tag = item_view.render().el;
         dom.tag_sec_ul.appendChild(dom.new_tag);
 
         // add to index
         index.each(function(coll) {
-          index_item_view = annot_index_item.create(coll);
-          index_item_view.configure({
-            on_change_annot_check: onChangeAnnotCheck
-          });
-
-          switch (coll.get('type')) {
-          case 'tag':
-            //dom.tag_sec_ul.appendChild(index_item_view.render().el);
-            dom.tag_sec_ul.insertBefore(
-              index_item_view.render().el, dom.new_tag
-            );
-            break;
-
-          case 'note':
-            //dom.note_sec_ul.appendChild(index_item_view.render().el);
-            dom.note_sec_ul.insertBefore(
-              index_item_view.render().el, dom.new_note
-            );
-            break;
-
-          default:
-            //
-          }
+          addItem(coll, null);
         });
 
         // add event handler
-        index.on('add', function(coll, idx) {
-          var first_item;
-          index_item_view = annot_index_item.create(coll);
-          index_item_view.configure({
-            on_change_annot_check: onChangeAnnotCheck
-          });
-
-          switch (coll.get('type')) {
-          case 'tag':
-            first_item = dom.tag_sec_ul.querySelector('.nav-index-item');
-            if (first_item) {
-              dom.tag_sec_ul.insertBefore(
-                index_item_view.render().el, first_item
-              );
-            } else {
-              dom.tag_sec_ul.insertBefore(
-                index_item_view.render().el, dom.new_tag
-              );
-            }
-            break;
-
-          case 'note':
-            first_item = dom.note_sec_ul.querySelector('.nav-index-item');
-            if (first_item) {
-              dom.note_sec_ul.insertBefore(
-                index_item_view.render().el, first_item
-              );
-            } else {
-              dom.note_sec_ul.insertBefore(
-                index_item_view.render().el, dom.new_note
-              );
-            }
-            break;
-
-          default:
-            //
-          }
-          // animation
-          index_item_view.el.scrollIntoView();
-          index_item_view.el.classList.add('blink');
-          setTimeout(function() {
-            index_item_view.el.classList.remove('blink');
-          }, 300);
-        });  // index.on('add',
-
+        index.on('add', addItem);
+      
         return self;
       };  // self.render
+
+      addItem = function(coll, idx) {
+        var item_view, item_el, first_item_el;
+
+        item_el = self.el.querySelector(
+          cards.util.formatTmpl('li[coll-id="{{id}}"]', { id: coll.get('id') })
+        );
+        if (!item_el) {
+          item_view = annot_index_item.create(coll);
+          item_view.configure({
+            on_change_annot_check: onChangeAnnotCheck
+          });
+          item_el = item_view.render().el;
+        }
+
+        switch (coll.get('type')) {
+        case 'tag':
+          first_item_el = dom.tag_sec_ul.querySelector('.nav-index-item');
+          if (idx === 0 && first_item_el) {
+            dom.tag_sec_ul.insertBefore(item_el, first_item_el);
+          } else {
+            dom.tag_sec_ul.insertBefore(item_el, dom.new_tag);
+          }
+          break;
+        case 'note':
+          first_item_el = dom.note_sec_ul.querySelector('.nav-index-item');
+          if (idx === 0 && first_item_el) {
+            dom.note_sec_ul.insertBefore(item_el, first_item_el);
+          } else {
+            dom.note_sec_ul.insertBefore(item_el, dom.new_note);
+          }
+          break;
+        default:
+          //
+        }
+        // animation
+        //item_el.scrollIntoView();
+        item_el.classList.add('blink');
+        setTimeout(function() { item_el.classList.remove('blink'); }, 300);
+      };  // addItem
 
       createColl = function(title, coll_type) {
         var promise;
@@ -631,11 +585,7 @@ cards.view = (function() {
             return Promise.resolve();
           }
           coll = config.create_coll({ name: title.trim(), type: coll_type });
-          coll.save().then(function(coll) {
-            //index.add(coll, 0);
-            //
-            resolve(coll);
-          });
+          coll.save().then(resolve);
         });
         return promise;
       };
@@ -692,7 +642,7 @@ cards.view = (function() {
         default:
           //
         }
-      };
+      };  // self.setState
       
       return self;
     };
