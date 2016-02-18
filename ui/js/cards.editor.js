@@ -88,9 +88,9 @@ cards.editor = (function() {
     }
 
     if (!card) {
-      dom.content_title.innerHTML = null;
-      dom.content_body.innerHTML = null;
-      dom.content_colls.innerHTML = null;
+      dom.content_title.innerText = null;
+      dom.content_body.innerText = null;
+      dom.content_colls.innerText = null;
       data.draft = null;
       console.log('draft discard');
       return;
@@ -99,8 +99,8 @@ cards.editor = (function() {
     // make copy
     data.draft = card.clone();
 
-    dom.content_title.innerHTML = data.draft.get('title');
-    dom.content_body.innerHTML = data.draft.get('body');
+    dom.content_title.innerText = data.draft.get('title');
+    dom.content_body.innerText = data.draft.get('body');
     renderMeta();
     config.set_editor_anchor('opened');
 
@@ -110,7 +110,7 @@ cards.editor = (function() {
 
   renderMeta = function() {
     var coll_array = [];
-    dom.content_colls.innerHTML = null;
+    dom.content_colls.innerText = null;
     // sort: note -> tag
     data.draft.get('colls').each(function(coll) {
       if (coll.get('type') === 'note') {
@@ -138,8 +138,8 @@ cards.editor = (function() {
   onClickSaveCard = function(event) {
     event.preventDefault();
 
-    if (dom.content_title.innerHTML.trim().length === 0
-        && dom.content_body.innerHTML.trim().length === 0
+    if (dom.content_title.innerText.trim().length === 0
+        && dom.content_body.innerText.trim().length === 0
        ) {
       // skip if body is empty
       config.set_editor_anchor('closed');
@@ -147,8 +147,8 @@ cards.editor = (function() {
     }
 
     data.draft.set({
-      title: dom.content_title.innerHTML,
-      body: dom.content_body.innerHTML
+      title: dom.content_title.innerText,
+      body: dom.content_body.innerText
     });
 
     dom.self.classList.add('saving');
@@ -184,8 +184,8 @@ cards.editor = (function() {
       dom.content_title.setAttribute('contenteditable', 'false');
       dom.content_body.setAttribute('contenteditable', 'false');
 
-      if (dom.content_title.innerHTML.trim().length === 0
-          && dom.content_body.innerHTML.trim().length === 0
+      if (dom.content_title.innerText.trim().length === 0
+          && dom.content_body.innerText.trim().length === 0
           //&& data.draft.get('colls').len() === 0
          ) {
         // remove draft
