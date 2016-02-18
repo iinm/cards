@@ -737,11 +737,11 @@ cards.view = (function() {
         }
 
         // render model content
-        dom.title.innerText = model.get('title');
-        dom.body.innerText = model.get('body');
+        dom.title.innerHTML = model.get('title');
+        dom.body.innerHTML = model.get('body');
 
         // render coll
-        dom.colls.innerText = null;
+        dom.colls.innerHTML = null;
         // render date
         dom.colls.appendChild(
           cards.util.createElement('<li>01/01</li>')
