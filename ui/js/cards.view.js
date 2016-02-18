@@ -21,10 +21,12 @@ cards.view = (function() {
       self = { el: null, render: null, configure: null },
       config = {
         set_content_anchor: null,
+        remove_editor_coll: null,
         remove_coll: null
       },
       state = { mode: null },
-      dom = {}
+      dom = {},
+      onClickDone
       ;
 
       if (!tmpl) {
@@ -117,35 +119,43 @@ cards.view = (function() {
           false
         );
 
-        self.el.querySelector('.item-config-menu .done').addEventListener(
-          'click',
-          function(event) {
-            var model_clone;
-            event.preventDefault();
-            state.mode = null;
-            dom.title.focus();
-            dom.title.setAttribute('contenteditable', 'false');
-            self.el.classList.remove('config-menu-opened');
-            self.el.classList.remove('edit-mode');
+        onClickDone = function(event) {
+          var model_clone;
+          event.preventDefault();
+          state.mode = null;
+          dom.title.focus();
+          dom.title.setAttribute('contenteditable', 'false');
+          self.el.classList.remove('config-menu-opened');
+          self.el.classList.remove('edit-mode');
 
-            if (dom.title.innerText.trim() !== model.get('name')) {
-              model_clone = model.clone();
-              model_clone.set({ name: dom.title.innerText.trim() });
-              self.el.classList.add('syncing');
-              model_clone.save().then(function(coll) {
-                // modify draft coll
-                config.remove_editor_coll(null);
-                dom.title.innerText = coll.get('name');
-                // animation
-                self.el.classList.remove('syncing');
-                self.el.classList.add('blink');
-                setTimeout(function() {
-                  self.el.classList.remove('blink');
-                }, 300);
-              });
-            }
-          },
-          false
+          if (dom.title.innerText.trim() !== model.get('name')) {
+            model_clone = model.clone();
+            model_clone.set({ name: dom.title.innerText.trim() });
+            self.el.classList.add('syncing');
+            model_clone.save().then(function(coll) {
+              // modify draft coll
+              config.remove_editor_coll(null);
+              dom.title.innerText = coll.get('name');
+              // animation
+              self.el.classList.remove('syncing');
+              self.el.classList.add('blink');
+              setTimeout(function() {
+                self.el.classList.remove('blink');
+              }, 300);
+            });
+          }
+        };
+
+        dom.title.addEventListener('keydown', function(event) {
+          // Note: 'keyCode' is deprecated
+          // https://developer.mozilla.org/en-US/docs/Web/Events/keydown
+          if (event.keyCode === 13) {
+            onClickDone(event);
+          }
+        }, false);
+
+        self.el.querySelector('.item-config-menu .done').addEventListener(
+          'click', onClickDone, false
         );
 
         return self;
@@ -165,7 +175,8 @@ cards.view = (function() {
       var
       self = { el: null, render: null, config: null },
       config = { create_coll: null },
-      dom = {}
+      dom = {},
+      onClickAdd
       ;
 
       if (!tmpl) {
@@ -194,18 +205,26 @@ cards.view = (function() {
         dom.title = self.el.querySelector('.title');
 
         // set event handler
+        onClickAdd = function(event) {
+          event.preventDefault();
+          self.el.classList.add('syncing');
+          config.create_coll(dom.title.innerText, coll_type)
+            .then(function(coll) {
+              if (coll) { dom.title.innerText = ''; }
+              self.el.classList.remove('syncing');
+            });
+        };
+
+        dom.title.addEventListener('keydown', function(event) {
+          // Note: 'keyCode' is deprecated
+          // https://developer.mozilla.org/en-US/docs/Web/Events/keydown
+          if (event.keyCode === 13) {
+            onClickAdd(event);
+          }
+        }, false);
+
         self.el.querySelector('.item-add-trigger').addEventListener(
-          'click',
-          function(event) {
-            event.preventDefault();
-            self.el.classList.add('syncing');
-            config.create_coll(dom.title.innerText, coll_type)
-              .then(function(coll) {
-                if (coll) { dom.title.innerText = ''; }
-                self.el.classList.remove('syncing');
-              });
-          },
-          false
+          'click', onClickAdd, false
         );
 
         return self;
@@ -309,6 +328,7 @@ cards.view = (function() {
           item_view = index_item.create(coll);
           item_view.configure({
             set_content_anchor: config.set_content_anchor,
+            remove_editor_coll: config.remove_editor_coll,
             remove_coll: removeColl
           });
           item_el = item_view.render().el;
