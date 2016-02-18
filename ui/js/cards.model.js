@@ -71,7 +71,6 @@ cards.model = (function() {
             data.cards.get(data_.id).set(data_);
           }
           card = data.cards.get(data_.id);
-          console.log(data_);
 
           // update relations
           card.get('colls').each(function(coll) {
@@ -118,6 +117,7 @@ cards.model = (function() {
 
           if (is_changed(data_)) {
             cards.fake.saveCard(data_).then(function(data_) {
+              console.log('save card', data_);
               var card = update_models(data_);
               resolve(card);
             });
@@ -225,6 +225,7 @@ cards.model = (function() {
 
           // save to fake storage
           cards.fake.saveColl(data_).then(function(data_) {
+            console.log('save coll', data_);
             // update models
             var coll = data.index.get(data_.id);
             if (coll) {
@@ -241,14 +242,17 @@ cards.model = (function() {
         return promise;
       };  // .save
 
+      // override
+      self.destroy_ = self.destroy;
       self.destroy = function() {
         var promise;
         promise = new Promise(function(resolve, reject) {
           // delete from fake storage
           cards.fake.deleteColl(self.get('id')).then(function(coll_id) {
+            self.destroy_();
             // update models
-            //self.get('cards').each(function(card) {
             // TODO: check
+            //self.get('cards').each(function(card) {
             data.cards.each(function(card) {
               card.get('colls').remove(coll_id);
             });

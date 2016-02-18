@@ -15,8 +15,8 @@ cards.model_util = (function() {
       var
       config = { on: {}, create: create },
       set_create,
-      get, set, //destroy, fetch, save
-      clone,
+      get, set, // fetch, save
+      clone, destroy,
       on, off
       ;
 
@@ -50,9 +50,11 @@ cards.model_util = (function() {
         }
       };
 
-      //destroy = function() {
-      //  config.on.destroy.forEach(function(f) { f(); });
-      //};
+      destroy = function() {
+        if (config.on.destroy) {
+          config.on.destroy.forEach(function(f) { f(); });
+        }
+      };
 
       clone = function() {
         var instance = config.create(data), modifications = {};
@@ -77,6 +79,11 @@ cards.model_util = (function() {
 
       off = function(event_target, f) {
         var idx;
+        if (event_target === '*') {
+          // remove all
+          config.on = {};
+          return;
+        }
         if (config.on[event_target]) {
           idx = config.on[event_target].indexOf(f);
           if (idx > -1) {
@@ -88,7 +95,7 @@ cards.model_util = (function() {
       return {
         set_create: set_create,
         get: get, set: set,
-        clone: clone,
+        clone: clone, destroy: destroy,
         on: on, off: off
       };
     };

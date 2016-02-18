@@ -21,8 +21,7 @@ cards.view = (function() {
       self = { el: null, render: null, configure: null },
       config = { set_content_anchor: null, remove_editor_coll: null },
       state = { mode: null },
-      dom = {},
-      onClickSetContentAnchor
+      dom = {}
       ;
 
       if (!tmpl) {
@@ -53,13 +52,20 @@ cards.view = (function() {
             id: model.get('id'), name: model.get('name'), icon: icon_html
           })
         );
-
         // set dom map
         dom.title = self.el.querySelector('.title');
 
         // set event handlers
         self.el.querySelector('.title').addEventListener(
-          'click', onClickSetContentAnchor
+          'click',
+          function(event) {
+            event.preventDefault();
+            if (state.mode === 'edit') {
+              return;
+            }
+            config.set_content_anchor(model.get('id'));
+          },
+          false
         );
 
         self.el.querySelector('.item-config-trigger').addEventListener(
@@ -115,7 +121,6 @@ cards.view = (function() {
           function(event) {
             var model_clone;
             event.preventDefault();
-
             state.mode = null;
             dom.title.focus();
             dom.title.setAttribute('contenteditable', 'false');
@@ -144,14 +149,6 @@ cards.view = (function() {
 
         return self;
       };  // render
-
-      onClickSetContentAnchor = function(event) {
-        event.preventDefault();
-        if (state.mode === 'edit') {
-          return;
-        }
-        config.set_content_anchor(model.get('id'));
-      };
 
       return self;
     };
@@ -320,11 +317,14 @@ cards.view = (function() {
 
         // add event handler
         index.on('add', function(coll, idx) {
-          var first_item;
+          var first_item, old_view_el;
           // TODO: if coll has aleady rendered, remove
+          old_view_el = self.el.querySelector('#' + coll.get('id'));
+
           index_item_view = index_item.create(coll);
           index_item_view.configure({
-            set_content_anchor: config.set_content_anchor
+            set_content_anchor: config.set_content_anchor,
+            remove_editor_coll: config.remove_editor_coll
           });
 
           switch (coll.get('type')) {
@@ -429,6 +429,7 @@ cards.view = (function() {
         );
         dom.name = self.el.querySelector('.title');
 
+        // event handlers
         model.on('change:annot_check', function() {
           config.on_change_annot_check(model);
 
@@ -448,6 +449,11 @@ cards.view = (function() {
 
         model.on('change:name', function() {
           dom.name.innerText = model.get('name');
+        });
+
+        model.on('destroy', function() {
+          model.off('*');
+          self.el.remove();
         });
 
         self.el.querySelector('.item-check-trigger').addEventListener(
