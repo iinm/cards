@@ -151,6 +151,16 @@ cards.shell = (function() {
       //
       window.addEventListener('hashchange', onHashchange);
       onHashchange();
+      //
+      window.addEventListener('beforeunload', function(event) {
+        // Ref: https://developer.mozilla.org/en-US/docs/Web/Events/beforeunload
+        var msg;
+        if (cards.editor.getDraft()) {
+          msg = 'Discard draft?';
+          event.returnValue = msg;  // Gecko, Trident, Chrome 34+
+          return msg; // Gecko, WebKit, Chrome <34
+        }
+      });
     });
   }; 
 

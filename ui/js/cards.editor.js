@@ -21,10 +21,9 @@ cards.editor = (function() {
   dom = {},
 
   init, configure, setDomMap,
-  setEditorState, onClickToggleEditor,
-  onClickSaveCard, setEditTarget,
-  removeColl,
-  renderMeta
+  onClickToggleEditor, onClickSaveCard,
+  setEditorState, setEditTarget, getDraft,
+  removeColl, renderMeta
   ;  // var
 
   setDomMap = function(container) {
@@ -210,11 +209,14 @@ cards.editor = (function() {
     }
   };
 
+  getDraft = function() { return data.draft; };
+
   return {
     configure: configure,
     init: init,
     setEditorState: setEditorState,
     setEditTarget: setEditTarget,
+    getDraft: getDraft,
     removeColl: removeColl
   };
 }());
