@@ -128,14 +128,14 @@ cards.view = (function() {
           self.el.classList.remove('config-menu-opened');
           self.el.classList.remove('edit-mode');
 
-          if (dom.title.innerText.trim() !== model.get('name')) {
+          if (dom.title.innerHTML.trim() !== model.get('name')) {
             model_clone = model.clone();
-            model_clone.set({ name: dom.title.innerText.trim() });
+            model_clone.set({ name: dom.title.innerHTML.trim() });
             self.el.classList.add('syncing');
             model_clone.save().then(function(coll) {
               // modify draft coll
               config.remove_editor_coll(null);
-              dom.title.innerText = coll.get('name');
+              dom.title.innerHTML = coll.get('name');
               // animation
               self.el.classList.remove('syncing');
               self.el.classList.add('blink');
@@ -208,9 +208,9 @@ cards.view = (function() {
         onClickAdd = function(event) {
           event.preventDefault();
           self.el.classList.add('syncing');
-          config.create_coll(dom.title.innerText, coll_type)
+          config.create_coll(dom.title.innerHTML, coll_type)
             .then(function(coll) {
-              if (coll) { dom.title.innerText = ''; }
+              if (coll) { dom.title.innerHTML = ''; }
               self.el.classList.remove('syncing');
             });
         };
@@ -447,7 +447,7 @@ cards.view = (function() {
         });
 
         model.on('change:name', function() {
-          dom.name.innerText = model.get('name');
+          dom.name.innerHTML = model.get('name');
         });
 
         model.on('destroy', function() {

@@ -55,8 +55,8 @@
 .cards-nav-head .search-input,
 .cards-nav-head .nav-annot-closer,
 .cards-nav-head .nav-annot-saving,
-.cards-nav-head .annot-trigger-wrapper
-{
+.cards-nav-head .annot-trigger-wrapper,
+.cards-nav-head .annot-move-control {
   position: absolute;
   height: 100%;
   /*   background: #00A8C6; */
@@ -216,6 +216,33 @@
 
 .cards-nav-head .annot-trigger li.clear-check i {
   font-weight: bold;
+}
+
+.cards-nav-head .annot-move-control {
+  right: 100%;
+  width: 100%;
+  height: 100%;
+  transition: right 250ms;
+  overflow: hidden;
+}
+.cards-nav.annot-move-mode .cards-nav-head .annot-move-control {
+  right: 0;  /* annot-closer/width */
+}
+.cards-nav-head .annot-move-control .annot-move-cancel {
+  position: absolute;
+  left: 0;
+  width: 3em;
+  height: 100%;
+  text-align: center;
+  line-height: 3em;
+  cursor: pointer;
+}
+.cards-nav-head .annot-move-control .annot-move-msg {
+  position: absolute;
+  left: 3em;
+  height: 100%;
+  text-align: center;
+  line-height: 3em;
 }
 
 .cards-nav-content-wrapper {

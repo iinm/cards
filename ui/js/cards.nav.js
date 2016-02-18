@@ -102,6 +102,22 @@ cards.nav = (function() {
       false
     );
 
+    dom.annot_trigger.querySelector('.move').addEventListener(
+      'click',
+      function(event) {
+        event.preventDefault();
+        dom.self.classList.add('annot-move-mode');
+        // TODO: move
+      },
+      false
+    );
+
+    dom.self.querySelector('.annot-move-control .annot-move-cancel')
+      .addEventListener('click', function(event) {
+        event.preventDefault();
+        dom.self.classList.remove('annot-move-mode');
+      });
+
     dom.annot_trigger.querySelector('.add-tag').addEventListener(
       'click',
       function(event) {
@@ -130,7 +146,6 @@ cards.nav = (function() {
         }
       }, false
     );
-
 
     // render index
     view.index = cards.view.index.create(config.index);
