@@ -68,6 +68,7 @@ cards.model = (function() {
                ) {
               changed = true;
             }
+            // apply clone change
             data.cards.get(data_.id).set(data_);
           }
           card = data.cards.get(data_.id);
@@ -234,7 +235,15 @@ cards.model = (function() {
             // update models
             var coll = data.index.get(data_.id);
             if (coll) {
+              // apply clone change
               coll.set(data_);
+              // WARNING: .save doesn't reset coll.get('cards')
+              //if (data_.type === 'note' && self.get('fetched')) {
+              //  coll.get('cards').reset();
+              //  self.get('cards').each(function(card) {
+              //    coll.get('cards').add(card);
+              //  });
+              //}
             } else {  // new coll
               coll = self;
               coll.set(data_);

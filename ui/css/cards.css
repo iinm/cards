@@ -57,6 +57,18 @@ strong {
   box-shadow: 0 0 .6em #CB4040;
 }
 
+.cards-item .cards-item-cover {
+  display: none;
+}
+.cards-content.annot-move-mode .cards-item .cards-item-cover {
+  display: block;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+}
+
 .cards-item .item-content {
   margin: .3em 2em .3em .4em;
 }
@@ -123,6 +135,10 @@ strong {
 }
 .cards-item .item-check-trigger {
   top: 0;
+}
+.cards-content.annot-move-mode .cards-item .item-check-trigger,
+.cards-content.annot-move-mode .cards-item .item-edit-trigger {
+  display: none;
 }
 .cards-item .item-edit-trigger {
   bottom: 0;

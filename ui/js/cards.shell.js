@@ -128,6 +128,8 @@ cards.shell = (function() {
         index: data.index,
         create_coll: cards.model.createColl,
         remove_editor_coll: cards.editor.removeColl,
+        request_move: cards.content.moveCards,
+        cancel_move: cards.content.endMove,
         get_current_coll: function() {
           return data.index.get(state.anchor_map.content);
         }

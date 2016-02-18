@@ -109,7 +109,7 @@ cards.model_util = (function() {
     var
     config = { model: model, on: {} },
     data = { instances: {}, instance_ids: [] },
-    get, at, len, each,
+    get, at, len, each, indexOf,
     add, create, remove, reset,  // fetch
     clone, as_array,
     on, off
@@ -131,8 +131,13 @@ cards.model_util = (function() {
       });
     };
 
+    //indexOf = data.instance_ids.indexOf;
+    indexOf = function(instance_id) {
+      return data.instance_ids.indexOf(instance_id);
+    };
+
     add = function(instance, idx) {
-      var old_idx;
+      var old_idx, insert_before_id;
       if (data.instances.hasOwnProperty(instance.get('id'))
           && (typeof idx) !== 'number'
          ) {
@@ -142,11 +147,17 @@ cards.model_util = (function() {
       else {
         data.instances[instance.get('id')] = instance;
         if ((typeof idx) === 'number') {
-          old_idx = data.instance_ids.indexOf(instance.get('id'));
-          if (old_idx > -1) {
-            data.instance_ids.splice(old_idx, 1);
+          insert_before_id = data.instance_ids[idx];
+          if (insert_before_id !== instance.get('id')) {
+            old_idx = data.instance_ids.indexOf(instance.get('id'));
+            if (old_idx > -1) {
+              // 1. remove itself
+              data.instance_ids.splice(old_idx, 1);
+              // 2. update idx and insert
+              idx = data.instance_ids.indexOf(insert_before_id);
+            }
+            data.instance_ids.splice(idx, 0, instance.get('id'));
           }
-          data.instance_ids.splice(idx, 0, instance.get('id'));
         } else {
           data.instance_ids.push(instance.get('id'));
         }
@@ -169,7 +180,7 @@ cards.model_util = (function() {
 
     reset = function() {
       while (data.instance_ids.length > 0) {
-        remove(data.instance_ids.pop());
+        remove(data.instance_ids[0]);
       }
     };
 
@@ -210,7 +221,7 @@ cards.model_util = (function() {
     };
 
     return {
-      get: get, at: at, len: len, each: each,
+      get: get, at: at, len: len, each: each, indexOf: indexOf,
       clone: clone, as_array: as_array,
       add: add, create: create, remove: remove, reset: reset,
       on: on, off: off

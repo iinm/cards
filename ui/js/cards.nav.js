@@ -16,6 +16,7 @@ cards.nav = (function() {
     index: null,  // collection of cards.model/models.coll
     create_coll: null,
     remove_editor_coll: null,
+    request_move: null, cancel_move: null,
     get_current_coll: null
   },
 
@@ -107,7 +108,17 @@ cards.nav = (function() {
       function(event) {
         event.preventDefault();
         dom.self.classList.add('annot-move-mode');
-        // TODO: move
+        console.log('move');
+        config.request_move({
+          targets: state.annot_targets,
+          start_sync: function() {
+            dom.self.classList.add('annot-saving');
+          },
+          end_sync: function() {
+            dom.self.classList.remove('annot-saving');
+            dom.self.classList.remove('annot-move-mode');
+          }
+        });
       },
       false
     );
@@ -116,6 +127,7 @@ cards.nav = (function() {
       .addEventListener('click', function(event) {
         event.preventDefault();
         dom.self.classList.remove('annot-move-mode');
+        config.cancel_move();
       });
 
     dom.annot_trigger.querySelector('.add-tag').addEventListener(

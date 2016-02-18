@@ -12,7 +12,8 @@ cards.content = (function() {
   config = {
     self_selector: '.cards-content',
     set_edit_target: null,
-    set_annot_target: null
+    set_annot_target: null,
+    on_click_move_cards: null
   },
 
   state = {
@@ -24,6 +25,7 @@ cards.content = (function() {
 
   init, configure,
   setColl, render, createCardView, onAddItem, onRemoveItem,
+  moveCards, endMove,
   onScroll
   ;  // var
 
@@ -35,7 +37,10 @@ cards.content = (function() {
     dom.self = container.querySelector(config.self_selector);
     dom.cards = dom.self.querySelector('.cards-content-cards');
     // event handler
-    dom.self.removeEventListener('scroll', onScroll);
+    // load more cards when scroll to bottom
+    //dom.self.addEventListener('scroll', onScroll, false);
+    //dom.self.removeEventListener('scroll', onScroll);
+
   }; 
 
   setColl = function(coll) {
@@ -67,7 +72,10 @@ cards.content = (function() {
     return card_view;
   };
 
-  render = function() {
+  render = function(scroll_top) {
+    if (scroll_top === undefined) {
+      scroll_top = true;
+    }
     // destroy previous collection
     Object.keys(state.card_id2view).forEach(function(card_id) {
       state.card_id2view[card_id].destroy();
@@ -79,9 +87,9 @@ cards.content = (function() {
         var card_view = createCardView(card);
         dom.cards.appendChild(card_view.render().el);
       });
-      dom.self.scrollTop = 0;
-      // load more cards when scroll to bottom
-      dom.self.addEventListener('scroll', onScroll, false);
+      if (scroll_top) {
+        dom.self.scrollTop = 0;
+      }
     }
     else {
       dom.self.classList.add('init-loading');
@@ -89,8 +97,6 @@ cards.content = (function() {
         dom.self.scrollTop = 0;
         dom.self.classList.remove('init-loading');
       });
-      // load more cards when scroll to bottom
-      dom.self.addEventListener('scroll', onScroll, false);
     }
   };
 
@@ -113,7 +119,8 @@ cards.content = (function() {
 
     if ((typeof idx) !== 'number') {
       dom.cards.appendChild(card_el);
-    } else {
+    }
+    else if (idx === 0) {
       sibling = dom.cards.querySelector('.cards-item');
       if (sibling) {
         dom.cards.insertBefore(card_el, sibling);
@@ -121,12 +128,17 @@ cards.content = (function() {
         dom.self.appendChild(card_el);
       }
     }
+    else {  // idx > 0
+      sibling = dom.cards.querySelectorAll('.cards-item')[idx];
+      dom.cards.insertBefore(card_el, sibling);
+    }
 
     // scroll into view
     //card_el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    card_el.scrollIntoView();
     if (idx === 0) {
       dom.self.scrollTop = 0;
+    } else if ((typeof idx) !== 'number') {
+      card_el.scrollIntoView();
     }
     setTimeout(function() { card_el.classList.add('blink'); }, 300);
     setTimeout(function() { card_el.classList.remove('blink'); }, 600);
@@ -146,10 +158,70 @@ cards.content = (function() {
     //delete state.card_id2view[card.get('id')];
   };
 
+  endMove = function() {
+    dom.self.classList.remove('annot-move-mode');
+    dom.self.removeEventListener('click', config.on_click_move_cards);
+  };
+
+  moveCards = function(params) {
+    config.on_click_move_cards = function(event) {
+      var
+      insert_target = event.target,
+      targets = [], coll_clone, i, insert_target_id, card
+      ;
+      event.preventDefault();
+
+      if (!insert_target.classList.contains('cards-item')) {
+        insert_target = insert_target.parentNode;
+        if (!insert_target.classList.contains('cards-item')) {
+          return;
+        }
+      }
+      console.log(insert_target);
+      insert_target_id = insert_target.getAttribute('card-id');
+      // use clone to update
+      coll_clone = state.coll.clone();
+      // sort move targets and find insert_target_idx
+      for (i = 0; i < coll_clone.get('cards').len(); i++) {
+        card = coll_clone.get('cards').at(i);
+        if (params.targets.get(card.get('id'))) {
+          targets.push(card);
+        }
+      }
+
+      console.log('insert at', insert_target_id);
+      // update clone
+      targets.forEach(function(card) {
+        coll_clone.get('cards').add(
+          card, coll_clone.get('cards').indexOf(insert_target_id)
+        );
+      });
+
+      params.start_sync();
+      coll_clone.save().then(function(coll) {
+        coll.get('cards').each(function(card) {
+          console.log('*', card.get('title'));
+        });
+        // update real model (not clone!)
+        targets.forEach(function(card) {
+          state.coll.get('cards').add(
+            card, state.coll.get('cards').indexOf(insert_target_id)
+          );
+        });
+        endMove();
+        params.end_sync();
+      });
+    };
+
+    dom.self.classList.add('annot-move-mode');
+    dom.self.addEventListener('click', config.on_click_move_cards, false);
+  };
+
   return {
     init: init,
     configure: configure,
     setColl: setColl,
-    render: render
+    render: render,
+    moveCards: moveCards, endMove: endMove
   };
 }());
