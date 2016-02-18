@@ -179,7 +179,6 @@ cards.content = (function() {
           return;
         }
       }
-      console.log(insert_target);
       insert_target_id = insert_target.getAttribute('card-id');
       // use clone to update
       coll_clone = state.coll.clone();
@@ -191,7 +190,6 @@ cards.content = (function() {
         }
       }
 
-      console.log('insert at', insert_target_id);
       // update clone
       targets.forEach(function(card) {
         coll_clone.get('cards').add(
@@ -201,9 +199,6 @@ cards.content = (function() {
 
       params.start_sync();
       coll_clone.save().then(function(coll) {
-        coll.get('cards').each(function(card) {
-          console.log('*', card.get('title'));
-        });
         // update real model (not clone!)
         targets.forEach(function(card) {
           state.coll.get('cards').add(
