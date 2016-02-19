@@ -230,7 +230,7 @@ cards.fake = (function() {
     var promise;
     promise = new Promise(function(resolve, reject) {
       if (!data_.id) {  // new coll
-        data_.id = 'coll_' + num_coll;
+        data_.id = '_coll_' + num_coll;
         num_coll += 1;
         coll_ids.push(data_.id);
         if (data_.type === 'note') {
@@ -305,7 +305,7 @@ cards.fake = (function() {
     promise = new Promise(function(resolve, reject) {
       // TODO: handle error
       if (!data_.id) {  // new card
-        data_.id = 'card_' + num_card;
+        data_.id = '_card_' + num_card;
         num_card += 1;
         card_ids.push(data_.id);
       }
