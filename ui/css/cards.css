@@ -118,7 +118,8 @@ strong {
   font-size: .95em;
   line-height: 1.3em;
   max-height: calc(1.3em * 3);
-  overflow: hidden;
+  word-wrap: break-word;
+  overflow-y: hidden;
 }
 .cards-item.opened .item-content .item-body {
   max-height: initial;
