@@ -789,7 +789,7 @@ cards.view = (function() {
         dom.colls.innerHTML = null;
         // render date
         dom.colls.appendChild(
-          cards.util.createElement('<li>01/01</li>')
+          cards.util.createElement('<li>' + model.get('created_date') + '</li>')
         );
 
         // sort: note -> tag

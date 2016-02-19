@@ -19,7 +19,7 @@ cards.model = (function() {
     base_model = cards.model_util.createModel(function () {
       return {
         id: null,
-        title: '', body: '',
+        title: '', body: '', created_date: '01/01',
         colls: cards.model_util.createCollection(models.coll),
         checked: false
       };
