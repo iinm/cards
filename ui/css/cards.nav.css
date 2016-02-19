@@ -238,6 +238,7 @@
   cursor: pointer;
 }
 
+.cards-nav.opened .annot-trigger li.move,
 .cards-nav.content-is-not-note .annot-trigger li.move {
   display: none;
 }
