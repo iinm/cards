@@ -15,7 +15,10 @@ cards.fake = (function() {
   ;
 
   card_ids = [
-    'card_01', 'card_02', 'card_03', 'card_04', 'card_05', 'card_06', 'card_07'
+    'card_01', 'card_02', 'card_03', 'card_04', 'card_05', 'card_06', 'card_07',
+    'card_08', 'card_09', 'card_10', 'card_11', 'card_12', 'card_13', 'card_14',
+    'card_15', 'card_16', 'card_17', 'card_18', 'card_19', 'card_20', 'card_21',
+    'card_23', 'card_24', 'card_22'
   ];
   num_card = card_ids.length;
   cards_ = {
@@ -60,6 +63,107 @@ cards.fake = (function() {
       body: 'Luke Skywalker has vanished. In his absence, the sinister FIRST ORDER has risen from the ashes of the Empire and will not rest until Skywalker, the last Jedi, has been destroyed.',
       id: 'card_07',
       coll_ids: ['tag_06', 'note_04']
+    },
+    card_08: {
+      title: 'margin',
+      body: 'margin: top right bottom left<br>t rl b<br>tb rl',
+      id: 'card_08',
+      coll_ids: ['tag_02']
+    },
+    card_09: {
+      title: 'traisition',
+      body: '.cards-editor {<br>  position: absolute;<br>  bottom: 0;<br>  height: 3em;<br>  transition: height 250ms ease;<br>}<br>.cards-editor.opened {<br>  height: calc(100vh - 3.5em);<br>}',
+      id: 'card_09',
+      coll_ids: ['tag_02']
+    },
+    card_10: {
+      title:'blink',
+      body: "/* css */<br>.blink {<br>box-shadow: 0 0 .6em #40C0CB;<br>}<br><br>// js<br>el.classList.add('blink');<br>setTimeout(function() { el.classList.remove('blink') }, 300);",
+      id: 'card_10',
+      coll_ids: ['tag_02', 'tag_03']
+    },
+    card_11: {
+      title: 'custom variables',
+      body: "Chrome 49+ (Feb 29th, 2016)<br>:root {<br> --nav-head-color: #eee;<br>}<br>",
+      id: 'card_11',
+      coll_ids: ['tag_02']
+    },
+    card_12: {
+      title: 'placeholder for contenteditable',
+      body: '/* css */<br>div[contentEditable]:empty:not(:focus):before {<br> content: attr(data-text);<br> color: #aaa;<br>}<br><br> &lt;div contenteditable="true" data-text="New"&gt;&lt;/div&gt;',
+      id: 'card_12',
+      coll_ids: ['tag_02', 'tag_01']
+    },
+    card_13: {
+      title: 'prepare storage',
+      body: "pvcreate /dev/sda3<br> vgcreate debian-vg /dev/sda3<br> lvcreate -L 6G debian-vg -n swap<br> lvcreate -l +100%FREE debian-vg -n root<br><br> mkfs.ext4 /dev/sda2<br> mkfs.ext4 /dev/debian-vg/root<br> mkswap /dev/debian-vg/swap<br><br>swapon /dev/debian-vg/swap<br> mkdir /mnt/debian<br> mount /dev/debian-vg/root /mnt/debian/<br> mkdir /mnt/debian/boot<br> mount /dev/sda2 /mnt/debian/boot",
+      id: 'card_13',
+      coll_ids: ['note_03']
+    },
+    card_14: {
+      title: 'bootstrap',
+      body: "sudo apt-get install debootstrap<br> debootstrap --arch amd64 jessie /mnt/debian http://ftp.jp.debian.org/debian<br>",
+      id: 'card_14',
+      coll_ids: ['note_03']
+    },
+    card_15: {
+      title: 'follow the official guide',
+      body: 'https://www.debian.org/releases/stable/i386/apds03.html',
+      id: 'card_15',
+      coll_ids: ['note_03']
+    },
+    card_16: {
+      title: 'note',
+      body: "before chroot<br> mount -o bind /dev /mnt/debian/dev<br> mount -t proc none /mnt/debian/proc<br><br> apt-get install lvm2<br> tasksel  # gnome, laptop",
+      coll_ids: ['note_03']
+    },
+    card_17: {
+      title: 'create model',
+      body: 'rails g model review<br> emacs db/migrate/20151223082746_create_reviews.rb<br> bundle exec rake db:migrate<br><br> rails g migration AddNicknameToUsers nickname:string  # 複数形<br> rails g migration RemoveNicknameFromReviews nickname:string',
+      id: 'card_17',
+      coll_ids: ['note_02', 'tag_05']
+    },
+    card_18: {
+      title: 'rollback',
+      body: 'bundle exec rake db:rollback',
+      id: 'card_18',
+      coll_ids: ['note_02', 'tag_05']
+    },
+    card_19: {
+      title: 'controller',
+      body: 'rails g controller users  # 複数形',
+      id: 'card_19',
+      coll_ids: ['note_02', 'tag_05']
+    },
+    card_20: {
+      title: 'check router',
+      body: 'bundle exec rake routes',
+      id: 'card_20',
+      coll_ids: ['note_02', 'tag_05']
+    },
+    card_21: {
+      title: 'devise',
+      body: 'rails generate devise:install<br> rails g devise user<br> rails g devise:views<br><br> user_signed_in?<br><br> before_action authenticate_user!, only: [:new, :create]<br><br> devise_parameter_sanitizer.for(追加したいメソッドの種類).push(追加したいパラメータ名)',
+      id: 'card_21',
+      coll_ids: ['note_02', 'tag_05']
+    },
+    card_22: {
+      title: 'Hello World!',
+      body: 'Cardsはモバイルデバイス用のノートアプリです．左上のメニューアイコンをタップして，Cards Helpを覗いてみましょう!',
+      id: 'card_22',
+      coll_ids: ['note_01']
+    },
+    card_23: {
+      title: 'Cardの作成',
+      body: '画面下にあるエディタ右のえんぴつアイコンをタップして，Cardを作ってみましょう．',
+      id: 'card_23',
+      coll_ids: ['note_01']
+    },
+    card_24: {
+      title: 'Tag，Note',
+      body: 'Tag, Noteを使うことで，Cardをグループ化することが出来ます．<br>Tagはその名の通り，Cardをグループ化するだけですが，NoteはCardの順序を保存します．',
+      id: 'card_24',
+      coll_ids: ['note_01']
     }
   };
 
@@ -76,13 +180,17 @@ cards.fake = (function() {
     tag_05: { name: 'Rails', id: 'tag_05', type: 'tag' },
     tag_06: { name: 'Star Wars', id: 'tag_06', type: 'tag' },
     note_01: {
-      name: 'Rails環境構築手順', id: 'note_01', type: 'note', card_ids: []
+      name: 'Cards Help', id: 'note_01', type: 'note',
+      card_ids: ['card_22', 'card_23', 'card_24']
     },
     note_02: {
-      name: 'Rails cheat sheet', id: 'note_02', type: 'note', card_ids: []
+      name: 'Rails cheat sheet', id: 'note_02', type: 'note',
+      card_ids: ['card_17', 'card_18', 'card_19', 'card_20', 'card_21']
     },
     note_03: {
-      name: 'サーバ設定ログ（長いタイトルを表示するテスト）', id: 'note_03', type: 'note', card_ids: []
+      name: 'Debian install log (looooooooooooooong title test)',
+      id: 'note_03', type: 'note',
+      card_ids: ['card_13', 'card_14', 'card_15', 'card_16']
     },
     note_04: {
       name: 'Star Wars Opening', id: 'note_04', type: 'note',
@@ -97,7 +205,8 @@ cards.fake = (function() {
     var promise;
     promise = new Promise(function(resolve, reject) {
       var i, reversed = [];
-      for (i = coll_ids.length - 1; i >= 0; i--) {
+      //for (i = coll_ids.length - 1; i >= 0; i--) {
+      for (i = 0; i < coll_ids.length; i++) {
         reversed.push(colls[coll_ids[i]]);
       }
       setTimeout(function() { resolve(reversed); }, 700);
