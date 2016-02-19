@@ -83,6 +83,9 @@ cards.editor = (function() {
 
   setEditTarget = function(card) {
     if (data.draft) {
+      if (card && !window.confirm('Discard draft?')) {
+        return;
+      }
       data.draft.get('colls').off('add', renderMeta);
       data.draft.get('colls').off('remove', renderMeta);
     }

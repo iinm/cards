@@ -879,6 +879,8 @@ cards.view = (function() {
         });
         //card.on('destroy', function() { onRemoveItem(card); });
         self.el.appendChild(card_view.render().el);
+        setTimeout(function() { card_view.el.classList.add('blink'); }, 300);
+        setTimeout(function() { card_view.el.classList.remove('blink'); }, 600);
       };
 
       onRemoveItem = function(card) {

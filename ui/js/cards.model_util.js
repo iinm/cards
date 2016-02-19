@@ -173,7 +173,7 @@ cards.model_util = (function() {
         delete data.instances[id];
         data.instance_ids.splice(data.instance_ids.indexOf(id), 1);
       }
-      if (config.on.remove) {
+      if (instance && config.on.remove) {
         config.on.remove.forEach(function(f) { f(instance); });
       }
     };
