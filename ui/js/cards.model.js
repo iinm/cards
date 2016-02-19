@@ -9,7 +9,11 @@
 cards.model = (function() {
   var
   models = {},
-  data = { index: null, cards: null, all: null },
+  data = {
+    index: null,  // index of coll
+    cards: null,  // cache to share card model
+    all: null  // top
+  },
   init, getIndex, createCard, createColl, getSearch
   ;
 
@@ -252,6 +256,13 @@ cards.model = (function() {
             if (coll) {
               // apply clone change
               coll.set(data_);
+              // add to re-render colls in card view
+              // Note: not efficient
+              data.cards.each(function(card) {
+                if (card.get('colls').get(coll.get('id'))) {
+                  card.get('colls').add(coll);
+                }
+              });
               // WARNING: .save doesn't reset coll.get('cards')
               //if (data_.type === 'note' && self.get('fetched')) {
               //  coll.get('cards').reset();
