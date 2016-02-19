@@ -350,6 +350,7 @@ cards.nav = (function() {
     view.annot_index.setState(cards_, annot_type);
     // to back to index (index) or content (closed)
     state.before_annot = state.self;
+
     config.set_nav_anchor(
       cards.util.cloneUpdateObj(state, { self: 'annot' })
     );
@@ -393,6 +394,10 @@ cards.nav = (function() {
       if (!dom.self.classList.contains('opened')) {
         dom.content.style.display = 'none';
       }
+      // if move mode -> cancel
+      dom.self.classList.remove('annot-move-mode');
+      config.cancel_move();
+
       dom.self.classList.add('opened', 'annot-opened');
       state.self = 'annot';
       break;

@@ -257,6 +257,9 @@
 .cards-nav.annot-move-mode .cards-nav-head .annot-move-control {
   right: 0;  /* annot-closer/width */
 }
+/* .cards-nav.annot-opened .cards-nav-head .annot-move-control {
+   right: 100% !important;
+   } */
 .cards-nav-head .annot-move-control .annot-move-cancel {
   position: absolute;
   left: 0;
