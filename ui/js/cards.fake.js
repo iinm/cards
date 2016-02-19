@@ -285,7 +285,7 @@ cards.fake = (function() {
         card_array_.reverse();
         // simulate pagination
         if (last_card_id) {
-          start_idx = card_array_.indexOf(cards_[last_card_id]) + 1
+          start_idx = card_array_.indexOf(cards_[last_card_id]) + 1;
         }
         card_array_ = card_array_.slice(start_idx, start_idx + 5);
       }
