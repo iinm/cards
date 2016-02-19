@@ -175,7 +175,8 @@ cards.model = (function() {
         annot_check: null,  // used by annotator, 'checked' or 'partial'
         cards: cards.model_util.createCollection(models.card),
         fetched: false,
-        match_search_input: null
+        match_search_input: null,
+        match_annot_search_input: null
       };
     });
 

@@ -54,7 +54,7 @@ cards.shell = (function() {
     changeAnchorPart({ editor: editor_state });
   };
 
-  onHashchange = function(event) {
+  onHashchange = function() {
     var
     anchor_map = cards.util.makeAnchorMap(),
     valid = true, current_coll, title_icon
@@ -158,7 +158,7 @@ cards.shell = (function() {
       cards.editor.init(container);
 
       //
-      window.addEventListener('hashchange', onHashchange);
+      window.addEventListener('hashchange', onHashchange, false);
       onHashchange();
       //
       window.addEventListener('beforeunload', function(event) {
@@ -169,7 +169,7 @@ cards.shell = (function() {
           event.returnValue = msg;  // Gecko, Trident, Chrome 34+
           return msg; // Gecko, WebKit, Chrome <34
         }
-      });
+      }, false);
     });
   }; 
 

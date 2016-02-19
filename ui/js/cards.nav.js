@@ -19,7 +19,7 @@ cards.nav = (function() {
     request_move: null, cancel_move: null,
     get_current_coll: null,
     search_model: null,
-    set_content_anchor: null
+    set_edit_target: null
   },
 
   state = {
@@ -34,7 +34,7 @@ cards.nav = (function() {
   init, configure, setDomMap,
   setTitle, setNavState, onClickToggleNav,
   updateAnnotTrigger, setAnnotTarget, annotate, resetAnnotTargets,
-  filterIndex
+  filterIndex, filterAnnotIndex
   ;  // var
 
   setDomMap = function(container) {
@@ -44,6 +44,7 @@ cards.nav = (function() {
     dom.nav_trigger = dom.self.querySelector('.nav-trigger');
     dom.annot_closer = dom.self.querySelector('.nav-annot-closer');
     dom.search_input = dom.self.querySelector('.search-input');
+    dom.annot_search_input = dom.self.querySelector('.annot-search-input');
     dom.content = dom.self.querySelector('.cards-nav-content');
     dom.annotator = dom.self.querySelector('.cards-nav-annotator');
     dom.target_indicator = dom.self.querySelector('.annot-target-indicator');
@@ -82,7 +83,7 @@ cards.nav = (function() {
     // render search result
     view.search = cards.view.search.create(config.search_model);
     view.search.configure({
-      set_content_anchor: config.set_content_anchor,
+      set_edit_target: config.set_edit_target,
       set_annot_target: setAnnotTarget
     });
     dom.content.appendChild(view.search.render().el);
@@ -201,8 +202,8 @@ cards.nav = (function() {
       //console.log('keyCode:', event.keyCode);
       if (input.length > 0) {
         dom.search_input.classList.add('not-empty');
-        filterIndex(input);
         if (state.search_input !== input) {
+          filterIndex(input);
           setTimeout(function() {
             if (state.search_input === input) {
               console.log('search:', input);
@@ -230,9 +231,32 @@ cards.nav = (function() {
       },
       false
     );
+
+    dom.annot_search_input.addEventListener('keyup', function(event) {
+      var input = dom.annot_search_input.value.trim().toLowerCase();
+      //console.log('filter index:', input);
+      if (input.length > 0) {
+        dom.annot_search_input.classList.add('not-empty');
+        filterAnnotIndex(input);
+      } else {
+        dom.annot_search_input.classList.remove('not-empty');
+        filterAnnotIndex(null);
+      }
+    }, false);
+
+    dom.head.querySelector('.clear-annot-search-input').addEventListener(
+      'click',
+      function(event) {
+        dom.annot_search_input.value = '';
+        dom.annot_search_input.classList.remove('not-empty');
+        filterAnnotIndex(null);
+      },
+      false
+    );
   };
 
   filterIndex = function(keyword) {
+    // Note: not efficient
     config.index.each(function(coll) {
       if (keyword === null) {
         coll.set({ match_search_input: null });
@@ -243,6 +267,20 @@ cards.nav = (function() {
       }
       else {
         coll.set({ match_search_input: false });
+      }
+    });
+  };
+
+  filterAnnotIndex = function(keyword) {
+    config.index.each(function(coll) {
+      if (keyword === null) {
+        coll.set({ match_annot_search_input: null });
+      }
+      else if (coll.get('name').toLowerCase().indexOf(keyword) > -1) {
+        coll.set({ match_annot_search_input: true });
+      }
+      else {
+        coll.set({ match_annot_search_input: false });
       }
     });
   };

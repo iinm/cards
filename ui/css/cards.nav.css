@@ -55,7 +55,7 @@
 .cards-nav-head .search-input,
 .cards-nav-head .clear-search-input,
 .cards-nav-head .annot-search-input,
-.cards-nav-head .annot-clear-search-input,
+.cards-nav-head .clear-annot-search-input,
 .cards-nav-head .nav-annot-closer,
 .cards-nav-head .nav-annot-saving,
 .cards-nav-head .annot-trigger-wrapper,
@@ -175,7 +175,7 @@
   cursor: pointer;
 }
 .cards-nav.opened .search-input.not-empty + .clear-search-input,
-.cards-nav.annot-opened .search-input.not-empty + .clear-annot-search-input {
+.cards-nav.annot-opened .annot-search-input.not-empty + .clear-annot-search-input {
   width: 3em;
 }
 

@@ -68,6 +68,7 @@ cards.view = (function() {
             if (state.mode === 'edit') {
               return;
             }
+            console.log('click:', model.get('id'), model.get('name'));
             config.set_content_anchor(model.get('id'));
           },
           false
@@ -462,14 +463,14 @@ cards.view = (function() {
           }
         });
 
-        model.on('change:name', onChangeName)
-        model.on('change:match_search_input', onMatchSearchInput);
+        model.on('change:name', onChangeName);
+        model.on('change:match_annot_search_input', onMatchSearchInput);
 
         model.on('destroy', function() {
           model.set({ annot_check: null });
-          // Note: doesn't need 'off', see model_util/model/destroy
-          model.off('change:name', onChangeName)
-          model.off('change:match_search_input', onMatchSearchInput);
+          // Note: doesn't need 'off', see model_util/model/destroy ???
+          model.off('change:name', onChangeName);
+          model.off('change:match_annot_search_input', onMatchSearchInput);
           self.el.remove();
         });
 
@@ -492,7 +493,7 @@ cards.view = (function() {
       };
 
       onMatchSearchInput = function() {
-        var match = model.get('match_search_input');
+        var match = model.get('match_annot_search_input');
         if (match === null || match === true) {
           self.el.classList.remove('cards-util-hide');
         } else if (match === false) {
@@ -903,6 +904,6 @@ cards.view = (function() {
   return {
     index: index, index_item: index_item,
     annot_index: annot_index,
-    search, card: card
+    search: search, card: card
   };
 }());
