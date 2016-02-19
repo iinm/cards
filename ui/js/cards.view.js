@@ -876,7 +876,7 @@ cards.view = (function() {
       };  // render
 
       onChangeState = function() {
-        if (model.get('searching')) {
+        if (model.get('searching') && !model.get('fetched')) {
           self.el.classList.add('searching');
         } else {
           self.el.classList.remove('searching');
