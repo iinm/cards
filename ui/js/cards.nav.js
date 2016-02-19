@@ -83,7 +83,14 @@ cards.nav = (function() {
     // render search result
     view.search = cards.view.search.create(config.search_model);
     view.search.configure({
-      set_edit_target: config.set_edit_target,
+      set_edit_target: function(card) {
+        config.set_edit_target(card);
+        // TODO: close nav
+        //config.set_nav_anchor(
+        //  cards.util.cloneUpdateObj(state, { self: 'closed' })
+        //);
+        //console.log('nav closed');
+      },
       set_annot_target: setAnnotTarget
     });
     dom.content.appendChild(view.search.render().el);
@@ -314,10 +321,10 @@ cards.nav = (function() {
     if (card.get('checked')) {
       // use clone
       state.annot_targets.add(card.clone());
-      config.set_nav_anchor(state);
+      //config.set_nav_anchor(state);
     } else {
       state.annot_targets.remove(card.get('id'));
-      config.set_nav_anchor(state);
+      //config.set_nav_anchor(state);
     }
   };
 
@@ -343,13 +350,13 @@ cards.nav = (function() {
     config.set_nav_anchor(new_state);
   };
 
-  setNavState = function(nav_state, annot_targets) {
-    if (annot_targets === 'false') {
-      // reset targets
-      resetAnnotTargets();
-      dom.self.classList.remove('annot-move-mode');
-      config.cancel_move();
-    }
+  setNavState = function(nav_state) {//, annot_targets) {
+    //if (annot_targets === 'false') {
+    //  // reset targets
+    //  resetAnnotTargets();
+    //  dom.self.classList.remove('annot-move-mode');
+    //  config.cancel_move();
+    //}
 
     if (nav_state === state.self) {
       return;
