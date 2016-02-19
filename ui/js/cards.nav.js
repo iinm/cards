@@ -53,6 +53,9 @@ cards.nav = (function() {
     dom.annotator = dom.self.querySelector('.cards-nav-annotator');
     dom.target_indicator = dom.self.querySelector('.annot-target-indicator');
     dom.annot_trigger = dom.self.querySelector('.annot-trigger');
+
+    dom.content_etc = dom.self.querySelector('.nav-etc-wrapper');
+    dom.sign_out_trigger = dom.content_etc.querySelector('.sign-out');
   };
 
   configure = function(kv_map) {
@@ -225,6 +228,8 @@ cards.nav = (function() {
       if (input.length > 0) {
         dom.search_input.classList.add('not-empty');
         if (state.search_input !== input) {
+          // hide sign out trigger
+          dom.content_etc.classList.add('cards-util-hide');
           filterIndex(input);
           setTimeout(function() {
             if (state.search_input === input) {
@@ -239,6 +244,8 @@ cards.nav = (function() {
         state.search_input = '';
         filterIndex(null);
         config.search_model.search(null).then(function() {});
+        // show sign out trigger
+        dom.content_etc.classList.remove('cards-util-hide');
       }
     }, false);
 
@@ -250,6 +257,8 @@ cards.nav = (function() {
         state.search_input = '';
         filterIndex(null);
         config.search_model.search(null).then(function() {});
+        // show sign out trigger
+        dom.content_etc.classList.remove('cards-util-hide');
       },
       false
     );
