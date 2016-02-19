@@ -36,7 +36,7 @@ cards.nav = (function() {
   init, configure, setDomMap,
   setTitle, setNavState, onClickToggleNav,
   updateAnnotTrigger, setAnnotTarget, annotate, resetAnnotTargets,
-  filterIndex, filterAnnotIndex
+  filterIndex, filterAnnotIndex, onScroll
   ;  // var
 
   setDomMap = function(container) {
@@ -48,6 +48,8 @@ cards.nav = (function() {
     dom.search_input = dom.self.querySelector('.search-input');
     dom.annot_search_input = dom.self.querySelector('.annot-search-input');
     dom.content = dom.self.querySelector('.cards-nav-content');
+    dom.content_index = dom.content.querySelector('.nav-index-wrapper');
+    dom.content_search = dom.content.querySelector('.nav-search-wrapper');
     dom.annotator = dom.self.querySelector('.cards-nav-annotator');
     dom.target_indicator = dom.self.querySelector('.annot-target-indicator');
     dom.annot_trigger = dom.self.querySelector('.annot-trigger');
@@ -68,7 +70,7 @@ cards.nav = (function() {
       create_coll: config.create_coll,
       remove_editor_coll: config.remove_editor_coll
     });
-    dom.content.appendChild(view.index.render().el);
+    dom.content_index.appendChild(view.index.render().el);
 
     // render annotator's index
     view.annot_index = cards.view.annot_index.create(config.index);
@@ -86,7 +88,6 @@ cards.nav = (function() {
       cards.model.models.card
     );
 
-
     // render search result
     view.search = cards.view.search.create(config.search_model);
     view.search.configure({
@@ -103,7 +104,7 @@ cards.nav = (function() {
       },
       set_annot_target: setAnnotTarget
     });
-    dom.content.appendChild(view.search.render().el);
+    dom.content_search.appendChild(view.search.render().el);
 
     // set event handlers
     dom.nav_trigger.addEventListener('click', onClickToggleNav);
@@ -274,7 +275,29 @@ cards.nav = (function() {
       },
       false
     );
-  };
+
+    // load more cards when scroll to bottom
+    dom.content.addEventListener('scroll', onScroll, false);
+  };  // init
+
+  onScroll = function(event) {
+    // TODO: load more searched cards
+    //console.log(dom.content.scrollTop);
+    //console.log(dom.content.scrollHeight - dom.content.clientHeight);
+    if ((dom.content.scrollHeight - dom.content.clientHeight) - dom.content.scrollTop < 20) {
+      if (config.search_model.get('searching')
+          || config.search_model.get('fetched') !== 'partial'
+          || state.search_input !== config.search_model.get('query')
+         ) {
+        return;
+      }
+      console.log('load more search results');
+      dom.content.classList.add('loading-more');
+      config.search_model.search(state.search_input).then(function() {
+        dom.content.classList.remove('loading-more');
+      });
+    }
+  }
 
   filterIndex = function(keyword) {
     // Note: not efficient

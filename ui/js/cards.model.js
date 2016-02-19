@@ -200,15 +200,15 @@ cards.model = (function() {
         };
 
         promise = new Promise(function(resolve, reject) {
-          var last, last_id;
+          var last, last_card_id;
           last = self.get('cards').last();
-          last_id = (last ? last.get('id') : null);
+          last_card_id = (last ? last.get('id') : null);
           if (self.get('fetched') === 'all') {
               resolve();
           }
           else {
             console.log('fetch: ' + self.get('name'));
-            cards.fake.getCards(self.get('id'), last_id).then(
+            cards.fake.getCards(self.get('id'), last_card_id).then(
               function(card_array) {
                 add_cards(card_array);
                 if (card_array.length === 0 || self.get('type') === 'note') {
@@ -308,6 +308,7 @@ cards.model = (function() {
     base_model = cards.model_util.createModel(function() {
       return {
         searching: false,
+        fetched: null,  // if result is fetched; 'partial' or 'all'
         query: null,
         cards: cards.model_util.createCollection(models.card)
       };
@@ -319,31 +320,38 @@ cards.model = (function() {
       self.search = function(query) {
         var promise;
         promise = new Promise(function(resolve, reject) {
-          if (query === self.get('query')) {
-            resolve();
-          }
-          else if (query === null) {
+          var last, last_card_id;
+          last = self.get('cards').last();
+          last_card_id = (last ? last.get('id') : null);
+
+          if (query === null) {
             self.get('cards').reset();
             self.set({ query: query });
             resolve();
           }
+          else if (query === self.get('query') && self.get('fetched') === 'all') {
+            resolve();
+          }
           else {
+            if (query !== self.get('query')) {
+              self.get('cards').reset();
+              self.set({ fetched: null });
+            }
             self.set({ searching: true });
-            self.get('cards').reset();
-            cards.fake.search(query).then(function(data_array) {
-              self.set({ searching: false });
-              self.set({ query: query });
+            cards.fake.search(query, last_card_id).then(function(data_array) {
+              self.set({
+                searching: false, query: query,
+                fetched: ((data_array.length === 0) ? 'all' : 'partial')
+              });
               data_array.forEach(function(data_) {
                 var card = data.cards.get(data_.id);
-                if (card) {
-                  self.get('cards').add(card);
-                }
-                else {
-                  card = self.get('cards').create(data_);
+                if (!card) {
+                  card = data.cards.create(data_);
                   data_.coll_ids.forEach(function(coll_id) {
                     card.get('colls').add(data.index.get(coll_id));
                   });
                 }
+                self.get('cards').add(card);
               });
               resolve();
             });

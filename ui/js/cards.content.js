@@ -106,7 +106,6 @@ cards.content = (function() {
   };
 
   onScroll = function(event) {
-    // TODO: load more cards
     //console.log(dom.self.scrollTop);
     //console.log(dom.self.scrollHeight - dom.self.clientHeight);
     if ((dom.self.scrollHeight - dom.self.clientHeight) - dom.self.scrollTop < 20) {

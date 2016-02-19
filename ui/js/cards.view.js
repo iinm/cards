@@ -867,6 +867,7 @@ cards.view = (function() {
           self.el = cards.util.createElement(tmpl);
         }
 
+        // event handlers
         model.on('change:searching', onChangeState);
         model.get('cards').on('add', onAddItem);
         model.get('cards').on('remove', onRemoveItem);

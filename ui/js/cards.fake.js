@@ -287,7 +287,7 @@ cards.fake = (function() {
         if (last_card_id) {
           start_idx = card_array_.indexOf(cards_[last_card_id]) + 1;
         }
-        card_array_ = card_array_.slice(start_idx, start_idx + 5);
+        card_array_ = card_array_.slice(start_idx, start_idx + 10);
       }
       else {  // note
         colls[coll_id].card_ids.forEach(function(card_id) {
@@ -367,10 +367,10 @@ cards.fake = (function() {
     return promise;
   };
 
-  search = function(query) {
+  search = function(query, last_card_id) {
     var promise;
     promise = new Promise(function(resolve, reject) {
-      var i, result = [], card;
+      var i, result = [], card, start_idx = 0;
       query = query.toLowerCase();
       for (i = card_ids.length - 1; i >= 0; i--) {
         card = cards_[card_ids[i]];
@@ -380,6 +380,12 @@ cards.fake = (function() {
           result.push(card);
         }
       }
+      // simulate pagination
+      if (last_card_id) {
+        start_idx = result.indexOf(cards_[last_card_id]) + 1;
+      }
+      result = result.slice(start_idx, start_idx + 10);
+
       setTimeout(function() { resolve(result); }, 700);
     });
     return promise;

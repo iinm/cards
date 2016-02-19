@@ -25,6 +25,7 @@
   font-size: 1.5em;
   line-height: 1.5em;
   text-align: center;
+  color: #888;
 }
 
 .cards-content.init-loading .loading {
