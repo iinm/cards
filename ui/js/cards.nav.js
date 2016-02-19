@@ -306,7 +306,7 @@ cards.nav = (function() {
         dom.content.classList.remove('loading-more');
       });
     }
-  }
+  };
 
   filterIndex = function(keyword) {
     // Note: not efficient
