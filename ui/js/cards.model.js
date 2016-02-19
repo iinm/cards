@@ -174,7 +174,7 @@ cards.model = (function() {
         name: '',
         annot_check: null,  // used by annotator, 'checked' or 'partial'
         cards: cards.model_util.createCollection(models.card),
-        fetched: false,
+        fetched: null,  // save last fetched card id
         match_search_input: null,
         match_annot_search_input: null
       };
@@ -197,18 +197,29 @@ cards.model = (function() {
             }
             self.get('cards').add(card);
           });
-          self.set({ fetched: true });
         };
 
         promise = new Promise(function(resolve, reject) {
-          if (self.get('fetched')) {
-            return;
+          var last, last_id;
+          last = self.get('cards').last();
+          last_id = (last ? last.get('id') : null);
+          if (self.get('fetched') === 'all') {
+              resolve();
           }
-          console.log('fetch: ' + self.get('name'));
-          cards.fake.getCards(self.get('id')).then(function(card_array) {
-            add_cards(card_array);
-            resolve();
-          });
+          else {
+            console.log('fetch: ' + self.get('name'));
+            cards.fake.getCards(self.get('id'), last_id).then(
+              function(card_array) {
+                add_cards(card_array);
+                if (card_array.length === 0 || self.get('type') === 'note') {
+                  self.set({ fetched: 'all' });
+                } else {
+                  self.set({ fetched: 'partial' });
+                }
+                resolve();
+              }
+            );
+          }
         });
 
         return promise;

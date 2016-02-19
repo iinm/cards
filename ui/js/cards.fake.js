@@ -267,19 +267,27 @@ cards.fake = (function() {
     return promise;
   };
 
-  getCards = function(coll_id) {
+  getCards = function(coll_id, last_card_id) {
     var promise;
     promise = new Promise(function(resolve, reject) {
-      var i, card_array_ = [];
+      var i, card_array_ = [], start_idx = 0;
       if (coll_id === 'special:all' || colls[coll_id].type === 'tag') {
         for (i = 0; i < card_ids.length; i++) {
           if (coll_id === 'special:all'
               || cards_[card_ids[i]].coll_ids.indexOf(coll_id) > -1
              ) {
             card_array_.push(cards_[card_ids[i]]);
+            if (last_card_id === card_ids[i]) {
+              start_idx = card_array_.length;
+            }
           }
         }
         card_array_.reverse();
+        // simulate pagination
+        if (last_card_id) {
+          start_idx = card_array_.indexOf(cards_[last_card_id]) + 1
+        }
+        card_array_ = card_array_.slice(start_idx, start_idx + 5);
       }
       else {  // note
         colls[coll_id].card_ids.forEach(function(card_id) {

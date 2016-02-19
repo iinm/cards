@@ -18,7 +18,8 @@ cards.content = (function() {
 
   state = {
     coll: null,  // cards.model.models.coll
-    card_id2view: {}
+    card_id2view: {},
+    loading: false
   },
 
   dom = {},
@@ -38,7 +39,7 @@ cards.content = (function() {
     dom.cards = dom.self.querySelector('.cards-content-cards');
     // event handler
     // load more cards when scroll to bottom
-    //dom.self.addEventListener('scroll', onScroll, false);
+    dom.self.addEventListener('scroll', onScroll, false);
     //dom.self.removeEventListener('scroll', onScroll);
 
   }; 
@@ -94,9 +95,11 @@ cards.content = (function() {
       }
     }
     else {
+      state.loading = true;
       dom.self.classList.add('init-loading');
       state.coll.fetch_cards().then(function() {
         dom.self.scrollTop = 0;
+        state.loading = false;
         dom.self.classList.remove('init-loading');
       });
     }
@@ -106,6 +109,18 @@ cards.content = (function() {
     // TODO: load more cards
     //console.log(dom.self.scrollTop);
     //console.log(dom.self.scrollHeight - dom.self.clientHeight);
+    if ((dom.self.scrollHeight - dom.self.clientHeight) - dom.self.scrollTop < 20) {
+      if (state.loading || state.coll.get('fetched') === 'all') {
+        return;
+      }
+      console.log('load more');
+      state.loading = true;
+      dom.self.classList.add('loading');
+      state.coll.fetch_cards().then(function() {
+        state.loading = false;
+        dom.self.classList.remove('loading');
+      });
+    }
   };
 
   onAddItem = function(card, idx) {
@@ -139,7 +154,7 @@ cards.content = (function() {
     //card_el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     if (idx === 0) {
       dom.self.scrollTop = 0;
-    } else if ((typeof idx) !== 'number') {
+    } else if ((typeof idx) !== 'number' && state.coll.get('type') === 'note') {
       card_el.scrollIntoView();
     }
     setTimeout(function() { card_el.classList.add('blink'); }, 300);

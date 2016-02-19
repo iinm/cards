@@ -109,7 +109,7 @@ cards.model_util = (function() {
     var
     config = { model: model, on: {} },
     data = { instances: {}, instance_ids: [] },
-    get, at, len, each, indexOf,
+    get, at, len, each, indexOf, last,
     add, create, remove, reset,  // fetch
     clone, as_array,
     on, off
@@ -134,6 +134,12 @@ cards.model_util = (function() {
     //indexOf = data.instance_ids.indexOf;
     indexOf = function(instance_id) {
       return data.instance_ids.indexOf(instance_id);
+    };
+
+    last = function() {
+      return data.instances[
+        data.instance_ids[data.instance_ids.length - 1]
+      ];
     };
 
     add = function(instance, idx) {
@@ -221,7 +227,7 @@ cards.model_util = (function() {
     };
 
     return {
-      get: get, at: at, len: len, each: each, indexOf: indexOf,
+      get: get, at: at, len: len, each: each, indexOf: indexOf, last: last,
       clone: clone, as_array: as_array,
       add: add, create: create, remove: remove, reset: reset,
       on: on, off: off
