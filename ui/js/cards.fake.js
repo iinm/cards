@@ -209,6 +209,7 @@ cards.fake = (function() {
           coll.card_ids.push(data_.id);
         }
       });
+      // TODO: update index item order; updated first
 
       setTimeout(function() { resolve(data_); }, 700);
     });
