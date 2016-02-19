@@ -91,6 +91,7 @@ cards.util = (function() {
       }
     }
     window.location.hash = '#' + kvs.join('&');
+    //window.location.replace(window.location.pathname + '#' + kvs.join('&'));
   };
 
   // https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise

@@ -103,7 +103,6 @@ cards.editor = (function() {
     dom.content_body.innerHTML = data.draft.get('body');
     renderMeta();
     config.set_editor_anchor('opened');
-    console.log('editor opened');
 
     data.draft.get('colls').on('add', renderMeta);
     data.draft.get('colls').on('remove', renderMeta);

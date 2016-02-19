@@ -84,12 +84,15 @@ cards.nav = (function() {
     view.search = cards.view.search.create(config.search_model);
     view.search.configure({
       set_edit_target: function(card) {
+        // TODO: check
+        // anchorを続けて変更すると，hashchangeを捉えられない．
+        // とりあえずsetTimeoutを使うが，どうにかすべき．
         config.set_edit_target(card);
-        // TODO: close nav
-        //config.set_nav_anchor(
-        //  cards.util.cloneUpdateObj(state, { self: 'closed' })
-        //);
-        //console.log('nav closed');
+        setTimeout(function() {
+          config.set_nav_anchor(
+            cards.util.cloneUpdateObj(state, { self: 'closed' })
+          );
+        }, 100);
       },
       set_annot_target: setAnnotTarget
     });
