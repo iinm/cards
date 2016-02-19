@@ -18,7 +18,7 @@ cards.fake = (function() {
     'card_01', 'card_02', 'card_03', 'card_04', 'card_05', 'card_06', 'card_07',
     'card_08', 'card_09', 'card_10', 'card_11', 'card_12', 'card_13', 'card_14',
     'card_15', 'card_16', 'card_17', 'card_18', 'card_19', 'card_20', 'card_21',
-    'card_23', 'card_24', 'card_22'
+    'card_23', 'card_24', 'card_26', 'card_25', 'card_22'
   ];
   num_card = card_ids.length;
   cards_ = {
@@ -164,6 +164,18 @@ cards.fake = (function() {
       body: 'Tag, Noteを使うことで，Cardをグループ化することが出来ます．<br>Tagはその名の通り，Cardをグループ化するだけですが，NoteはCardの順序を保存します．',
       id: 'card_24',
       coll_ids: ['note_01']
+    },
+    card_25: {
+      title: 'Warning!',
+      body: 'これはCardsのデモ版です．ページをリロードすると，変更が破棄されます．',
+      id: 'card_25',
+      coll_ids: []
+    },
+    card_26: {
+      title: 'ホーム画面に追加',
+      body: 'ブラウザのメニューから「ホーム画面に追加」すると，画面を広く使えます．',
+      id: 'card_26',
+      coll_ids: ['note_01']
     }
   };
 
@@ -181,7 +193,7 @@ cards.fake = (function() {
     tag_06: { name: 'Star Wars', id: 'tag_06', type: 'tag' },
     note_01: {
       name: 'Cards Help', id: 'note_01', type: 'note',
-      card_ids: ['card_22', 'card_23', 'card_24']
+      card_ids: ['card_22', 'card_23', 'card_24', 'card_26']
     },
     note_02: {
       name: 'Rails cheat sheet', id: 'note_02', type: 'note',
