@@ -262,7 +262,8 @@ cards.model = (function() {
             } else {  // new coll
               coll = self;
               coll.set(data_);
-              data.index.add(self, 0);
+              //data.index.add(self, 0);  // bring top
+              data.index.add(self);  // append
             }
             //
             resolve(coll);
