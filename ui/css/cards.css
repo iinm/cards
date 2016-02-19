@@ -141,6 +141,7 @@ strong {
 .cards-item .item-check-trigger {
   top: 0;
 }
+.cards-nav.annot-trigger-opened .cards-item .item-edit-trigger,
 .cards-content.annot-move-mode .cards-item .item-check-trigger,
 .cards-content.annot-move-mode .cards-item .item-edit-trigger {
   display: none;
