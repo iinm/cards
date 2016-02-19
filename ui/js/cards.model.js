@@ -145,7 +145,9 @@ cards.model = (function() {
             self.get('colls').each(function(coll) {
               coll.get('cards').remove(card_id);
             });
+            // remove from special colls
             data.index.get('special:all').get('cards').remove(card_id);
+            data.search.get('cards').remove(card_id);
             data.cards.remove(card_id);
 
             resolve(self);
