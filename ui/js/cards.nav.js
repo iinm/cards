@@ -321,13 +321,18 @@ cards.nav = (function() {
   };
 
   setAnnotTarget = function(card) {
+    var num_targets = state.annot_targets.len();
     if (card.get('checked')) {
       // use clone
       state.annot_targets.add(card.clone());
-      //config.set_nav_anchor(state);
+      if (num_targets === 0) {
+        config.set_nav_anchor(state);
+      }
     } else {
       state.annot_targets.remove(card.get('id'));
-      //config.set_nav_anchor(state);
+      if (num_targets === 1 && state.annot_targets.len() === 0) {
+        config.set_nav_anchor(state);
+      }
     }
   };
 
@@ -353,13 +358,13 @@ cards.nav = (function() {
     config.set_nav_anchor(new_state);
   };
 
-  setNavState = function(nav_state) {//, annot_targets) {
-    //if (annot_targets === 'false') {
-    //  // reset targets
-    //  resetAnnotTargets();
-    //  dom.self.classList.remove('annot-move-mode');
-    //  config.cancel_move();
-    //}
+  setNavState = function(nav_state, annot_selected) {
+    if (annot_selected === 'false' && state.annot_targets.len() > 0) {
+      // reset targets
+      resetAnnotTargets();
+      dom.self.classList.remove('annot-move-mode');
+      config.cancel_move();
+    }
 
     if (nav_state === state.self) {
       return;

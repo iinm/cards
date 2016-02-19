@@ -34,7 +34,7 @@ cards.shell = (function() {
   setNavAnchor = function(nav_state) {
     changeAnchorPart({
       nav: nav_state.self,
-      //annot_targets: (nav_state.annot_targets.len() > 0 ? 'true' : 'false'),
+      annot_selected: (nav_state.annot_targets.len() > 0 ? 'true' : 'false'),
       q: nav_state.search_input
     });
   };
@@ -66,10 +66,10 @@ cards.shell = (function() {
       valid = false;
       anchor_map.nav = 'closed';
     }
-    //if (['true', 'false'].indexOf(anchor_map.annot_targets) === -1) {
-    //  valid = false;
-    //  anchor_map.annot_targets = 'false';
-    //}
+    if (['true', 'false'].indexOf(anchor_map.annot_selected) === -1) {
+      valid = false;
+      anchor_map.annot_selected = 'false';
+    }
     if (['opened', 'closed'].indexOf(anchor_map.editor) === -1) {
       valid = false;
       anchor_map.editor = 'closed';
@@ -83,7 +83,7 @@ cards.shell = (function() {
       changeAnchorPart(anchor_map);
     }
 
-    cards.nav.setNavState(anchor_map.nav);//, anchor_map.annot_targets);
+    cards.nav.setNavState(anchor_map.nav, anchor_map.annot_selected);
     cards.editor.setEditorState(anchor_map.editor);
     current_coll = data.index.get(anchor_map.content);
     cards.content.setColl(current_coll);
