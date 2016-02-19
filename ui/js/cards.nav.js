@@ -24,8 +24,10 @@ cards.nav = (function() {
 
   state = {
     self: 'closed',
+    before_annot: null,
     search_input: '',
-    annot_targets: null
+    annot_targets: null,  // for clone
+    annot_targets_: null  // for real model
   },
 
   dom = {},
@@ -73,12 +75,17 @@ cards.nav = (function() {
     view.annot_index.configure({ create_coll: config.create_coll });
     dom.annotator.appendChild(view.annot_index.render().el);
 
-    // init annot targets
+    // init annot targets (clone)
     state.annot_targets = cards.model_util.createCollection(
       cards.model.models.card
     );
     state.annot_targets.on('add', updateAnnotTrigger);
     state.annot_targets.on('remove', updateAnnotTrigger);
+    // for real model
+    state.annot_targets_ = cards.model_util.createCollection(
+      cards.model.models.card
+    );
+
 
     // render search result
     view.search = cards.view.search.create(config.search_model);
@@ -118,8 +125,12 @@ cards.nav = (function() {
       Promise.all(promises).then(function(card_array) {
         dom.self.classList.remove('annot-saving');
         config.set_nav_anchor(
-          cards.util.cloneUpdateObj(state, { self: 'closed' })
+          cards.util.cloneUpdateObj(state, { self: state.before_annot })
         );
+        // clear annot search input
+        dom.annot_search_input.value = '';
+        dom.annot_search_input.classList.remove('not-empty');
+        filterAnnotIndex(null);
       });
     }, false);
 
@@ -311,19 +322,18 @@ cards.nav = (function() {
   };
 
   resetAnnotTargets = function() {
-    var coll = config.get_current_coll(), card_id;
     // Note: cards in annot_targets is clones
-    while (state.annot_targets.len() > 0) {
-      //state.annot_targets.at(0).set({ checked: false });
-      card_id = state.annot_targets.at(0).get('id');
-      coll.get('cards').get(card_id).set({ checked: false });
-    }
+    state.annot_targets_.as_array().forEach(function(card) {
+      card.set({ checked: false });
+      state.annot_targets_.remove(card.get('id'));
+    });
   };
 
   setAnnotTarget = function(card) {
     var num_targets = state.annot_targets.len();
     if (card.get('checked')) {
       // use clone
+      state.annot_targets_.add(card);
       state.annot_targets.add(card.clone());
       if (num_targets === 0) {
         config.set_nav_anchor(state);
@@ -338,6 +348,8 @@ cards.nav = (function() {
 
   annotate = function(cards_, annot_type) {
     view.annot_index.setState(cards_, annot_type);
+    // to back to index (index) or content (closed)
+    state.before_annot = state.self;
     config.set_nav_anchor(
       cards.util.cloneUpdateObj(state, { self: 'annot' })
     );
