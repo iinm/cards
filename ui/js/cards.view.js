@@ -145,6 +145,12 @@ cards.view = (function() {
         var match = model.get('match_search_input');
         if (match === null || match === true) {
           self.el.classList.remove('cards-util-hide');
+          if (match === true) {
+            self.el.classList.add('blink');
+            setTimeout(function() {
+              self.el.classList.remove('blink');
+            }, 300);
+          }
         } else if (match === false) {
           self.el.classList.add('cards-util-hide');
         }
@@ -496,6 +502,12 @@ cards.view = (function() {
         var match = model.get('match_annot_search_input');
         if (match === null || match === true) {
           self.el.classList.remove('cards-util-hide');
+          if (match === true) {
+            self.el.classList.add('blink');
+            setTimeout(function() {
+              self.el.classList.remove('blink');
+            }, 300);
+          }
         } else if (match === false) {
           self.el.classList.add('cards-util-hide');
         }
