@@ -22,12 +22,18 @@ cards.gdrive = (function() {
        'https://www.googleapis.com/auth/drive'
        //'https://www.googleapis.com/auth/drive.appdata'
     ],
+    app_folder_name: 'iinm.github.io/cards',
+    app_folder_id: null,
+    cards_folder_id: null,
+    colls_folder_id: null
   },
   dom = {},
 
-  init, initApp, checkAuth, handleAuthResult,
+  init, initApp,
+  checkAuth, handleAuthResult,
   listFiles, getFile, downloadFile,
-  createFolder, saveFile, updateFile, trashFile
+  createFolder, saveFile, updateFile, trashFile,
+  createAppFolders
   ;
 
   initApp = function() { cards.init(dom.app); };
@@ -272,10 +278,16 @@ cards.gdrive = (function() {
   // ----------------------------------------------------------------------
   // End Google Drive API
 
+  //
+  createAppFolders = function() {
+    // TODO: create or check app folders and set folder ids
+  };
+
   return {
     init: init,
     // expose to test
     listFiles: listFiles, getFile: getFile, downloadFile: downloadFile,
-    createFolder: createFolder, saveFile: saveFile, trashFile: trashFile
+    createFolder: createFolder, saveFile: saveFile, trashFile: trashFile,
+    createAppFolders: createAppFolders
   };
 }());
