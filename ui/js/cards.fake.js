@@ -185,12 +185,32 @@ cards.fake = (function() {
   ];
   num_coll = coll_ids.length;
   colls = {
-    tag_01: { name: 'HTML', id: 'tag_01', type: 'tag' },
-    tag_02: { name: 'CSS', id: 'tag_02', type: 'tag' },
-    tag_03: { name: 'JavaScript', id: 'tag_03', type: 'tag' },
-    tag_04: { name: 'Ruby', id: 'tag_04', type: 'tag' },
-    tag_05: { name: 'Rails', id: 'tag_05', type: 'tag' },
-    tag_06: { name: 'Star Wars', id: 'tag_06', type: 'tag' },
+    tag_01: {
+      name: 'HTML', id: 'tag_01', type: 'tag',
+      card_ids: ['card_12']
+    },
+    tag_02: {
+      name: 'CSS', id: 'tag_02', type: 'tag',
+      card_ids: ['card_12', 'card_11', 'card_10', 'card_09', 'card_08']
+    },
+    tag_03: {
+      name: 'JavaScript', id: 'tag_03', type: 'tag',
+      card_ids: ['card_10']
+    },
+    tag_04: {
+      name: 'Ruby', id: 'tag_04', type: 'tag', card_ids: []
+    },
+    tag_05: {
+      name: 'Rails', id: 'tag_05', type: 'tag',
+      card_ids: ['card_21', 'card_20', 'card_19', 'card_18', 'card_17']
+    },
+    tag_06: {
+      name: 'Star Wars', id: 'tag_06', type: 'tag',
+      card_ids: [
+        'card_07', 'card_06', 'card_05', 'card_04', 'card_03',
+        'card_02', 'card_01'
+      ]
+    },
     note_01: {
       name: 'Cards Help', id: 'note_01', type: 'note',
       card_ids: ['card_22', 'card_23', 'card_24', 'card_26']
@@ -275,26 +295,25 @@ cards.fake = (function() {
   getCards = function(coll_id, last_card_id) {
     var promise;
     promise = new Promise(function(resolve, reject) {
-      var i, card_array_ = [], start_idx = 0;
-      if (coll_id === 'special:all' || colls[coll_id].type === 'tag') {
-        for (i = 0; i < card_ids.length; i++) {
-          if (coll_id === 'special:all'
-              || cards_[card_ids[i]].coll_ids.indexOf(coll_id) > -1
-             ) {
-            card_array_.push(cards_[card_ids[i]]);
-          }
-        }
+      var card_id, card_array_ = [], start_idx = 0;
+
+      if (coll_id === 'special:all') {
+        card_ids.forEach(function(card_id) {
+          card_array_.push(cards_[card_id]);
+        });
         card_array_.reverse();
-        // simulate pagination
+      }
+      else {  // tag or note
+        colls[coll_id].card_ids.forEach(function(card_id) {
+          card_array_.push(cards_[card_id]);
+        });
+      }
+      // simulate pagination
+      if (coll_id === 'special:all' || colls[coll_id].type === 'tag') {
         if (last_card_id) {
           start_idx = card_array_.indexOf(cards_[last_card_id]) + 1;
         }
         card_array_ = card_array_.slice(start_idx, start_idx + 10);
-      }
-      else {  // note
-        colls[coll_id].card_ids.forEach(function(card_id) {
-          card_array_.push(cards_[card_id]);
-        });
       }
 
       setTimeout(function() { resolve(card_array_); }, 700);
@@ -333,11 +352,14 @@ cards.fake = (function() {
       }
       cards_[data_.id] = data_;
 
-      // update notes
+      // update coll
       data_.coll_ids.forEach(function(coll_id) {
         var coll = colls[coll_id];
         if (coll.type === 'note' && coll.card_ids.indexOf(data_.id) === -1) {
           coll.card_ids.push(data_.id);
+        }
+        else if (coll.type === 'tag' && coll.card_ids.indexOf(data_.id) === -1 ) {
+          coll.card_ids.splice(0, 0, data_.id);
         }
       });
       // TODO: update index item order; updated first
@@ -352,12 +374,10 @@ cards.fake = (function() {
     promise = new Promise(function(resolve, reject) {
       var idx = card_ids.indexOf(card_id);
       if (idx > -1) {
-        // update note
+        // update coll
         cards_[card_id].coll_ids.forEach(function(coll_id) {
           var coll = colls[coll_id];
-          if (coll.type === 'note') {
-            coll.card_ids.splice(coll.card_ids.indexOf(card_id), 1);
-          }
+          coll.card_ids.splice(coll.card_ids.indexOf(card_id), 1);
         });
         // delete self
         card_ids.splice(idx, 1);
