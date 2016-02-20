@@ -1,3 +1,10 @@
+/*
+  references:
+    - https://developers.google.com/drive/v2/reference/files
+    - https://developers.google.com/drive/v3/reference/files
+    - https://developers.google.com/drive/v3/web/quickstart/js
+*/
+
 /*jslint         browser : true, continue : true,
   devel  : true, indent  : 2,    maxerr   : 50,
   newcap : true, nomen   : true, plusplus : true,
@@ -105,7 +112,6 @@ cards.gdrive = (function() {
     if (!params.fields) params.fields = "nextPageToken, files(id, name)";
     if (!params.pageSize) params.pageSize = 10;
     var request = gapi.client.drive.files.list(params);
-
     request.execute(function(resp) {
       console.log('listFiles:');
       resp.files.forEach(function(file) {
@@ -116,6 +122,7 @@ cards.gdrive = (function() {
 
   getFile = function(file_id) {
     var promise = new Promise(function(resolve, reject) {
+      // Note: v3だと，download用のリンクが取れない
       var request = gapi.client.request({
         path: '/drive/v2/files/' + file_id, method: 'GET',
       });
@@ -150,8 +157,25 @@ cards.gdrive = (function() {
     return promise;
   };
 
-  createFolder = function() {
+  createFolder = function(name, parent_ids) {
     var promise = new Promise(function(resolve, reject) {
+      var request = gapi.client.request({
+        path: '/drive/v3/files',
+        method: 'POST',
+        params: { uploadType: 'multipart'},
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: name,
+          mimeType: 'application/vnd.google-apps.folder',
+          parents: parent_ids
+        })
+      });
+      request.execute(function(file) {
+        console.log('create folder', file);
+        resolve(file);
+      });
     });
     return promise;
   };
