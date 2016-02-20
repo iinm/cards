@@ -277,9 +277,6 @@ cards.fake = (function() {
               || cards_[card_ids[i]].coll_ids.indexOf(coll_id) > -1
              ) {
             card_array_.push(cards_[card_ids[i]]);
-            if (last_card_id === card_ids[i]) {
-              start_idx = card_array_.length;
-            }
           }
         }
         card_array_.reverse();

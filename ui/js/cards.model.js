@@ -95,8 +95,11 @@ cards.model = (function() {
                ) {
               // Note: when body is changed, bring card to the top of coll
               // add card to coll
-              idx = ((coll.get('type') === 'tag') ? 0 : null);
-              coll.get('cards').add(card, idx);
+              if (coll.get('fetched')) {
+                // Note: fetchしてないのに追加すると，fetchした時にレンダリングされない
+                idx = ((coll.get('type') === 'tag') ? 0 : null);
+                coll.get('cards').add(card, idx);
+              }
               // add coll to card
               card.get('colls').add(coll);
             }
