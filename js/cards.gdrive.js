@@ -31,7 +31,10 @@ cards.gdrive = (function() {
   checkAuth, handleAuthResult,
   listFiles, getFile, downloadFile,
   createFolder, saveFile, updateFile, trashFile, deleteFile,
-  createAppFolders
+  createAppFolders,
+  // TODO
+  getColls, getCards, saveColl, saveCard, deleteColl, deleteCard,
+  searchCards
   ;
 
   initApp = function() {
