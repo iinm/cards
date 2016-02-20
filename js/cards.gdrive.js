@@ -22,8 +22,6 @@ cards.gdrive = (function() {
        //'https://www.googleapis.com/auth/drive'
        'https://www.googleapis.com/auth/drive.appdata'
     ],
-    app_folder_name: 'iinm.github.io/cards',
-    app_folder_id: null,
     cards_folder_id: null,
     colls_folder_id: null
   },
@@ -32,7 +30,7 @@ cards.gdrive = (function() {
   init, initApp,
   checkAuth, handleAuthResult,
   listFiles, getFile, downloadFile,
-  createFolder, saveFile, updateFile, trashFile,
+  createFolder, saveFile, updateFile, trashFile, deleteFile,
   createAppFolders
   ;
 
@@ -280,6 +278,20 @@ cards.gdrive = (function() {
   trashFile = function(file_id, content) {
     return saveFile({ trashed: true }, content, file_id);
   };
+
+  deleteFile = function(file_id) {
+    var promise = new Promise(function(resolve, reject) {
+      var request = gapi.client.request({
+        path: '/drive/v3/files/' + file_id,
+        method: 'DELETE',
+      });
+      request.execute(function(resp) {
+        console.log('deleteFile:', resp);
+        resolve(resp);
+      });
+    });
+    return promise;
+  };
   // ----------------------------------------------------------------------
   // End Google Drive API
 
@@ -293,6 +305,7 @@ cards.gdrive = (function() {
     // expose to test
     listFiles: listFiles, getFile: getFile, downloadFile: downloadFile,
     createFolder: createFolder, saveFile: saveFile, trashFile: trashFile,
+    deleteFile: deleteFile,
     createAppFolders: createAppFolders
   };
 }());
