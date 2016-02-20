@@ -34,7 +34,12 @@ cards.gdrive = (function() {
   createAppFolders
   ;
 
-  initApp = function() { cards.init(dom.app); };
+  initApp = function() {
+    createAppFolders().then(function() {
+      // TODO: load colls
+      cards.init(dom.app);
+    });
+  };
 
   init = function() {
     // set dom map
@@ -92,9 +97,10 @@ cards.gdrive = (function() {
       localStorage.google_oauth_token = JSON.stringify(authResult);
       // Hide auth UI, then load client library.
       dom.greeting.classList.add('hide');
-      gapi.client.load('drive', 'v3');
-      // init App
-      initApp();
+      gapi.client.load('drive', 'v3', function() {
+        // init App
+        initApp();
+      });
     } else {
       // Show auth UI, allowing the user to initiate authorization by
       dom.greeting.classList.remove('hide');
