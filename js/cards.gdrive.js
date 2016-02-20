@@ -109,11 +109,17 @@ cards.gdrive = (function() {
     //  pageToken: pageToken
     //}
     // set default
-    if (!params.fields) params.fields = "nextPageToken, files(id, name)";
+    // https://developers.google.com/drive/v3/reference/files#resource
+    if (!params.fields) {
+      params.fields = (
+        "nextPageToken, " +
+        "files(id, name, createdTime, modifiedTime)"
+      );
+    }
     if (!params.pageSize) params.pageSize = 10;
     var request = gapi.client.drive.files.list(params);
     request.execute(function(resp) {
-      console.log('listFiles:');
+      console.log('listFiles:', resp);
       resp.files.forEach(function(file) {
         console.log('found:', file);
       });
@@ -122,9 +128,12 @@ cards.gdrive = (function() {
 
   getFile = function(file_id) {
     var promise = new Promise(function(resolve, reject) {
-      // Note: v3だと，download用のリンクが取れない
       var request = gapi.client.request({
-        path: '/drive/v2/files/' + file_id, method: 'GET',
+        path: '/drive/v3/files/' + file_id,
+        method: 'GET',
+        params: {
+          fields: "id, name, createdTime, modifiedTime"
+        }
       });
       request.execute(function(file) {
         console.log('getFile:', file);
@@ -134,28 +143,44 @@ cards.gdrive = (function() {
     return promise;
   };
 
-  downloadFile = function(file) {
-    //cards.gdrive.getFile(file_id).then(cards.gdrive.downloadFile).then()
+  downloadFile = function(file_id) {
+    // https://developers.google.com/drive/v3/web/manage-downloads
     var promise = new Promise(function(resolve, reject) {
-      if (file.downloadUrl) {
-        var access_token, xhr;
-        access_token = gapi.auth.getToken().access_token;
-        xhr = new XMLHttpRequest();
-        xhr.open('GET', file.downloadUrl);
-        xhr.setRequestHeader('Authorization', 'Bearer ' + access_token);
-        xhr.onload = function() {
-          resolve(xhr.responseText);
-        };
-        xhr.onerror = function() {
-          reject(null);
-        };
-        xhr.send();
-      } else {
-        resolve(null);
-      }
+      var request = gapi.client.request({
+        path: '/drive/v3/files/' + file_id + '?alt=media',
+        method: 'GET',
+      });
+      request.execute(function(jsonResp, rawResp) {
+        var data = JSON.parse(rawResp).gapiRequest.data.body;
+        console.log('getFile:', data);
+        resolve(data);
+      });
     });
     return promise;
   };
+
+  //downloadFile = function(file) {
+  //  //cards.gdrive.getFile(file_id).then(cards.gdrive.downloadFile).then()
+  //  var promise = new Promise(function(resolve, reject) {
+  //    if (file.webContentLink) {
+  //      var access_token, xhr;
+  //      access_token = gapi.auth.getToken().access_token;
+  //      xhr = new XMLHttpRequest();
+  //      xhr.open('GET', file.webContentLink);
+  //      xhr.setRequestHeader('Authorization', 'Bearer ' + access_token);
+  //      xhr.onload = function() {
+  //        resolve(xhr.responseText);
+  //      };
+  //      xhr.onerror = function() {
+  //        reject(null);
+  //      };
+  //      xhr.send();
+  //    } else {
+  //      resolve(null);
+  //    }
+  //  });
+  //  return promise;
+  //};
 
   createFolder = function(name, parent_ids) {
     var promise = new Promise(function(resolve, reject) {
@@ -222,7 +247,10 @@ cards.gdrive = (function() {
       request = gapi.client.request({
         path: '/upload/drive/v3/files',
         method: 'POST',
-        params: { uploadType: 'multipart' },
+        params: {
+          uploadType: 'multipart',
+          fields: "id, name, createdTime, modifiedTime"
+        },
         headers: {
           'Content-Type': 'multipart/mixed; boundary="' + boundary + '"'
         },
@@ -230,7 +258,7 @@ cards.gdrive = (function() {
       });
 
       request.execute(function(file) {
-        console.log('createFile', file);
+        console.log('createFile:', file);
         resolve(file);
       });
     });
