@@ -295,7 +295,8 @@ cards.model = (function() {
           cards.fake.deleteColl(self.get('id')).then(function(coll_id) {
             self.destroy_();
             // update models
-            // TODO: check
+            // Note: fetchされていないと，special:allが更新されないので，
+            // data.cardsから更新する
             //self.get('cards').each(function(card) {
             data.cards.each(function(card) {
               card.get('colls').remove(coll_id);

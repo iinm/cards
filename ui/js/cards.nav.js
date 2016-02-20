@@ -95,7 +95,7 @@ cards.nav = (function() {
     view.search = cards.view.search.create(config.search_model);
     view.search.configure({
       set_edit_target: function(card) {
-        // TODO: check
+        // TODO
         // anchorを続けて変更すると，hashchangeを捉えられない．
         // とりあえずsetTimeoutを使うが，どうにかすべき．
         config.set_edit_target(card);
@@ -290,7 +290,6 @@ cards.nav = (function() {
   };  // init
 
   onScroll = function(event) {
-    // TODO: load more searched cards
     //console.log(dom.content.scrollTop);
     //console.log(dom.content.scrollHeight - dom.content.clientHeight);
     if ((dom.content.scrollHeight - dom.content.clientHeight) - dom.content.scrollTop < 20) {

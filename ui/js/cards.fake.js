@@ -213,6 +213,11 @@ cards.fake = (function() {
     }
   };
 
+  // TODO
+  // tagging = [
+  //   ['card_', 'coll_'], ...
+  // ];
+
   getCollections = function() {
     var promise;
     promise = new Promise(function(resolve, reject) {
