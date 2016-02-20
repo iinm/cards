@@ -114,22 +114,26 @@ cards.gdrive = (function() {
     //}
     // set default
     // https://developers.google.com/drive/v3/reference/files#resource
-    params = params || {};
-    params.spaces = ['appDataFolder'];
-    if (!params.fields) {
-      params.fields = (
-        "nextPageToken, " +
-        "files(id, name, createdTime, modifiedTime)"
-      );
-    }
-    if (!params.pageSize) params.pageSize = 10;
-    var request = gapi.client.drive.files.list(params);
-    request.execute(function(resp) {
-      console.log('listFiles:', resp);
-      resp.files.forEach(function(file) {
-        console.log('found:', file);
+    var promise = new Promise(function(resolve, reject) {
+      params = params || {};
+      params.spaces = ['appDataFolder'];
+      if (!params.fields) {
+        params.fields = (
+          "nextPageToken, " +
+            "files(id, name, createdTime, modifiedTime)"
+        );
+      }
+      if (!params.pageSize) params.pageSize = 10;
+      var request = gapi.client.drive.files.list(params);
+      request.execute(function(resp) {
+        console.log('listFiles:', resp);
+        resp.files.forEach(function(file) {
+          console.log('found:', file);
+        });
+        resolve(resp);
       });
     });
+    return promise;
   };
 
   getFile = function(file_id) {
@@ -298,6 +302,7 @@ cards.gdrive = (function() {
   //
   createAppFolders = function() {
     // TODO: create or check app folders and set folder ids
+    //listFiles({q:"name = 'colls' or name = 'cards'"})
   };
 
   return {
