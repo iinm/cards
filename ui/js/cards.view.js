@@ -591,7 +591,11 @@ cards.view = (function() {
           state.target.each(function(card) {
             card.get('colls').add(coll);
           });
-        } else {
+        }
+        else if (coll.get('annot_check') === 'partial') {
+          //
+        }
+        else {
           delete state.checked_colls[coll.get('id')];
           state.target.each(function(card) {
             if (card.get('colls').get(coll.get('id'))) {
