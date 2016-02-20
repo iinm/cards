@@ -56,7 +56,7 @@ cards.content = (function() {
     }
 
     state.coll = coll;
-    console.log(state.coll.get('name'));
+    console.log('content:', state.coll.get('id'), state.coll.get('name'));
     state.coll.get('cards').on('add', onAddItem);
     state.coll.get('cards').on('remove', onRemoveItem);
     state.coll.on('change:name', renderNoScroll);

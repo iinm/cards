@@ -214,7 +214,7 @@ cards.model = (function() {
               resolve();
           }
           else {
-            console.log('fetch: ' + self.get('name'));
+            console.log('fetch: ' + self.get('name'), last_card_id);
             cards.fake.getCards(self.get('id'), last_card_id).then(
               function(card_array) {
                 add_cards(card_array);
