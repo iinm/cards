@@ -18,7 +18,9 @@ cards.gdrive = (function() {
   },
   dom = {},
 
-  init, initApp, checkAuth, handleAuthResult
+  init, initApp, checkAuth, handleAuthResult,
+  listFiles, getFile, downloadFile,
+  createFolder, insertFile, updateFile, trashFile
   ;
 
   initApp = function() { cards.init(dom.app); };
@@ -32,7 +34,6 @@ cards.gdrive = (function() {
     // event handlers
     dom.sign_in.addEventListener('click', function(event) {
       event.preventDefault();
-      console.log('click');
       gapi.auth.authorize({
         client_id: config.client_id,
         scope: config.scopes.join(' '),
@@ -41,17 +42,19 @@ cards.gdrive = (function() {
       return false;
     }, false);
 
-    // check
+    // authorize
     checkAuth();
   };
 
+  // Begin Auth
+  // ----------------------------------------------------------------------
   checkAuth = function() {
     // Check if current user has authorized this application.
     var token, now = Math.ceil(new Date().getTime() / 1000);
 
     if (localStorage.google_oauth_token) {
       token = JSON.parse(localStorage.google_oauth_token);
-      console.log(token);
+      //console.log(token);
       // modify token
       token.expires_in = token.expires_at - now;
       if (token.expires_in > 0) {
@@ -86,7 +89,81 @@ cards.gdrive = (function() {
       dom.greeting.classList.remove('hide');
     }
   };
+  // ----------------------------------------------------------------------
+  // End Auth
 
-  return { init: init };
+  // Begin Google Drive API
+  // ----------------------------------------------------------------------
+  listFiles = function(params) {
+    //var params_example = {
+    //  q: "fullText contains 'hoge'",  // search
+    //  fields: "nextPageToken, files(id, name)",
+    //  pageSize: 100,
+    //  pageToken: pageToken
+    //}
+    // set default
+    if (!params.fields) params.fields = "nextPageToken, files(id, name)";
+    if (!params.pageSize) params.pageSize = 10;
+    var request = gapi.client.drive.files.list(params);
+
+    request.execute(function(resp) {
+      console.log('listFiles:');
+      resp.files.forEach(function(file) {
+        console.log('found:', file);
+      });
+    });
+  };
+
+  getFile = function(file_id) {
+    var promise = new Promise(function(resolve, reject) {
+      var request = gapi.client.request({
+        path: '/drive/v2/files/' + file_id, method: 'GET',
+      });
+      request.execute(function(file) {
+        console.log('getFile:', file);
+        resolve(file);
+      });
+    });
+    return promise;
+  };
+
+  downloadFile = function(file) {
+    //cards.gdrive.getFile(file_id).then(cards.gdrive.downloadFile).then()
+    var promise = new Promise(function(resolve, reject) {
+      if (file.downloadUrl) {
+        var access_token, xhr;
+        access_token = gapi.auth.getToken().access_token;
+        xhr = new XMLHttpRequest();
+        xhr.open('GET', file.downloadUrl);
+        xhr.setRequestHeader('Authorization', 'Bearer ' + access_token);
+        xhr.onload = function() {
+          resolve(xhr.responseText);
+        };
+        xhr.onerror = function() {
+          reject(null);
+        };
+        xhr.send();
+      } else {
+        resolve(null);
+      }
+    });
+    return promise;
+  };
+
+  createFolder = function() {
+    var promise = new Promise(function(resolve, reject) {
+    });
+    return promise;
+  };
+
+  //insertFile, updateFile, trashFile
+  // ----------------------------------------------------------------------
+  // End Google Drive API
+
+  return {
+    init: init,
+    // expose to test
+    listFiles: listFiles, getFile: getFile, downloadFile: downloadFile,
+    createFolder: createFolder
+  };
 }());
- 
