@@ -27,7 +27,7 @@ cards.gdrive = (function() {
 
   init, initApp, checkAuth, handleAuthResult,
   listFiles, getFile, downloadFile,
-  createFolder, createFile, updateFile, trashFile
+  createFolder, saveFile, updateFile, trashFile
   ;
 
   initApp = function() { cards.init(dom.app); };
@@ -205,8 +205,8 @@ cards.gdrive = (function() {
     return promise;
   };
 
-  createFile = function(params) {
-    // cards.gdrive.createFile({name: 'hello.txt', content: 'hello', parents:[]})
+  saveFile = function(params, file_id) {
+    // cards.gdrive.saveFile({name: 'hello.txt', content: 'hello', parents:[]})
     //var params_example = {
     //  name: 'file name',
     //  content: "{ 'msg': 'Hello!' }",
@@ -228,7 +228,7 @@ cards.gdrive = (function() {
         mimeType: params.content_type,
         //indexableText: { text: params.indexable_text },  // v2
         contentHints: { indexableText: params.indexable_text },  // v3
-        parents: params.parents
+        parents: ((!file_id) ? params.parents : undefined)
       };
 
       base64data = btoa(params.content);
@@ -245,10 +245,11 @@ cards.gdrive = (function() {
       );
 
       request = gapi.client.request({
-        path: '/upload/drive/v3/files',
-        method: 'POST',
+        path: '/upload/drive/v3/files' + ((!file_id) ? '' : '/' + file_id),
+        method: ((!file_id) ? 'POST' : 'PATCH'),
         params: {
           uploadType: 'multipart',
+          fileId: file_id,
           fields: "id, name, createdTime, modifiedTime"
         },
         headers: {
@@ -266,7 +267,10 @@ cards.gdrive = (function() {
     return promise;
   };
 
-  // updateFile, trashFile
+  updateFile = function() {
+  };
+
+  // trashFile
   // ----------------------------------------------------------------------
   // End Google Drive API
 
@@ -274,6 +278,6 @@ cards.gdrive = (function() {
     init: init,
     // expose to test
     listFiles: listFiles, getFile: getFile, downloadFile: downloadFile,
-    createFolder: createFolder, createFile: createFile
+    createFolder: createFolder, saveFile: saveFile,
   };
 }());
