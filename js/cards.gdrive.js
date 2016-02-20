@@ -27,7 +27,7 @@ cards.gdrive = (function() {
 
   init, initApp, checkAuth, handleAuthResult,
   listFiles, getFile, downloadFile,
-  createFolder, insertFile, updateFile, trashFile
+  createFolder, createFile, updateFile, trashFile
   ;
 
   initApp = function() { cards.init(dom.app); };
@@ -173,14 +173,72 @@ cards.gdrive = (function() {
         })
       });
       request.execute(function(file) {
-        console.log('create folder', file);
+        console.log('create folder:', file);
         resolve(file);
       });
     });
     return promise;
   };
 
-  //insertFile, updateFile, trashFile
+  createFile = function(params) {
+    // cards.gdrive.createFile({name: 'hello.txt', content: 'hello', parents:[]})
+    //var params_example = {
+    //  name: 'file name',
+    //  content: "{ 'msg': 'Hello!' }",
+    //  content_type: 'application/json',
+    //  indexable_text: 'Hello!',
+    //  parents: []
+    //};
+    var promise;
+    const boundary = '-------314159265358979323846';
+    const delimiter = "\r\n--" + boundary + "\r\n";
+    const close_delim = "\r\n--" + boundary + "--";
+
+    promise = new Promise(function(resolve, reject) {
+      var metadata, base64data, multipartRequestBody, request;
+      params.content_type = params.content_type || 'application/octet-stream';
+      metadata = {
+        //title: params.name,  // v2
+        name: params.name,  // v3
+        mimeType: params.content_type,
+        //indexableText: { text: params.indexable_text },  // v2
+        contentHints: { indexableText: params.indexable_text },  // v3
+        parents: params.parents
+      };
+
+      base64data = btoa(params.content);
+      multipartRequestBody = (
+        delimiter +
+          'Content-Type: application/json\r\n\r\n' +
+          JSON.stringify(metadata) +
+          delimiter +
+          'Content-Type: ' + params.content_type + '\r\n' +
+          'Content-Transfer-Encoding: base64\r\n' +
+          '\r\n' +
+          base64data +
+          close_delim
+      );
+
+      request = gapi.client.request({
+        path: '/upload/drive/v3/files',
+        method: 'POST',
+        params: { uploadType: 'multipart' },
+        headers: {
+          'Content-Type': 'multipart/mixed; boundary="' + boundary + '"'
+        },
+        body: multipartRequestBody
+      });
+
+      request.execute(function(file) {
+        console.log('createFile', file);
+        resolve(file);
+      });
+    });
+
+    return promise;
+  };
+
+  // updateFile, trashFile
   // ----------------------------------------------------------------------
   // End Google Drive API
 
@@ -188,6 +246,6 @@ cards.gdrive = (function() {
     init: init,
     // expose to test
     listFiles: listFiles, getFile: getFile, downloadFile: downloadFile,
-    createFolder: createFolder
+    createFolder: createFolder, createFile: createFile
   };
 }());
