@@ -205,43 +205,43 @@ cards.gdrive = (function() {
     return promise;
   };
 
-  saveFile = function(params, file_id) {
-    // cards.gdrive.saveFile({name: 'hello.txt', content: 'hello', parents:[]})
-    //var params_example = {
+  saveFile = function(metadata, content, file_id) {
+    // Example
+    // cards.gdrive.saveFile({name: 'hello.txt', parents:[folderid]}, 'Hello!')
+    // cards.gdrive.saveFile({}, 'Hello! Hello', file_id)
+    // cards.gdrive.saveFile({ trashed: true }, content, file_id)
+    //
+    //var metadata_example = {
     //  name: 'file name',
-    //  content: "{ 'msg': 'Hello!' }",
-    //  content_type: 'application/json',
+    //  mimeType: 'application/json',
     //  indexable_text: 'Hello!',
     //  parents: []
     //};
+    //content = "{ 'msg': 'Hello!' }",
     var promise;
     const boundary = '-------314159265358979323846';
     const delimiter = "\r\n--" + boundary + "\r\n";
     const close_delim = "\r\n--" + boundary + "--";
 
     promise = new Promise(function(resolve, reject) {
-      var metadata, base64data, multipartRequestBody, request;
-      params.content_type = params.content_type || 'application/octet-stream';
-      metadata = {
-        //title: params.name,  // v2
-        name: params.name,  // v3
-        mimeType: params.content_type,
-        //indexableText: { text: params.indexable_text },  // v2
-        contentHints: { indexableText: params.indexable_text },  // v3
-        parents: ((!file_id) ? params.parents : undefined)
-      };
+      var base64data, multipartRequestBody, request;
+      metadata.mimeType = metadata.mimeType || 'application/octet-stream';
+      if (metadata.indexable_text) {
+        metadata.contentHints = { indexableText: metadata.indexable_text };
+        delete metadata.indexable_text;
+      }
 
-      base64data = btoa(params.content);
+      base64data = btoa(content);
       multipartRequestBody = (
         delimiter +
-          'Content-Type: application/json\r\n\r\n' +
-          JSON.stringify(metadata) +
-          delimiter +
-          'Content-Type: ' + params.content_type + '\r\n' +
-          'Content-Transfer-Encoding: base64\r\n' +
-          '\r\n' +
-          base64data +
-          close_delim
+        'Content-Type: application/json\r\n\r\n' +
+        JSON.stringify(metadata) +
+        delimiter +
+        'Content-Type: ' + metadata.mimeType + '\r\n' +
+        'Content-Transfer-Encoding: base64\r\n' +
+        '\r\n' +
+        base64data +
+        close_delim
       );
 
       request = gapi.client.request({
@@ -249,7 +249,6 @@ cards.gdrive = (function() {
         method: ((!file_id) ? 'POST' : 'PATCH'),
         params: {
           uploadType: 'multipart',
-          fileId: file_id,
           fields: "id, name, createdTime, modifiedTime"
         },
         headers: {
@@ -267,10 +266,9 @@ cards.gdrive = (function() {
     return promise;
   };
 
-  updateFile = function() {
+  trashFile = function(file_id, content) {
+    return saveFile({ trashed: true }, content, file_id);
   };
-
-  // trashFile
   // ----------------------------------------------------------------------
   // End Google Drive API
 
@@ -278,6 +276,6 @@ cards.gdrive = (function() {
     init: init,
     // expose to test
     listFiles: listFiles, getFile: getFile, downloadFile: downloadFile,
-    createFolder: createFolder, saveFile: saveFile,
+    createFolder: createFolder, saveFile: saveFile, trashFile: trashFile
   };
 }());
