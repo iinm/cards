@@ -301,8 +301,42 @@ cards.gdrive = (function() {
 
   //
   createAppFolders = function() {
-    // TODO: create or check app folders and set folder ids
-    //listFiles({q:"name = 'colls' or name = 'cards'"})
+    // create or check app folders and set folder ids
+    var promise = new Promise(function(resolve, reject) {
+      var promises = [], p;
+
+      p = listFiles({
+        q: "name = 'colls' and mimeType = 'application/vnd.google-apps.folder'"
+      }).then(function(resp) {
+        if (resp.files.length > 0) {
+          return Promise.resolve(resp.files[0]);
+        } else {
+          return createFolder('colls');
+        } 
+      }).then(function(file) {
+        config.colls_folder_id = file.id;
+      });
+      promises.push(p);
+
+      p = listFiles({
+        q: "name = 'cards' and mimeType = 'application/vnd.google-apps.folder'"
+      }).then(function(resp) {
+        if (resp.files.length > 0) {
+          return Promise.resolve(resp.files[0]);
+        } else {
+          return createFolder('cards');
+        } 
+      }).then(function(file) {
+        config.cards_folder_id = file.id;
+      });
+      promises.push(p);
+
+      Promise.all(promises).then(function() {
+        console.log('createAppFolder:', config);
+        resolve();
+      });
+    });
+    return promise;
   };
 
   return {
