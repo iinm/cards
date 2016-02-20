@@ -172,3 +172,59 @@ strong {
 .cards-item.checked .item-checkbox-checked {
   height: 100%;
 }
+
+.cards-hello-world {
+  position: absolute;
+  bottom: 3em;
+  height: calc(100vh - 6em);
+  left: 0;
+  right: 0;
+  transition: bottom 500ms ease;
+  /*   background: rgba(0, 0, 0, 0.5); */
+  /*   z-index: 1; */
+}
+.cards-hello-world.hide {
+  bottom: 100vh;
+}
+
+.cards-hello-world .greeting-card {
+  position: absolute;
+  top: 1em;
+  bottom: 1em;
+  max-width: 45em;
+  margin: auto;
+  left: 1em;
+  right: 1em;
+  background: #F9F2E7;
+  box-shadow: 0 0 .3em #777;
+  /*   box-shadow: 0 0 .5em #40C0CB; */
+  overflow: hidden;
+}
+
+.cards-hello-world .greeting-card .greeting {
+  font-family: Raleway;
+  font-size: 2em;
+  font-weight: bold;
+  width: 100%;
+  margin: 2em 0 1.5em;
+  text-align: center;
+}
+
+.cards-hello-world .greeting-card .start-menu {
+  width: 100%;
+  text-align: center;
+}
+
+.greeting-card .start-menu .cards-sign-in,
+.greeting-card .start-menu .cards-try-demo {
+  display: inline-block;
+  font-size: 1em;
+  margin: .5em;
+  padding: .5em .7em;
+  border-radius: .1em;
+  font-weight: bold;
+  background: #F9F2E7;
+  /*   box-shadow: 0 0 .2em #777; */
+  border: .15em solid #bbb;
+  cursor: pointer;
+}

@@ -110,6 +110,15 @@ cards.nav = (function() {
     dom.content_search.appendChild(view.search.render().el);
 
     // set event handlers
+
+    dom.sign_out_trigger.addEventListener('click', function(event) {
+      // clear oauth token
+      if (window.confirm('Are you sure to sign out?')) {
+        window.localStorage.clear();
+        window.location.href = window.location.origin + window.location.pathname;
+      }
+    });
+    
     dom.nav_trigger.addEventListener('click', onClickToggleNav);
     dom.title.addEventListener('click', function(event) {
       event.preventDefault();

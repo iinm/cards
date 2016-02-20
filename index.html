@@ -12,6 +12,7 @@
     <meta name="mobile-web-app-capable" content="yes">
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link href='https://fonts.googleapis.com/css?family=Raleway' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="css/cards.css" type="text/css">
     <link rel="stylesheet" href="css/cards.nav.css" type="text/css">
     <link rel="stylesheet" href="css/cards.content.css" type="text/css">
@@ -19,7 +20,9 @@
 
     <script type="text/javascript" src="js/cards.js"></script>
     <script type="text/javascript" src="js/cards.util.js"></script>
+    <!-- fake storage -->
     <script type="text/javascript" src="js/cards.fake.js"></script>
+    <script type="text/javascript" src="js/cards.gdrive.js"></script>
     <script type="text/javascript" src="js/cards.model_util.js"></script>
     <script type="text/javascript" src="js/cards.model.js"></script>
     <script type="text/javascript" src="js/cards.view.js"></script>
@@ -28,14 +31,23 @@
     <script type="text/javascript" src="js/cards.content.js"></script>
     <script type="text/javascript" src="js/cards.editor.js"></script>
     <!-- for test -->
-    <script type="text/javascript" src="js/cards.test.js"></script>
+    <!-- <script type="text/javascript" src="js/cards.test.js"></script> -->
     <script type="text/javascript">
-     document.addEventListener('DOMContentLoaded', function(event) {
-       var container = document.getElementById('cards');
-       cards.init(container);
-     });
+     function init() {
+       var state = document.readyState;
+       if (state === 'interactive' || state === 'complete') {
+         cards.gdrive.init();
+       }
+       else {
+         document.addEventListener('DOMContentLoaded', function(event) {
+           //var container = document.getElementById('cards');
+           //cards.init(container);
+           cards.gdrive.init();
+         });
+       }
+     }
     </script>
-
+    <script src="https://apis.google.com/js/client.js?onload=init"></script>
   </head>
 
   <body>
@@ -48,7 +60,7 @@
               <div class="nav-closer"><i class="fa fa-chevron-up"></i></div>
             </div>
             <div class="nav-annot-closer"><i class="fa fa-check"></i></div>
-            <div class="title">Cards</div>
+            <div class="title">Cards - Note App</div>
             <input class="search-input" name="" type="text" placeholder="Search"/>
             <div class="clear-search-input">
               <i class="fa fa-times-circle"></i>
@@ -97,7 +109,7 @@
         </div>
       </div> <!-- .cards-nav -->
 
-      <div class="cards-content">
+      <div class="cards-content init-loading">
         <div class="cards-content-cards"></div>
         <div class="loading"><i class="fa fa-spinner fa-spin"></i></div>
       </div> <!-- .cards-content -->
@@ -128,6 +140,24 @@
           </ul>
         </div> <!-- .cards-editor-control -->
       </div> <!-- .cards-editor -->
+      <div class="cards-hello-world hide">
+        <div class="greeting-card">
+          <div class="greeting">
+            Hello, World!
+          </div>
+          <div class="start-menu">
+            <div class="cards-sign-in">
+              Sign in with Google
+            </div>
+            <br>
+            or
+            <br>
+            <div class="cards-try-demo">
+              Try Demo
+            </div>
+          </div>
+        </div>
+      </div>
     </div> <!-- #cards -->
 
     <!-- Templates -->

@@ -13,7 +13,8 @@
   transition: height 350ms ease;
   overflow: hidden;
   /*   background: #EAE4DD; */
-  background: #ddd;
+  /*   background: #ddd; */
+  background: inherit;
   z-index: 2;
   box-shadow: 0 0 .3em #777;
 }
@@ -344,6 +345,7 @@
   background: #F9F2E7;
   box-shadow: 0 0 .1em #777;
   transition: box-shadow 300ms;
+  cursor: pointer;
 }
 .nav-index li.nav-index-item.blink {
   box-shadow: 0 0 .6em #40C0CB;
