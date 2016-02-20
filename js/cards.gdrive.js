@@ -19,8 +19,8 @@ cards.gdrive = (function() {
   config = {
     client_id: '352055360944-70jipkghcmfbbg9o21f8pq4opilbvkia.apps.googleusercontent.com',
     scopes: [
-       'https://www.googleapis.com/auth/drive'
-       //'https://www.googleapis.com/auth/drive.appdata'
+       //'https://www.googleapis.com/auth/drive'
+       'https://www.googleapis.com/auth/drive.appdata'
     ],
     app_folder_name: 'iinm.github.io/cards',
     app_folder_id: null,
@@ -116,6 +116,8 @@ cards.gdrive = (function() {
     //}
     // set default
     // https://developers.google.com/drive/v3/reference/files#resource
+    params = params || {};
+    params.spaces = ['appDataFolder'];
     if (!params.fields) {
       params.fields = (
         "nextPageToken, " +
@@ -200,7 +202,7 @@ cards.gdrive = (function() {
         body: JSON.stringify({
           name: name,
           mimeType: 'application/vnd.google-apps.folder',
-          parents: parent_ids
+          parents: parent_ids || ['appDataFolder']
         })
       });
       request.execute(function(file) {
@@ -232,6 +234,9 @@ cards.gdrive = (function() {
     promise = new Promise(function(resolve, reject) {
       var base64data, multipartRequestBody, request;
       metadata.mimeType = metadata.mimeType || 'application/octet-stream';
+      if (!metadata.parents && !file_id) {
+        metadata.parents = ['appDataFolder'];
+      }
       if (metadata.indexable_text) {
         metadata.contentHints = { indexableText: metadata.indexable_text };
         delete metadata.indexable_text;
