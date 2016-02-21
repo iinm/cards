@@ -173,23 +173,27 @@ cards.gdrive = (function() {
 
   getFile = function(file_id) {
     var promise = new Promise(function(resolve, reject) {
-      var request;
-      //if (localStorage[file_id]) {
-      //  resolve(file);
-      //}
-      request = gapi.client.request({
-        path: '/drive/v3/files/' + file_id,
-        method: 'GET',
-        params: {
-          fields: "id, name, createdTime, modifiedTime"
-        }
-      });
-      request.execute(function(file) {
-        console.log('getFile:', file);
-        // cache
-        localStorage[file.id] = JSON.stringify(file);
+      var request, file;
+      if (localStorage[file_id]) {
+        file = JSON.parse(localStorage[file_id]);
+        console.log('getFile: from cache', file);
         resolve(file);
-      });
+      }
+      else {
+        request = gapi.client.request({
+          path: '/drive/v3/files/' + file_id,
+          method: 'GET',
+          params: {
+            fields: "id, name, createdTime, modifiedTime"
+          }
+        });
+        request.execute(function(file) {
+          console.log('getFile:', file);
+          // cache
+          localStorage[file.id] = JSON.stringify(file);
+          resolve(file);
+        });
+      }
     });
     return promise;
   };
@@ -198,24 +202,37 @@ cards.gdrive = (function() {
     // Note: file obj must be retrieved before download
     // https://developers.google.com/drive/v3/web/manage-downloads
     var promise = new Promise(function(resolve, reject) {
-      var request = gapi.client.request({
-        path: '/drive/v3/files/' + file.id + '?alt=media',
-        method: 'GET',
-      });
-      request.execute(function(jsonResp, rawResp) {
-        var data = JSON.parse(rawResp).gapiRequest.data.body;
-        console.log('getFile:', data);
-        // cache
-        file.content = data;
-        localStorage[file.id] = JSON.stringify(file);
+      var request, data;
+      if (localStorage[file.id + '_content']) {
+        data = localStorage[file.id + '_content'];
+        console.log('getFile: from cache', data);
         resolve(data);
-      });
+      }
+      else {
+        request = gapi.client.request({
+          path: '/drive/v3/files/' + file.id + '?alt=media',
+          method: 'GET',
+        });
+        request.execute(function(jsonResp, rawResp) {
+          //console.log(arguments);
+          if (!jsonResp.error) {
+            data = JSON.parse(rawResp).gapiRequest.data.body;
+            console.log('getFile:', data);
+            // cache
+            localStorage[file.id + '_content'] = data;
+            resolve(data);
+          }
+          else {
+            console.log('getFile: error', jsonResp);
+            reject();
+          }
+        });
+      }
     });
     return promise;
   };
 
   downloadFiles = function(files, partition_size) {
-    // cards.gdrive.getColls().then(function(files) { return cards.gdrive.downloadFiles(files, 1); }).then(function(d) { console.log(d); });
     var download_part, partition_size;
 
     partition_size = partition_size || 10;
@@ -225,13 +242,16 @@ cards.gdrive = (function() {
         if (parts.length === 0) {
           resolve(data_array);
         }
-        parts[0].forEach(function(file) {
-          downloads.push(downloadFile(file));
-        });
-        Promise.all(downloads).then(function(data_array_) {
-          download_part(parts.slice(1), data_array.concat(data_array_))
-            .then(resolve);
-        });
+        else {
+          console.log('parts', parts[0]);
+          parts[0].forEach(function(file) {
+            downloads.push(downloadFile(file));
+          });
+          Promise.all(downloads).then(function(data_array_) {
+            download_part(parts.slice(1), data_array.concat(data_array_))
+              .then(resolve);
+          });
+        }
       });
       return promise;
     };
@@ -279,6 +299,8 @@ cards.gdrive = (function() {
       });
       request.execute(function(file) {
         console.log('create folder:', file);
+        // cache
+        localStorage[file.id] = JSON.stringify(file);
         resolve(file);
       });
     });
@@ -342,6 +364,9 @@ cards.gdrive = (function() {
 
       request.execute(function(file) {
         console.log('createFile:', file);
+        // cache
+        //file.content = content;
+        localStorage[file.id + '_content'] = content;
         resolve(file);
       });
     });
@@ -420,9 +445,9 @@ cards.gdrive = (function() {
         ),
         orderBy: 'name desc'
       };
-      listFilesAll(params).then(function(files) {
-        downloadFiles(files, 10).then(resolve);
-      });
+      listFilesAll(params)
+        .then(downloadFiles)
+        .then(function(data_array) { resolve(data_array.map(JSON.parse)); });
     });
     return promise;
   };
@@ -431,18 +456,81 @@ cards.gdrive = (function() {
     // cards.gdrive.saveColl({name: 'star wars', card_ids: [], type: 'tag'})
     var promise;
     promise = new Promise(function(resolve, reject) {
-      var timestamp, file, name_parts;
-      if (data_.id && localStorage[data_.id]) {
-        file = JSON.parse(localStorage[data_.id]);
+      var p, preparations = [], timestamp;
+
+      p = new Promise (function(resolve, reject) {
+        // set timestamp
+        var name_parts;
+        if (data_.id) {
+          getFile(data_.id).then(function(file) {
+            name_parts = file.name.match(/^(\d+)_(.*)/);
+            timestamp = name_parts[1];
+            resolve();
+          });
+        }
+        else {
+          timestamp = cards.util.timestamp();
+          resolve();
+        }
+      });
+      preparations.push(p);
+
+      Promise.all(preparations)
+        .then(function() {
+          saveFile({
+            name: timestamp + '_' + cards.util.unescape(data_.name) + '.json',
+            mimeType: 'application/json',
+            parents: [config.colls_folder_id]
+          }, JSON.stringify(data_), data_.id)
+            .then(function(file) {
+              // downloadして，checkしたほうが良い?
+              data_.id = file.id;
+              resolve(data_);
+            });
+        });
+    });
+    return promise;
+  };
+
+  getCards = function(coll_id, pageToken) {
+    var promise = new Promise(function(resolve, reject) {
+      var params;
+      if (coll_id === 'special:all') {
+        params = {
+          q: cards.util.formatTmpl(
+            "'{{folder_id}}' in parents" , { folder_id: config.cards_folder_id }
+          ),
+          orderBy: 'name desc'
+        };
+        listFilesAll(params).then(downloadFiles).then(resolve);
+      }
+    });
+    return promise;
+  };
+
+  saveCard = function(data_) {
+    var promise;
+    promise = new Promise(function(resolve, reject) {
+      var timestamp, file, name_parts, indexable_coll_names = '';
+
+      if (data_.id) {
+        file = getFile(data_.id);
         name_parts = file.name.match(/^(\d+)_(.*)/);
         timestamp = name_parts[1];
       }
       timestamp = timestamp || cards.util.timestamp();
 
+      data_.coll_ids.forEach(function(coll_id) {
+
+      });
+
       saveFile({
-        name: timestamp + '_' + cards.util.unescape(data_.name) + '.json',
+        name: timestamp + '_' + cards.util.unescape(data_.title) + '.json',
         mimeType: 'application/json',
-        parents: [config.colls_folder_id]
+        parents: [config.cards_folder_id],
+        indexable_text: [
+          data_.title, data_.body // coll names
+        ].map(cards.util.unescape).join('\n\n')
       }, JSON.stringify(data_), data_.id)
         .then(function(file) {
           // downloadして，checkしたほうが良い?
@@ -454,7 +542,7 @@ cards.gdrive = (function() {
   };
 
   // TODO
-  // getCards, saveCard, deleteColl, deleteCard,
+  // deleteColl, deleteCard,
   //searchCards
   // ----------------------------------------------------------------------
   // End cards storage
@@ -469,6 +557,7 @@ cards.gdrive = (function() {
     deleteFile: deleteFile,
     // cards storage
     createAppFolders: createAppFolders,
-    getColls: getColls, saveColl: saveColl
+    getColls: getColls, saveColl: saveColl,
+    getCards: getCards, saveCard: saveCard
   };
 }());
