@@ -139,6 +139,8 @@ cards.gdrive = (function() {
         console.log('listFiles:', resp);
         resp.files.forEach(function(file) {
           console.log('found:', file);
+          // cache
+          localStorage[file.id] = JSON.stringify(file);
         });
         resolve(resp);
       });
@@ -148,7 +150,11 @@ cards.gdrive = (function() {
 
   getFile = function(file_id) {
     var promise = new Promise(function(resolve, reject) {
-      var request = gapi.client.request({
+      var request;
+      //if (localStorage[file_id]) {
+      //  resolve(file);
+      //}
+      request = gapi.client.request({
         path: '/drive/v3/files/' + file_id,
         method: 'GET',
         params: {
@@ -157,6 +163,8 @@ cards.gdrive = (function() {
       });
       request.execute(function(file) {
         console.log('getFile:', file);
+        // cache
+        localStorage[file.id] = JSON.stringify(file);
         resolve(file);
       });
     });
@@ -164,6 +172,7 @@ cards.gdrive = (function() {
   };
 
   downloadFile = function(file) {
+    // Note: file obj must be retrieved before download
     // https://developers.google.com/drive/v3/web/manage-downloads
     var promise = new Promise(function(resolve, reject) {
       var request = gapi.client.request({
@@ -173,6 +182,9 @@ cards.gdrive = (function() {
       request.execute(function(jsonResp, rawResp) {
         var data = JSON.parse(rawResp).gapiRequest.data.body;
         console.log('getFile:', data);
+        // cache
+        file.content = data;
+        localStorage[file.id] = JSON.stringify(file);
         resolve(data);
       });
     });
@@ -183,7 +195,7 @@ cards.gdrive = (function() {
     // cards.gdrive.getColls().then(function(files) { return cards.gdrive.downloadFiles(files, 1); }).then(function(d) { console.log(d); });
     var download_part, partition_size;
 
-    partition_size = partition_size || 5;
+    partition_size = partition_size || 10;
     download_part = function(parts, data_array) {
       var promise = new Promise(function(resolve, reject) {
         var downloads = [];
@@ -396,7 +408,8 @@ cards.gdrive = (function() {
           if (resp.nextPageToken) {
             getColls(files, resp.nextPageToken).then(resolve);
           } else {
-            resolve(files);
+            //resolve(files);
+            downloadFiles(files, 10).then(resolve);
           }
         });
     });
