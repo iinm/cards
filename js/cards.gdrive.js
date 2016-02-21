@@ -29,7 +29,7 @@ cards.gdrive = (function() {
 
   init, initApp,
   checkAuth, handleAuthResult,
-  listFiles, getFile, downloadFile, downloadFiles,
+  listFiles, listFilesAll, getFile, downloadFile, downloadFiles,
   createFolder, saveFile, updateFile, trashFile, deleteFile,
   createAppFolders,
   // TODO
@@ -134,6 +134,8 @@ cards.gdrive = (function() {
         );
       }
       if (!params.pageSize) params.pageSize = 20;
+      //if (!params.pageSize) params.pageSize = 1;
+
       request = gapi.client.drive.files.list(params);
       request.execute(function(resp) {
         console.log('listFiles:', resp);
@@ -144,6 +146,27 @@ cards.gdrive = (function() {
         });
         resolve(resp);
       });
+    });
+    return promise;
+  };
+
+  listFilesAll = function(params, files) {
+    // list all files
+    var promise = new Promise(function(resolve, reject) {
+      listFiles(params)
+        .then(function(resp) {
+          if (!files) {
+            files = resp.files;
+          } else {
+            files = files.concat(resp.files);
+          }
+          if (resp.nextPageToken) {
+            params.pageToken = resp.nextPageToken;
+            listFilesAll(params, files).then(resolve);
+          } else {
+            resolve(files);
+          }
+        });
     });
     return promise;
   };
@@ -387,7 +410,7 @@ cards.gdrive = (function() {
     return promise;
   };
 
-  getColls = function(files, pageToken) {
+  getColls = function() {
     // get all collections
     var promise = new Promise(function(resolve, reject) {
       var params, downloads;
@@ -397,21 +420,9 @@ cards.gdrive = (function() {
         ),
         orderBy: 'name desc'
       };
-      if (pageToken) { params.pageToken = pageToken };
-      listFiles(params)
-        .then(function(resp) {
-          if (!files) {
-            files = resp.files;
-          } else {
-            files = files.concat(resp.files);
-          }
-          if (resp.nextPageToken) {
-            getColls(files, resp.nextPageToken).then(resolve);
-          } else {
-            //resolve(files);
-            downloadFiles(files, 10).then(resolve);
-          }
-        });
+      listFilesAll(params).then(function(files) {
+        downloadFiles(files, 10).then(resolve);
+      });
     });
     return promise;
   };
@@ -452,8 +463,8 @@ cards.gdrive = (function() {
   return {
     init: init,
     // expose to test
-    listFiles: listFiles, getFile: getFile, downloadFile: downloadFile,
-    downloadFiles: downloadFiles,
+    listFiles: listFiles, listFilesAll: listFilesAll, getFile: getFile,
+    downloadFile: downloadFile, downloadFiles: downloadFiles,
     createFolder: createFolder, saveFile: saveFile, trashFile: trashFile,
     deleteFile: deleteFile,
     // cards storage

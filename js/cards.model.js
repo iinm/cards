@@ -398,6 +398,7 @@ cards.model = (function() {
 
       // create colls (tags and notes)
       cards.fake.getCollections()
+      //cards.gdrive.getColls()
         .then(function(coll_array) {
           coll_array.forEach(function(data_) {
             var coll = models.coll.create(data_);
