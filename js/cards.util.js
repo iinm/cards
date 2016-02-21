@@ -14,7 +14,8 @@ cards.util = (function() {
   getPxPerEm,
   formatTmpl,
   makeAnchorMap, setAnchor,
-  $http
+  $http,
+  timestamp
   ;
 
   cloneObj = function(obj) {
@@ -179,6 +180,10 @@ cards.util = (function() {
     };
   };  // $http
 
+  timestamp = function() {
+    return Math.floor(Date.now() / 1000);
+  };
+
   return {
     cloneObj: cloneObj,
     updateObj: updateObj,
@@ -194,6 +199,7 @@ cards.util = (function() {
     makeAnchorMap: makeAnchorMap,
     setAnchor: setAnchor,
 
-    $http: $http
+    $http: $http,
+    timestamp: timestamp
   };
 }());

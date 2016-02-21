@@ -29,7 +29,7 @@ cards.gdrive = (function() {
 
   init, initApp,
   checkAuth, handleAuthResult,
-  listFiles, getFile, downloadFile,
+  listFiles, getFile, downloadFile, downloadFiles,
   createFolder, saveFile, updateFile, trashFile, deleteFile,
   createAppFolders,
   // TODO
@@ -69,7 +69,7 @@ cards.gdrive = (function() {
   // ----------------------------------------------------------------------
   checkAuth = function() {
     // Check if current user has authorized this application.
-    var token, now = Math.ceil(new Date().getTime() / 1000);
+    var token, now = cards.util.timestamp();
 
     if (localStorage.google_oauth_token) {
       token = JSON.parse(localStorage.google_oauth_token);
@@ -162,11 +162,11 @@ cards.gdrive = (function() {
     return promise;
   };
 
-  downloadFile = function(file_id) {
+  downloadFile = function(file) {
     // https://developers.google.com/drive/v3/web/manage-downloads
     var promise = new Promise(function(resolve, reject) {
       var request = gapi.client.request({
-        path: '/drive/v3/files/' + file_id + '?alt=media',
+        path: '/drive/v3/files/' + file.id + '?alt=media',
         method: 'GET',
       });
       request.execute(function(jsonResp, rawResp) {
@@ -176,6 +176,14 @@ cards.gdrive = (function() {
       });
     });
     return promise;
+  };
+
+  downloadFiles = function(files) {
+    var downloads = [];
+    files.forEach(function(file) {
+      downloads.push(downloadFile(file));
+    });
+    return Promise.all(downloads);
   };
 
   //downloadFile = function(file) {
@@ -352,7 +360,13 @@ cards.gdrive = (function() {
   getColls = function(files, nextPageToken) {
     // get all collections
     var promise = new Promise(function(resolve, reject) {
-      var params = { q: "'" + config.colls_folder_id + "'" + " in parents" };
+      var params, downloads;
+      params = {
+        q: cards.util.formatTmpl(
+          "'{{folder_id}}' in parents" , { folder_id: config.colls_folder_id }
+        ),
+        orderBy: 'name desc'
+      };
       if (nextPageToken) { params.nextPageToken = nextPageToken };
       listFiles(params)
         .then(function(resp) {
@@ -372,8 +386,32 @@ cards.gdrive = (function() {
     return promise;
   };
 
+  saveColl = function(data_) {
+    // cards.gdrive.saveColl({name: 'star wars', card_ids: [], type: 'tag'})
+    var promise;
+    promise = new Promise(function(resolve, reject) {
+      var timestamp, file, name_parts;
+      if (data_.id && localStorage[data_.id]) {
+        file = JSON.parse(localStorage[data_.id]);
+        name_parts = file.name.match(/^(\d+)_(.*)/);
+        timestamp = name_parts[1];
+      }
+      timestamp = timestamp || cards.util.timestamp();
+
+      saveFile({
+        name: timestamp + '_' + cards.util.unescape(data_.name) + '.json',
+        mimeType: 'application/json',
+        parents: [config.colls_folder_id]
+      }, JSON.stringify(data_), data_.id)
+        .then(function(file) {
+          resolve(data_);
+        });
+    });
+    return promise;
+  };
+
   // TODO
-  // getCards, saveColl, saveCard, deleteColl, deleteCard,
+  // getCards, saveCard, deleteColl, deleteCard,
   //searchCards
   // ----------------------------------------------------------------------
   // End cards storage
@@ -383,10 +421,11 @@ cards.gdrive = (function() {
     init: init,
     // expose to test
     listFiles: listFiles, getFile: getFile, downloadFile: downloadFile,
+    downloadFiles: downloadFiles,
     createFolder: createFolder, saveFile: saveFile, trashFile: trashFile,
     deleteFile: deleteFile,
     // cards storage
     createAppFolders: createAppFolders,
-    getColls: getColls
+    getColls: getColls, saveColl: saveColl
   };
 }());
