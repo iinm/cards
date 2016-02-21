@@ -215,7 +215,8 @@ cards.model = (function() {
           }
           else {
             console.log('fetch: ' + self.get('name'), last_card_id);
-            cards.fake.getCards(self.get('id'), last_card_id).then(
+            //cards.fake.getCards(self.get('id'), last_card_id).then(
+            cards.gdrive.getCards(self.get('id'), last_card_id).then(
               function(card_array) {
                 add_cards(card_array);
                 if (card_array.length === 0 || self.get('type') === 'note') {
@@ -397,8 +398,8 @@ cards.model = (function() {
       data.index.add(data.all);
 
       // create colls (tags and notes)
-      cards.fake.getCollections()
-      //cards.gdrive.getColls()
+      //cards.fake.getCollections()
+      cards.gdrive.getColls()
         .then(function(coll_array) {
           coll_array.forEach(function(data_) {
             var coll = models.coll.create(data_);
