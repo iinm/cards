@@ -606,28 +606,44 @@ cards.gdrive = (function() {
   };
 
   getCards = function(coll_id, pageToken) {
-    // cards.gdrive.getCards('special:all').then(function(cards_) { cards_.forEach(function(card) { cards.gdrive.deleteFile(card.id) }); });
     var promise = new Promise(function(resolve, reject) {
       var params;
       if (coll_id === 'special:all') {
         params = {
           q: cards.util.formatTmpl(
-            "'{{folder_id}}' in parents" , { folder_id: config.cards_folder_id }
+            "'{{folder_id}}' in parents" ,
+            { folder_id: config.cards_folder_id }
           ),
           orderBy: 'name desc'
         };
-        listFilesAll(params)
-          .then(function(files) {
-            downloadFiles(files).then(function(data_array) {
-              var i, card, cards_ = [];
-              for (i = 0; i < files.length; i++) {
-                card = JSON.parse(data_array[i]);
-                card.id = files[i].id;
-                cards_.push(card);
-              }
-              resolve(cards_);
-            });
+        listFiles(params).then(function(resp) {
+          downloadFiles(resp.files).then(function(data_array) {
+            var i, card, cards_ = [];
+            for (i = 0; i < resp.files.length; i++) {
+              card = JSON.parse(data_array[i]);
+              card.id = resp.files[i].id;
+              cards_.push(card);
+            }
+            resolve(cards_, resp.nextPageToken);
           });
+        });
+      }
+      else {
+        getColl(coll_id).then(function(coll) {
+          if (coll.type === 'note') {
+            var loads = [];
+            // load all cards
+            coll.card_ids.forEach(function(card_id) {
+              loads.push(getCard(card_id));
+            });
+            Promise.all(loads).then(function(card_) {
+              resolve(card_);
+            });
+          }
+          else {
+            //coll.card_ids.slice
+          }
+        });
       }
     });
     return promise;
