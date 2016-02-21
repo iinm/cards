@@ -35,7 +35,8 @@ cards.gdrive = (function() {
   // TODO
   getColl, getColls, getCard, getCards, saveColl, saveCard,
   deleteColl, deleteCard,
-  searchCards
+  searchCards,
+  avadakedavra
   ;
 
   initApp = function() {
@@ -183,7 +184,7 @@ cards.gdrive = (function() {
       var request, file, file_;
       if (localStorage[file_id]) {
         file = JSON.parse(localStorage[file_id]);
-        console.log('getFile: from cache', file);
+        //console.log('getFile: from cache', file);
         resolve(file);
       }
       else {
@@ -220,7 +221,7 @@ cards.gdrive = (function() {
       }
       if (file_.content) {
         data = file_.content;
-        console.log('downloadFile: from cache', data);
+        //console.log('downloadFile: from cache', data);
         resolve(data);
       }
       else {
@@ -392,7 +393,11 @@ cards.gdrive = (function() {
       });
 
       request.execute(function(file) {
-        console.log('createFile:', file);
+        if (file_id) {
+          console.log('updateFile:', file);
+        } else {
+          console.log('createFile:', file);
+        }
         // cache
         //file.content = content;
         localStorage[file.id + '_content'] = content;
@@ -414,7 +419,7 @@ cards.gdrive = (function() {
         method: 'DELETE',
       });
       request.execute(function(resp) {
-        console.log('deleteFile:', resp);
+        console.log('deleteFile:', resp, file_id);
         resolve(file_id);
       });
     });
@@ -457,7 +462,7 @@ cards.gdrive = (function() {
       promises.push(p);
 
       Promise.all(promises).then(function() {
-        console.log('createAppFolder:', config);
+        //console.log('createAppFolder:', config);
         resolve();
       });
     });
@@ -515,7 +520,7 @@ cards.gdrive = (function() {
               if (idx > -1) {
                 card.coll_ids.splice(idx, 1);
               }
-              saveCard(card).then(resolve);
+              saveCard(card, false).then(resolve);
             });
           });
           updates.push(update);
@@ -563,6 +568,7 @@ cards.gdrive = (function() {
         }
         else {  // new coll
           timestamp = cards.util.timestamp();
+          coll.card_ids = [];
           resolve();
         }
       });
@@ -653,7 +659,7 @@ cards.gdrive = (function() {
     return promise;
   };
 
-  saveCard = function(card) {
+  saveCard = function(card, update_colls) {
     var promise;
     promise = new Promise(function(resolve, reject) {
       var
@@ -714,37 +720,38 @@ cards.gdrive = (function() {
           JSON.stringify(card), card.id
         ).then(function(file) {
           card.id = file.id;
-          // update colls
           var updates = [];
-          removed_coll_ids.forEach(function(coll_id) {
-            var update = new Promise(function(resolve, reject) {
-              getColl(coll_id).then(function(coll) {
-                var idx = coll.card_ids.indexOf(card.id);
-                if (idx > -1) {
-                  coll.card_ids.splice(idx, 1);
-                }
-                saveColl(coll).then(resolve);
+          if (update_colls) {
+            // update colls
+            removed_coll_ids.forEach(function(coll_id) {
+              var update = new Promise(function(resolve, reject) {
+                getColl(coll_id).then(function(coll) {
+                  var idx = coll.card_ids.indexOf(card.id);
+                  if (idx > -1) {
+                    coll.card_ids.splice(idx, 1);
+                  }
+                  saveColl(coll).then(resolve);
+                });
               });
+              updates.push(update);
             });
-            updates.push(update);
-          });
-          added_coll_ids.forEach(function(coll_id) {
-            var update = new Promise(function(resolve, reject) {
-              getColl(coll_id).then(function(coll) {
-                if (coll.type === 'note') {
-                  coll.card_ids.push(card.id);
-                } else {  // tag
-                  coll.card_ids.splice(0, 0, card.id);
-                }
-                saveColl(coll).then(resolve);
+            added_coll_ids.forEach(function(coll_id) {
+              var update = new Promise(function(resolve, reject) {
+                getColl(coll_id).then(function(coll) {
+                  if (coll.type === 'note') {
+                    coll.card_ids.push(card.id);
+                  } else {  // tag
+                    coll.card_ids.splice(0, 0, card.id);
+                  }
+                  saveColl(coll).then(resolve);
+                });
               });
+              updates.push(update);
             });
-            updates.push(update);
-          });
+          }
 
           return Promise.all(updates);
         }).then(function(coll_files) {
-          console.log('##', coll_files);
           resolve(card);
         });
       });
@@ -756,6 +763,14 @@ cards.gdrive = (function() {
   // ----------------------------------------------------------------------
   // End cards storage
 
+  avadakedavra = function() {
+    // delete all data
+    listFilesAll().then(function(files) {
+      files.forEach(function(file) {
+        deleteFile(file.id).then();
+      });
+    });
+  };
 
   return {
     init: init,
@@ -768,6 +783,7 @@ cards.gdrive = (function() {
     createAppFolders: createAppFolders,
     getColl: getColl, getColls: getColls, saveColl: saveColl,
     getCard: getCard, getCards: getCards, saveCard: saveCard,
-    deleteCard: deleteCard, deleteColl: deleteColl
+    deleteCard: deleteCard, deleteColl: deleteColl,
+    avadakedavra: avadakedavra
   };
 }());
