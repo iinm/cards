@@ -399,8 +399,9 @@ cards.gdrive = (function() {
           console.log('createFile:', file);
         }
         // cache
-        //file.content = content;
-        localStorage[file.id + '_content'] = content;
+        file.content = content;
+        //localStorage[file.id + '_content'] = content;
+        localStorage[file.id] = JSON.stringify(file);
         resolve(file);
       });
     });
@@ -520,7 +521,7 @@ cards.gdrive = (function() {
               if (idx > -1) {
                 card.coll_ids.splice(idx, 1);
               }
-              saveCard(card, false).then(resolve);
+              saveCard(card, true).then(resolve);
             });
           });
           updates.push(update);
@@ -659,7 +660,7 @@ cards.gdrive = (function() {
     return promise;
   };
 
-  saveCard = function(card, update_colls) {
+  saveCard = function(card, skip_update_colls) {
     var promise;
     promise = new Promise(function(resolve, reject) {
       var
@@ -721,7 +722,7 @@ cards.gdrive = (function() {
         ).then(function(file) {
           card.id = file.id;
           var updates = [];
-          if (update_colls) {
+          if (skip_update_colls !== true) {
             // update colls
             removed_coll_ids.forEach(function(coll_id) {
               var update = new Promise(function(resolve, reject) {
@@ -749,7 +750,6 @@ cards.gdrive = (function() {
               updates.push(update);
             });
           }
-
           return Promise.all(updates);
         }).then(function(coll_files) {
           resolve(card);
