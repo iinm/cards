@@ -258,9 +258,7 @@ cards.fake = (function() {
         data_.id = '_coll_' + num_coll;
         num_coll += 1;
         coll_ids.push(data_.id);
-        if (data_.type === 'note') {
-          data_.card_ids = [];
-        }
+        data_.card_ids = [];
         colls[data_.id] = data_;
       } else {
         cards.util.updateObj(colls[data_.id], data_);
