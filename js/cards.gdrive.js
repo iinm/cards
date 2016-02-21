@@ -178,12 +178,29 @@ cards.gdrive = (function() {
     return promise;
   };
 
-  downloadFiles = function(files) {
-    var downloads = [];
-    files.forEach(function(file) {
-      downloads.push(downloadFile(file));
-    });
-    return Promise.all(downloads);
+  downloadFiles = function(files, partition_size) {
+    // cards.gdrive.getColls().then(function(files) { return cards.gdrive.downloadFiles(files, 1); }).then(function(d) { console.log(d); });
+    var download_part, partition_size;
+
+    partition_size = partition_size || 5;
+    download_part = function(parts, data_array) {
+      var promise = new Promise(function(resolve, reject) {
+        var downloads = [];
+        if (parts.length === 0) {
+          resolve(data_array);
+        }
+        parts[0].forEach(function(file) {
+          downloads.push(downloadFile(file));
+        });
+        Promise.all(downloads).then(function(data_array_) {
+          download_part(parts.slice(1), data_array.concat(data_array_))
+            .then(resolve);
+        });
+      });
+      return promise;
+    };
+
+    return download_part(cards.util.partition(files, partition_size), []);
   };
 
   //downloadFile = function(file) {
@@ -404,6 +421,8 @@ cards.gdrive = (function() {
         parents: [config.colls_folder_id]
       }, JSON.stringify(data_), data_.id)
         .then(function(file) {
+          // downloadして，checkしたほうが良い?
+          data_.id = file.id;
           resolve(data_);
         });
     });
