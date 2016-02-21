@@ -33,7 +33,8 @@ cards.gdrive = (function() {
   createFolder, saveFile, updateFile, trashFile, deleteFile,
   createAppFolders,
   // TODO
-  getColls, getCards, saveColl, saveCard, deleteColl, deleteCard,
+  getColl, getColls, getCard, getCards, saveColl, saveCard,
+  deleteColl, deleteCard,
   searchCards
   ;
 
@@ -219,7 +220,7 @@ cards.gdrive = (function() {
       }
       if (file_.content) {
         data = file_.content;
-        console.log('getFile: from cache', data);
+        console.log('downloadFile: from cache', data);
         resolve(data);
       }
       else {
@@ -234,7 +235,7 @@ cards.gdrive = (function() {
             data = JSON.parse(rawResp).gapiRequest.data.body;
             // TODO: ?
             data = decodeURIComponent(data);
-            console.log('getFile:', data);
+            console.log('downloadFile:', data);
             // cache
             //localStorage[file.id + '_content'] = data;
             file.content = data;
@@ -414,7 +415,7 @@ cards.gdrive = (function() {
       });
       request.execute(function(resp) {
         console.log('deleteFile:', resp);
-        resolve(resp);
+        resolve(file_id);
       });
     });
     return promise;
@@ -463,6 +464,19 @@ cards.gdrive = (function() {
     return promise;
   };
 
+  getColl = function(file_id) {
+    var promise = new Promise(function(resolve, reject) {
+      getFile(file_id).then(function(file) {
+        downloadFile(file).then(function(data) {
+          var coll = JSON.parse(data);
+          coll.id = file_id;
+          resolve(coll);
+        });
+      });
+    });
+    return promise;
+  };
+
   getColls = function() {
     // get all collections
     var promise = new Promise(function(resolve, reject) {
@@ -489,7 +503,7 @@ cards.gdrive = (function() {
     return promise;
   };
 
-  saveColl = function(data_) {
+  saveColl = function(coll) {
     // cards.gdrive.saveColl({name: 'star wars', card_ids: [], type: 'tag'})
     var promise;
     promise = new Promise(function(resolve, reject) {
@@ -497,15 +511,31 @@ cards.gdrive = (function() {
 
       p = new Promise (function(resolve, reject) {
         // set timestamp
-        var name_parts;
-        if (data_.id) {
-          getFile(data_.id).then(function(file) {
-            name_parts = file.name.match(/^(\d+)_(.*)/);
-            timestamp = name_parts[1];
-            resolve();
+        var name_parts, new_card_added = false;
+        if (coll.id) {
+          getFile(coll.id).then(function(file) {
+            downloadFile(file).then(function(data){
+              var coll_ = JSON.parse(data);
+              if (coll.card_ids) {
+                coll.card_ids.forEach(function(card_id) {
+                  if (coll_.card_ids.indexOf(card_id)) {
+                    new_card_added = true;
+                  }
+                });
+              } else {
+                coll.card_ids = coll_.card_ids;
+              }
+              if (new_card_added) {
+                timestamp = cards.util.timestamp();
+              } else {
+                name_parts = file.name.match(/^(\d+)_(.*)/);
+                timestamp = name_parts[1];
+              }
+              resolve();
+            });
           });
         }
-        else {
+        else {  // new coll
           timestamp = cards.util.timestamp();
           resolve();
         }
@@ -515,16 +545,29 @@ cards.gdrive = (function() {
       Promise.all(preparations)
         .then(function() {
           saveFile({
-            name: timestamp + '_' + cards.util.unescape(data_.name) + '.json',
+            name: timestamp + '_' + cards.util.unescape(coll.name) + '.json',
             mimeType: 'application/json',
-            parents: [config.colls_folder_id]
-          }, JSON.stringify(data_), data_.id)
+            parents: ((!coll.id) ? [config.colls_folder_id] : null)
+          }, JSON.stringify(coll), coll.id)
             .then(function(file) {
               // downloadして，checkしたほうが良い?
-              data_.id = file.id;
-              resolve(data_);
+              coll.id = file.id;
+              resolve(coll);
             });
         });
+    });
+    return promise;
+  };
+
+  getCard = function(file_id) {
+    var promise = new Promise(function(resolve, reject) {
+      getFile(file_id).then(function(file) {
+        downloadFile(file).then(function(data) {
+          var card = JSON.parse(data);
+          card.id = file_id;
+          resolve(card);
+        });
+      });
     });
     return promise;
   };
@@ -557,49 +600,134 @@ cards.gdrive = (function() {
     return promise;
   };
 
-  saveCard = function(data_) {
+  deleteCard = function(file_id) {
+    var promise = new Promise(function(resolve, reject) {
+      // remove from colls
+      getCard(file_id).then(function(card) {
+        var updates = [];
+        card.coll_ids.forEach(function(coll_id) {
+          var update = new Promise(function(resolve, reject) {
+            getColl(coll_id).then(function(coll) {
+              var idx = coll.card_ids.indexOf(coll_id);
+              if (idx > -1) {
+                coll.card_ids.splice(idx, 1);
+              }
+              saveColl(coll).then(resolve);
+            });
+          });
+          updates.push(update);
+        });
+
+        Promise.all(updates).then(function(coll_files) {
+          // remove card
+          deleteFile(card.id).then(resolve);
+        });
+      });
+    });
+    return promise;
+  };
+
+  saveCard = function(card) {
     var promise;
     promise = new Promise(function(resolve, reject) {
-      var p, preparations = [], timestamp;
+      var
+      p, preparations = [],
+      timestamp,
+      removed_coll_ids = [], added_coll_ids = []
+      ;
 
       p = new Promise (function(resolve, reject) {
-        // set timestamp
+        // set timestamp and updated coll ids
         var name_parts;
-        if (data_.id) {
-          getFile(data_.id).then(function(file) {
-            name_parts = file.name.match(/^(\d+)_(.*)/);
-            timestamp = name_parts[1];
-            resolve();
+        if (card.id) {
+          getFile(card.id).then(function(file) {
+            downloadFile(file).then(function(data) {
+              var card_ = JSON.parse(data);
+              if (card.title !== card_.title || card.body !== card_.body) {
+                // if changed update timestamp
+                timestamp = cards.util.timestamp();
+              } else {
+                name_parts = file.name.match(/^(\d+)_(.*)/);
+                timestamp = name_parts[1];
+              }
+              // check coll updates
+              card_.coll_ids.forEach(function(coll_id) {
+                if (card.coll_ids.indexOf(coll_id) === -1) {
+                  removed_coll_ids.push(coll_id);
+                }
+              });
+              card.coll_ids.forEach(function(coll_id) {
+                if (card_.coll_ids.indexOf(coll_id) === -1) {
+                  added_coll_ids.push(coll_id);
+                }
+              });
+              resolve();
+            });
           });
         }
-        else {
+        else {  // new card
           timestamp = cards.util.timestamp();
+          removed_coll_ids = [];
+          added_coll_ids = card.coll_ids;
           resolve();
         }
       });
       preparations.push(p);
-
+      
+      // save card
       Promise.all(preparations).then(function() {
-        saveFile({
-          name: timestamp + '_' + cards.util.unescape(data_.title) + '.json',
-          //mimeType: 'application/json',
-          parents: [config.cards_folder_id],
-          indexable_text: [
-            data_.title, data_.body // coll names
-          ].map(cards.util.unescape).join('\n\n')
-        }, JSON.stringify(data_), data_.id)
-          .then(function(file) {
-            // downloadして，checkしたほうが良い?
-            data_.id = file.id;
-            resolve(data_);
+        saveFile(
+          {
+            name: timestamp + '_' + cards.util.unescape(card.title) + '.json',
+            //mimeType: 'application/json',
+            parents: ((!card.id) ? [config.cards_folder_id] : null),
+            indexable_text: [
+              card.title, card.body // coll names
+            ].map(cards.util.unescape).join('\n\n')
+          },
+          JSON.stringify(card), card.id
+        ).then(function(file) {
+          card.id = file.id;
+          // update colls
+          var updates = [];
+          removed_coll_ids.forEach(function(coll_id) {
+            var update = new Promise(function(resolve, reject) {
+              getColl(coll_id).then(function(coll) {
+                var idx = coll.card_ids.indexOf(card.id);
+                if (idx > -1) {
+                  coll.card_ids.splice(idx, 1);
+                }
+                saveColl(coll).then(resolve);
+              });
+            });
+            updates.push(update);
           });
+          added_coll_ids.forEach(function(coll_id) {
+            var update = new Promise(function(resolve, reject) {
+              getColl(coll_id).then(function(coll) {
+                if (coll.type === 'note') {
+                  coll.card_ids.push(card.id);
+                } else {  // tag
+                  coll.card_ids.splice(0, 0, card.id);
+                }
+                saveColl(coll).then(resolve);
+              });
+            });
+            updates.push(update);
+          });
+
+          return Promise.all(updates);
+        }).then(function(coll_files) {
+          console.log('##', coll_files);
+          resolve(card);
+        });
       });
     });
     return promise;
   };
 
   // TODO
-  // deleteColl, deleteCard,
+  // deleteColl
   //searchCards
   // ----------------------------------------------------------------------
   // End cards storage
@@ -614,7 +742,8 @@ cards.gdrive = (function() {
     deleteFile: deleteFile,
     // cards storage
     createAppFolders: createAppFolders,
-    getColls: getColls, saveColl: saveColl,
-    getCards: getCards, saveCard: saveCard
+    getColl: getColl, getColls: getColls, saveColl: saveColl,
+    getCard: getCard, getCards: getCards, saveCard: saveCard,
+    deleteCard: deleteCard
   };
 }());

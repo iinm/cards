@@ -148,7 +148,8 @@ cards.model = (function() {
         var promise;
         promise = new Promise(function(resolve, reject) {
           // delete from fake storage
-          cards.fake.deleteCard(self.get('id')).then(function(card_id) {
+          //cards.fake.deleteCard(self.get('id')).then(function(card_id) {
+          cards.gdrive.deleteCard(self.get('id')).then(function(card_id) {
             // update models
             self.get('colls').each(function(coll) {
               coll.get('cards').remove(card_id);
@@ -254,7 +255,8 @@ cards.model = (function() {
           }
 
           // save to fake storage
-          cards.fake.saveColl(data_).then(function(data_) {
+          //cards.fake.saveColl(data_).then(function(data_) {
+          cards.gdrive.saveColl(data_).then(function(data_) {
             console.log('save coll', data_);
             // update models
             var coll = data.index.get(data_.id);
