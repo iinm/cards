@@ -296,7 +296,8 @@ cards.model = (function() {
         var promise;
         promise = new Promise(function(resolve, reject) {
           // delete from fake storage
-          cards.fake.deleteColl(self.get('id')).then(function(coll_id) {
+          //cards.fake.deleteColl(self.get('id')).then(function(coll_id) {
+          cards.gdrive.deleteColl(self.get('id')).then(function(coll_id) {
             self.destroy_();
             // update models
             // Note: fetchされていないと，special:allが更新されないので，

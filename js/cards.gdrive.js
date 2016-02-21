@@ -503,6 +503,32 @@ cards.gdrive = (function() {
     return promise;
   };
 
+  deleteColl = function(file_id) {
+    var promise = new Promise(function(resolve, reject) {
+      // remove coll from cards
+      getColl(file_id).then(function(coll) {
+        var updates = [];
+        coll.card_ids.forEach(function(card_id) {
+          var update = new Promise(function(resolve, reject) {
+            getCard(card_id).then(function(card) {
+              var idx = card.coll_ids.indexOf(coll.id);
+              if (idx > -1) {
+                card.coll_ids.splice(idx, 1);
+              }
+              saveCard(card).then(resolve);
+            });
+          });
+          updates.push(update);
+        });
+
+        Promise.all(updates).then(function(card_files) {
+          deleteFile(coll.id).then(resolve);
+        });
+      });
+    });
+    return promise;
+  };
+
   saveColl = function(coll) {
     // cards.gdrive.saveColl({name: 'star wars', card_ids: [], type: 'tag'})
     var promise;
@@ -725,9 +751,7 @@ cards.gdrive = (function() {
     });
     return promise;
   };
-
   // TODO
-  // deleteColl
   //searchCards
   // ----------------------------------------------------------------------
   // End cards storage
@@ -744,6 +768,6 @@ cards.gdrive = (function() {
     createAppFolders: createAppFolders,
     getColl: getColl, getColls: getColls, saveColl: saveColl,
     getCard: getCard, getCards: getCards, saveCard: saveCard,
-    deleteCard: deleteCard
+    deleteCard: deleteCard, deleteColl: deleteColl
   };
 }());
