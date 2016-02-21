@@ -9,6 +9,7 @@
 cards.util = (function() {
   "use strict";
   var
+  partition,
   cloneObj, updateObj, cloneUpdateObj,
   createElements, appendChildren, createElement, escape, unescape,
   getPxPerEm,
@@ -17,6 +18,18 @@ cards.util = (function() {
   $http,
   timestamp
   ;
+
+  partition = function(array, size) {
+    var parts = [], i;
+    for (i = 0; i < array.length; i += size) {
+      parts.push(array.slice(i, i + size));
+    }
+    return parts;
+  };
+
+  timestamp = function() {
+    return Math.floor(Date.now() / 1000);
+  };
 
   cloneObj = function(obj) {
     var obj_clone = {}, key;
@@ -180,11 +193,10 @@ cards.util = (function() {
     };
   };  // $http
 
-  timestamp = function() {
-    return Math.floor(Date.now() / 1000);
-  };
-
   return {
+    partition: partition,
+    timestamp: timestamp,
+ 
     cloneObj: cloneObj,
     updateObj: updateObj,
     cloneUpdateObj: cloneUpdateObj,
@@ -199,7 +211,6 @@ cards.util = (function() {
     makeAnchorMap: makeAnchorMap,
     setAnchor: setAnchor,
 
-    $http: $http,
-    timestamp: timestamp
+    $http: $http
   };
 }());
