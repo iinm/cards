@@ -129,7 +129,8 @@ cards.model = (function() {
           };
 
           if (is_changed(data_)) {
-            cards.fake.saveCard(data_).then(function(data_) {
+            //cards.fake.saveCard(data_).then(function(data_) {
+            cards.gdrive.saveCard(data_).then(function(data_) {
               console.log('save card', data_);
               var card = update_models(data_);
               resolve(card);

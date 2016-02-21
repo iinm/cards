@@ -140,9 +140,15 @@ cards.gdrive = (function() {
       request.execute(function(resp) {
         console.log('listFiles:', resp);
         resp.files.forEach(function(file) {
+          var file_;
           console.log('found:', file);
           // cache
-          localStorage[file.id] = JSON.stringify(file);
+          if (localStorage[file.id]) {
+            file_ = JSON.parse(localStorage[file.id]);
+          }
+          if (!file_ || (file_ && file_.modifiedTime !== file.modifiedTime)) {
+            localStorage[file.id] = JSON.stringify(file);
+          }
         });
         resolve(resp);
       });
@@ -173,7 +179,7 @@ cards.gdrive = (function() {
 
   getFile = function(file_id) {
     var promise = new Promise(function(resolve, reject) {
-      var request, file;
+      var request, file, file_;
       if (localStorage[file_id]) {
         file = JSON.parse(localStorage[file_id]);
         console.log('getFile: from cache', file);
@@ -190,7 +196,12 @@ cards.gdrive = (function() {
         request.execute(function(file) {
           console.log('getFile:', file);
           // cache
-          localStorage[file.id] = JSON.stringify(file);
+          if (localStorage[file.id]) {
+            file_ = JSON.parse(localStorage[file.id]);
+          }
+          if (!file_ || (file_ && file_.modifiedTime !== file.modifiedTime)) {
+            localStorage[file.id] = JSON.stringify(file);
+          }
           resolve(file);
         });
       }
@@ -202,10 +213,12 @@ cards.gdrive = (function() {
     // Note: file obj must be retrieved before download
     // https://developers.google.com/drive/v3/web/manage-downloads
     var promise = new Promise(function(resolve, reject) {
-      var request, data;
-      //if (false) {
-      if (file.content) {
-        data = file.content;
+      var request, data, file_;
+      if (localStorage[file.id]) {
+        file_ = JSON.parse(localStorage[file.id]);
+      }
+      if (file_.content) {
+        data = file_.content;
         console.log('getFile: from cache', data);
         resolve(data);
       }
