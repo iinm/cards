@@ -9,6 +9,7 @@
 cards.util = (function() {
   "use strict";
   var
+  utf8_to_b64, b64_to_utf8, to_unicode,
   partition,
   cloneObj, updateObj, cloneUpdateObj,
   createElements, appendChildren, createElement, escape, unescape,
@@ -18,6 +19,26 @@ cards.util = (function() {
   $http,
   timestamp
   ;
+
+  to_unicode = function(str) {
+    var i, code, u_str = '';
+    for (i = 0; i < str.length; i++) {
+      code = str.charCodeAt(i).toString(16).toUpperCase();
+      while (code.length < 4) {
+        code = '0' + code;
+      }
+      u_str += '\\u' + code;
+    }
+    return u_str;
+  };
+
+  utf8_to_b64 = function(str) {
+    return window.btoa( unescape(encodeURIComponent( str )) );
+  };
+
+  b64_to_utf8 = function(str) {
+    return decodeURIComponent( escape(window.atob( str )) );
+  };
 
   partition = function(array, size) {
     var parts = [], i;
@@ -194,6 +215,10 @@ cards.util = (function() {
   };  // $http
 
   return {
+    utf8_to_b64: utf8_to_b64,
+    b64_to_utf8: b64_to_utf8,
+    to_unicode: to_unicode,
+    
     partition: partition,
     timestamp: timestamp,
  

@@ -203,8 +203,9 @@ cards.gdrive = (function() {
     // https://developers.google.com/drive/v3/web/manage-downloads
     var promise = new Promise(function(resolve, reject) {
       var request, data;
-      if (localStorage[file.id + '_content']) {
-        data = localStorage[file.id + '_content'];
+      //if (false) {
+      if (file.content) {
+        data = file.content;
         console.log('getFile: from cache', data);
         resolve(data);
       }
@@ -214,14 +215,25 @@ cards.gdrive = (function() {
           method: 'GET',
         });
         request.execute(function(jsonResp, rawResp) {
-          //console.log(arguments);
+          //console.log('getFile resp:', arguments);
+          //if (!jsonResp && !jsonResp.error) {
           if (!jsonResp.error) {
             data = JSON.parse(rawResp).gapiRequest.data.body;
+            // TODO: ?
+            data = decodeURIComponent(data);
             console.log('getFile:', data);
             // cache
-            localStorage[file.id + '_content'] = data;
+            //localStorage[file.id + '_content'] = data;
+            file.content = data;
+            localStorage[file.id] = JSON.stringify(file);
             resolve(data);
           }
+          //else if (!jsonResp.error) {
+          //  console.log('getFile:', jsonResp);
+          //  // cache
+          //  localStorage[file.id + '_content'] = JSON.stringify(jsonResp);
+          //  resolve(jsonResp);
+          //}
           else {
             console.log('getFile: error', jsonResp);
             reject();
@@ -243,7 +255,7 @@ cards.gdrive = (function() {
           resolve(data_array);
         }
         else {
-          console.log('parts', parts[0]);
+          //console.log('parts', parts[0]);
           parts[0].forEach(function(file) {
             downloads.push(downloadFile(file));
           });
@@ -336,10 +348,13 @@ cards.gdrive = (function() {
         delete metadata.indexable_text;
       }
 
-      base64data = btoa(content);
+      // TODO: ?
+      base64data = cards.util.utf8_to_b64(content);
+      //base64data = btoa(content);
+
       multipartRequestBody = (
         delimiter +
-        'Content-Type: application/json\r\n\r\n' +
+        'Content-Type: application/json; charset=UTF-8\r\n\r\n' +
         JSON.stringify(metadata) +
         delimiter +
         'Content-Type: ' + metadata.mimeType + '\r\n' +
@@ -446,8 +461,17 @@ cards.gdrive = (function() {
         orderBy: 'name desc'
       };
       listFilesAll(params)
-        .then(downloadFiles)
-        .then(function(data_array) { resolve(data_array.map(JSON.parse)); });
+        .then(function(files) {
+          downloadFiles(files).then(function(data_array) {
+            var i, coll, colls = [];
+            for (i = 0; i < files.length; i++) {
+              coll = JSON.parse(data_array[i]);
+              coll.id = files[i].id;
+              colls.push(coll);
+            }
+            resolve(colls);
+          });
+        });
     });
     return promise;
   };
@@ -493,6 +517,7 @@ cards.gdrive = (function() {
   };
 
   getCards = function(coll_id, pageToken) {
+    // cards.gdrive.getCards('special:all').then(function(cards_) { cards_.forEach(function(card) { cards.gdrive.deleteFile(card.id) }); });
     var promise = new Promise(function(resolve, reject) {
       var params;
       if (coll_id === 'special:all') {
@@ -502,7 +527,18 @@ cards.gdrive = (function() {
           ),
           orderBy: 'name desc'
         };
-        listFilesAll(params).then(downloadFiles).then(resolve);
+        listFilesAll(params)
+          .then(function(files) {
+            downloadFiles(files).then(function(data_array) {
+              var i, card, cards_ = [];
+              for (i = 0; i < files.length; i++) {
+                card = JSON.parse(data_array[i]);
+                card.id = files[i].id;
+                cards_.push(card);
+              }
+              resolve(cards_);
+            });
+          });
       }
     });
     return promise;
@@ -511,32 +547,40 @@ cards.gdrive = (function() {
   saveCard = function(data_) {
     var promise;
     promise = new Promise(function(resolve, reject) {
-      var timestamp, file, name_parts, indexable_coll_names = '';
+      var p, preparations = [], timestamp;
 
-      if (data_.id) {
-        file = getFile(data_.id);
-        name_parts = file.name.match(/^(\d+)_(.*)/);
-        timestamp = name_parts[1];
-      }
-      timestamp = timestamp || cards.util.timestamp();
-
-      data_.coll_ids.forEach(function(coll_id) {
-
+      p = new Promise (function(resolve, reject) {
+        // set timestamp
+        var name_parts;
+        if (data_.id) {
+          getFile(data_.id).then(function(file) {
+            name_parts = file.name.match(/^(\d+)_(.*)/);
+            timestamp = name_parts[1];
+            resolve();
+          });
+        }
+        else {
+          timestamp = cards.util.timestamp();
+          resolve();
+        }
       });
+      preparations.push(p);
 
-      saveFile({
-        name: timestamp + '_' + cards.util.unescape(data_.title) + '.json',
-        mimeType: 'application/json',
-        parents: [config.cards_folder_id],
-        indexable_text: [
-          data_.title, data_.body // coll names
-        ].map(cards.util.unescape).join('\n\n')
-      }, JSON.stringify(data_), data_.id)
-        .then(function(file) {
-          // downloadして，checkしたほうが良い?
-          data_.id = file.id;
-          resolve(data_);
-        });
+      Promise.all(preparations).then(function() {
+        saveFile({
+          name: timestamp + '_' + cards.util.unescape(data_.title) + '.json',
+          //mimeType: 'application/json',
+          parents: [config.cards_folder_id],
+          indexable_text: [
+            data_.title, data_.body // coll names
+          ].map(cards.util.unescape).join('\n\n')
+        }, JSON.stringify(data_), data_.id)
+          .then(function(file) {
+            // downloadして，checkしたほうが良い?
+            data_.id = file.id;
+            resolve(data_);
+          });
+      });
     });
     return promise;
   };
