@@ -124,6 +124,7 @@ cards.gdrive = (function() {
     // set default
     // https://developers.google.com/drive/v3/reference/files#resource
     var promise = new Promise(function(resolve, reject) {
+      var request;
       params = params || {};
       params.spaces = ['appDataFolder'];
       if (!params.fields) {
@@ -132,8 +133,8 @@ cards.gdrive = (function() {
             "files(id, name, createdTime, modifiedTime)"
         );
       }
-      if (!params.pageSize) params.pageSize = 10;
-      var request = gapi.client.drive.files.list(params);
+      if (!params.pageSize) params.pageSize = 20;
+      request = gapi.client.drive.files.list(params);
       request.execute(function(resp) {
         console.log('listFiles:', resp);
         resp.files.forEach(function(file) {
@@ -374,7 +375,7 @@ cards.gdrive = (function() {
     return promise;
   };
 
-  getColls = function(files, nextPageToken) {
+  getColls = function(files, pageToken) {
     // get all collections
     var promise = new Promise(function(resolve, reject) {
       var params, downloads;
@@ -384,7 +385,7 @@ cards.gdrive = (function() {
         ),
         orderBy: 'name desc'
       };
-      if (nextPageToken) { params.nextPageToken = nextPageToken };
+      if (pageToken) { params.pageToken = pageToken };
       listFiles(params)
         .then(function(resp) {
           if (!files) {
@@ -393,8 +394,7 @@ cards.gdrive = (function() {
             files = files.concat(resp.files);
           }
           if (resp.nextPageToken) {
-            // TODO: check if this works
-            return getColls(files, resp.nextPageToken);
+            getColls(files, resp.nextPageToken).then(resolve);
           } else {
             resolve(files);
           }
