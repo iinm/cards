@@ -10,7 +10,7 @@ cards.util = (function() {
   "use strict";
   var
   cloneObj, updateObj, cloneUpdateObj,
-  createElements, appendChildren, createElement,
+  createElements, appendChildren, createElement, escape, unescape,
   getPxPerEm,
   formatTmpl,
   makeAnchorMap, setAnchor,
@@ -56,6 +56,18 @@ cards.util = (function() {
 
   createElement = function(html) {
     return createElements(html)[0];
+  };
+
+  escape = function(text) {
+    var div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  };
+
+  unescape = function(html) {
+    var div = document.createElement('div');
+    div.innerHTML = html;
+    return div.textContent;
   };
 
   getPxPerEm = function(el) {
@@ -175,6 +187,7 @@ cards.util = (function() {
     createElements: createElements,
     appendChildren: appendChildren,
     createElement: createElement,
+    escape: escape, unescape: unescape,
     getPxPerEm: getPxPerEm,
     formatTmpl: formatTmpl,
 
