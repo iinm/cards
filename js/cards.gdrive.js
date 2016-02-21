@@ -308,7 +308,8 @@ cards.gdrive = (function() {
   // ----------------------------------------------------------------------
   // End Google Drive API
 
-  //
+  // Begin cards storage
+  // ----------------------------------------------------------------------
   createAppFolders = function() {
     // create or check app folders and set folder ids
     var promise = new Promise(function(resolve, reject) {
@@ -348,12 +349,44 @@ cards.gdrive = (function() {
     return promise;
   };
 
+  getColls = function(files, nextPageToken) {
+    // get all collections
+    var promise = new Promise(function(resolve, reject) {
+      var params = { q: "'" + config.colls_folder_id + "'" + " in parents" };
+      if (nextPageToken) { params.nextPageToken = nextPageToken };
+      listFiles(params)
+        .then(function(resp) {
+          if (!files) {
+            files = resp.files;
+          } else {
+            files = files.concat(resp.files);
+          }
+          if (resp.nextPageToken) {
+            // TODO: check if this works
+            return getColls(files, resp.nextPageToken);
+          } else {
+            resolve(files);
+          }
+        });
+    });
+    return promise;
+  };
+
+  // TODO
+  // getCards, saveColl, saveCard, deleteColl, deleteCard,
+  //searchCards
+  // ----------------------------------------------------------------------
+  // End cards storage
+
+
   return {
     init: init,
     // expose to test
     listFiles: listFiles, getFile: getFile, downloadFile: downloadFile,
     createFolder: createFolder, saveFile: saveFile, trashFile: trashFile,
     deleteFile: deleteFile,
-    createAppFolders: createAppFolders
+    // cards storage
+    createAppFolders: createAppFolders,
+    getColls: getColls
   };
 }());
