@@ -781,8 +781,9 @@ cards.gdrive = (function() {
   // End cards storage
 
   avadakedavra = function() {
+    var params = { spaces: ['appDataFolder'] };
     // delete all data
-    listFilesAll().then(function(files) {
+    listFilesAll(params).then(function(files) {
       files.forEach(function(file) {
         deleteFile(file.id).then();
       });
