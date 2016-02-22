@@ -9,6 +9,7 @@
 cards.util = (function() {
   "use strict";
   var
+  partitionPromiseAll,
   utf8_to_b64, b64_to_utf8, to_unicode,
   partition,
   cloneObj, updateObj, cloneUpdateObj,
@@ -19,6 +20,27 @@ cards.util = (function() {
   $http,
   timestamp
   ;
+
+  partitionPromiseAll = function(promise_generators, partition_size) {
+    var promise_part;
+    partition_size = partition_size || promise_generators.length;
+    promise_part = function(parts, values) {
+      var promise = new Promise(function(resolve, reject) {
+        if (parts.length === 0) {
+          resolve(values)
+        }
+        else {
+          Promise.all(parts[0].map(function(generate) { return generate(); }))
+            .then(function(values_) {
+              promise_part(parts.slice(1), values.concat(values_))
+                .then(resolve);
+            });
+        }
+      });
+      return promise;
+    };
+    return promise_part(partition(promise_generators, partition_size), []);
+  };
 
   to_unicode = function(str) {
     var i, code, u_str = '';
@@ -215,6 +237,8 @@ cards.util = (function() {
   };  // $http
 
   return {
+    partitionPromiseAll: partitionPromiseAll,
+    
     utf8_to_b64: utf8_to_b64,
     b64_to_utf8: b64_to_utf8,
     to_unicode: to_unicode,

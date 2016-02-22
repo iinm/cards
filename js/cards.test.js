@@ -8,7 +8,11 @@
 
 cards.test = (function () {
   "use strict";
-  var toggleAnnot, onModelChange, createCards;
+  var
+  toggleAnnot, onModelChange,
+  createCards,
+  testPartitionPromise
+  ;
 
   toggleAnnot = function(state) {
     var nav = document.querySelector('.cards-nav');
@@ -53,7 +57,26 @@ cards.test = (function () {
     }
   };
 
+  testPartitionPromise = function() {
+    var i, generator, generators = [];
+    for (i = 0; i < 20; i++) {
+      generator = function(i) {
+        return function() {
+          return new Promise(function(resolve, reject) {
+            console.log(i.toString());
+            setTimeout(resolve, 300, i.toString());
+          });
+        };
+      };
+      generators.push(generator(i));
+    }
+    cards.util.partitionPromiseAll(generators, 2).then(function(values) {
+      console.log(values);
+    });
+  };
+
   return {
+    testPartitionPromise: testPartitionPromise,
     toggleAnnot: toggleAnnot,
     onModelChange: onModelChange,
     createCards: createCards
