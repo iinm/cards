@@ -8,13 +8,15 @@
 
 cards.model = (function() {
   var
+  config = { storage: null },
   models = {},
   data = {
     index: null,  // index of coll
     cards: null,  // cache to share card model
     all: null  // top
   },
-  init, getIndex, createCard, createColl, getSearch
+  init, configure,
+  getIndex, createCard, createColl, getSearch
   ;
 
   // define models
@@ -118,7 +120,7 @@ cards.model = (function() {
         promise = new Promise(function(resolve, reject) {
           var data_, coll_ids = [];
 
-          // 1. save to (fake) storage
+          // 1. save to storage
           self.get('colls').each(function(coll) {
             coll_ids.push(coll.get('id'));
           });
@@ -132,7 +134,8 @@ cards.model = (function() {
 
           if (is_changed(data_)) {
             //cards.fake.saveCard(data_).then(function(data_) {
-            cards.gdrive.saveCard(data_).then(function(data_) {
+            //cards.gdrive.saveCard(data_).then(function(data_) {
+            config.storage.saveCard(data_).then(function(data_) {
               console.log('save card', data_);
               var card = update_models(data_);
               resolve(card);
@@ -149,9 +152,10 @@ cards.model = (function() {
       self.destroy = function() {
         var promise;
         promise = new Promise(function(resolve, reject) {
-          // delete from fake storage
+          // delete from storage
           //cards.fake.deleteCard(self.get('id')).then(function(card_id) {
-          cards.gdrive.deleteCard(self.get('id')).then(function(card_id) {
+          //cards.gdrive.deleteCard(self.get('id')).then(function(card_id) {
+          config.storage.deleteCard(self.get('id')).then(function(card_id) {
             // update models
             self.get('colls').each(function(coll) {
               coll.get('cards').remove(card_id);
@@ -221,7 +225,8 @@ cards.model = (function() {
           else {
             console.log('fetch: ' + self.get('name'), self.get('next_page_token'));
             //cards.fake.getCards(self.get('id'), last_card_id).then(
-            cards.gdrive.getCards(self.get('id'), self.get('next_page_token'))
+            //cards.gdrive.getCards(self.get('id'), self.get('next_page_token'))
+            config.storage.getCards(self.get('id'), self.get('next_page_token'))
               //.then(function(card_array, next_page_token) {
               .then(function(resp) {
                 add_cards(resp.card_array);
@@ -263,7 +268,8 @@ cards.model = (function() {
 
           // save to fake storage
           //cards.fake.saveColl(data_).then(function(data_) {
-          cards.gdrive.saveColl(data_).then(function(data_) {
+          //cards.gdrive.saveColl(data_).then(function(data_) {
+          config.storage.saveColl(data_).then(function(data_) {
             console.log('save coll', data_);
             // update models
             var coll = data.index.get(data_.id);
@@ -304,7 +310,8 @@ cards.model = (function() {
         promise = new Promise(function(resolve, reject) {
           // delete from fake storage
           //cards.fake.deleteColl(self.get('id')).then(function(coll_id) {
-          cards.gdrive.deleteColl(self.get('id')).then(function(coll_id) {
+          //cards.gdrive.deleteColl(self.get('id')).then(function(coll_id) {
+          config.storage.cards.gdrive.deleteColl(self.get('id')).then(function(coll_id) {
             self.destroy_();
             // update models
             // Note: fetchされていないと，special:allが更新されないので，
@@ -367,7 +374,8 @@ cards.model = (function() {
             }
             self.set({ searching: true });
             //cards.fake.search(query, last_card_id).then(function(data_array) {
-            cards.gdrive.searchCards(query, self.get('next_page_token'))
+            //cards.gdrive.searchCards(query, self.get('next_page_token'))
+            config.storage.searchCards(query, self.get('next_page_token'))
               .then(function(resp) {
                 self.set({
                   searching: false, query: query,
@@ -397,6 +405,10 @@ cards.model = (function() {
     return { create: create };
   }());  // models.search
 
+  configure = function(kv_map) {
+    cards.util.updateObj(config, kv_map);
+  };
+
   init = function() {
     var promise;
     promise = new Promise(function(resolve, reject) {
@@ -413,8 +425,9 @@ cards.model = (function() {
       data.index.add(data.all);
 
       // create colls (tags and notes)
-      //cards.fake.getCollections()
-      cards.gdrive.getColls()
+      //cards.fake.getColls()
+      //cards.gdrive.getColls()
+      config.storage.getColls()
         .then(function(coll_array) {
           coll_array.forEach(function(data_) {
             var coll = models.coll.create(data_);
@@ -444,7 +457,7 @@ cards.model = (function() {
   };
 
   return {
-    init: init,
+    init: init, configure: configure,
     models: models,
     getIndex: getIndex,
     getSearch: getSearch,

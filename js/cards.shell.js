@@ -124,6 +124,8 @@ cards.shell = (function() {
     // animate while initializing model
     nav_el.classList.add('annot-saving');
 
+    console.log(cards);
+    cards.model.configure({ storage: cards.gdrive || cards.fake });
     cards.model.init().then(function() {
       data.index = cards.model.getIndex();
 

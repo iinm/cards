@@ -20,9 +20,6 @@
 
     <script type="text/javascript" src="js/cards.js"></script>
     <script type="text/javascript" src="js/cards.util.js"></script>
-    <!-- fake storage -->
-    <script type="text/javascript" src="js/cards.fake.js"></script>
-    <script type="text/javascript" src="js/cards.gdrive.js"></script>
     <script type="text/javascript" src="js/cards.model_util.js"></script>
     <script type="text/javascript" src="js/cards.model.js"></script>
     <script type="text/javascript" src="js/cards.view.js"></script>
@@ -30,24 +27,32 @@
     <script type="text/javascript" src="js/cards.nav.js"></script>
     <script type="text/javascript" src="js/cards.content.js"></script>
     <script type="text/javascript" src="js/cards.editor.js"></script>
+    <!-- fake storage for demo -->
+    <!-- <script type="text/javascript" src="js/cards.fake.js"></script>
+         <script type="text/javascript" src="js/cards.gdrive.js"></script> -->
     <!-- for test -->
     <script type="text/javascript" src="js/cards.test.js"></script>
     <script type="text/javascript">
-     function init() {
-       var state = document.readyState;
-       if (state === 'interactive' || state === 'complete') {
-         cards.gdrive.init();
-       }
-       else {
-         document.addEventListener('DOMContentLoaded', function(event) {
-           //var container = document.getElementById('cards');
-           //cards.init(container);
-           cards.gdrive.init();
-         });
-       }
+     if ((/\/demo\/?$/).test(window.location.pathname)) {
+       // load fake storage
+       cards.util.loadJSfile('js/cards.fake.js');
+       // Note: init App from cards.fake.js
+       //document.addEventListener('DOMContentLoaded', function(event) {
+       //  var container = document.getElementById('cards');
+       //  cards.init(container);
+       //});
+     }
+     else {
+       // load module to use Google Drive
+       cards.util.loadJSfile('js/cards.gdrive.js');
+       // load Google api client
+       cards.util.loadJSfile(
+         // Note: __init is defined in cards.gdrive.js
+         'https://apis.google.com/js/client.js?onload=__init'
+       );
      }
     </script>
-    <script src="https://apis.google.com/js/client.js?onload=init"></script>
+    <!-- <script src="https://apis.google.com/js/client.js?onload=__init"></script> -->
   </head>
 
   <body>
@@ -147,15 +152,13 @@
               Hello, World!
             </div>
             <div class="start-menu">
-              <div class="cards-sign-in">
-                Sign in with Google
-              </div>
+              <div class="cards-sign-in">Sign in with Google</div>
               <br>
               or
               <br>
-              <div class="cards-try-demo">
-                Try Demo
-              </div>
+              <a href="demo">
+                <div class="cards-try-demo">Try Demo</div>
+              </a>
             </div>
           </div>
         </div>

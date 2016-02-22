@@ -9,10 +9,25 @@
 cards.fake = (function() {
   "use strict";
   var
+  init,
   cards_ = {}, colls = {}, card_ids, coll_ids, num_card, num_coll,
-  getCollections, saveColl, deleteColl,
-  getCards, saveCard, deleteCard, search
+  getColls, saveColl, deleteColl,
+  getCards, saveCard, deleteCard, searchCards
   ;
+
+  init = function() {
+    var container, state = document.readyState;
+    if (state === 'interactive' || state === 'complete') {
+      container = document.getElementById('cards');
+      cards.init(container);
+    }
+    else {
+      document.addEventListener('DOMContentLoaded', function(event) {
+        container = document.getElementById('cards');
+        cards.init(container);
+      });
+    }
+  };
 
   card_ids = [
     'card_01', 'card_02', 'card_03', 'card_04', 'card_05', 'card_06', 'card_07',
@@ -238,7 +253,7 @@ cards.fake = (function() {
   //   ['card_', 'coll_'], ...
   // ];
 
-  getCollections = function() {
+  getColls = function() {
     var promise;
     promise = new Promise(function(resolve, reject) {
       var i, reversed = [];
@@ -290,10 +305,10 @@ cards.fake = (function() {
     return promise;
   };
 
-  getCards = function(coll_id, last_card_id) {
+  getCards = function(coll_id, start_card_id) {
     var promise;
     promise = new Promise(function(resolve, reject) {
-      var card_id, card_array_ = [], start_idx = 0;
+      var card_id, card_array_ = [], start_idx = 0, next_card_id;
 
       if (coll_id === 'special:all') {
         card_ids.forEach(function(card_id) {
@@ -308,13 +323,16 @@ cards.fake = (function() {
       }
       // simulate pagination
       if (coll_id === 'special:all' || colls[coll_id].type === 'tag') {
-        if (last_card_id) {
-          start_idx = card_array_.indexOf(cards_[last_card_id]) + 1;
+        if (start_card_id) {
+          start_idx = card_array_.indexOf(cards_[start_card_id]);
         }
         card_array_ = card_array_.slice(start_idx, start_idx + 10);
+        next_card_id = card_array_[start_idx + 10];
       }
 
-      setTimeout(function() { resolve(card_array_); }, 700);
+      setTimeout(
+        resolve, 700, { card_array: card_array_, next_page_token: next_card_id }
+      );
     });
     return promise;
   };
@@ -336,12 +354,10 @@ cards.fake = (function() {
           card_ids.splice(card_ids.indexOf(data_.id), 1);
           card_ids.push(data_.id);
         }
-        //
+        // remove card from coll
         cards_[data_.id].coll_ids.forEach(function(coll_id) {
-          if (colls[coll_id].type === 'note'
-              && data_.coll_ids.indexOf(coll_id) === -1
-             ) {
-            // remove card from note
+          if (data_.coll_ids.indexOf(coll_id) === -1) {
+            // remove card from note/tag
             colls[coll_id].card_ids.splice(
               colls[coll_id].card_ids.indexOf(data_.id), 1
             );
@@ -350,13 +366,14 @@ cards.fake = (function() {
       }
       cards_[data_.id] = data_;
 
-      // update coll
+      // add card to coll
       data_.coll_ids.forEach(function(coll_id) {
         var coll = colls[coll_id];
         if (coll.type === 'note' && coll.card_ids.indexOf(data_.id) === -1) {
           coll.card_ids.push(data_.id);
         }
         else if (coll.type === 'tag' && coll.card_ids.indexOf(data_.id) === -1 ) {
+          // TODO: bodyが更新された場合も先頭にするんじゃなかった？
           coll.card_ids.splice(0, 0, data_.id);
         }
       });
@@ -387,10 +404,10 @@ cards.fake = (function() {
     return promise;
   };
 
-  search = function(query, last_card_id) {
+  searchCards = function(query, start_card_id) {
     var promise;
     promise = new Promise(function(resolve, reject) {
-      var i, result = [], card, start_idx = 0;
+      var i, result = [], card, start_idx = 0, next_card_id;
       query = query.toLowerCase();
       for (i = card_ids.length - 1; i >= 0; i--) {
         card = cards_[card_ids[i]];
@@ -401,23 +418,29 @@ cards.fake = (function() {
         }
       }
       // simulate pagination
-      if (last_card_id) {
-        start_idx = result.indexOf(cards_[last_card_id]) + 1;
+      if (start_card_id) {
+        start_idx = result.indexOf(cards_[start_card_id]);
       }
       result = result.slice(start_idx, start_idx + 10);
+      next_card_id = result[start_idx + 10];
 
-      setTimeout(function() { resolve(result); }, 700);
+      setTimeout(
+        resolve, 700, { card_array: result, next_page_token: next_card_id }
+      );
     });
     return promise;
   };
 
   return {
-    getCollections: getCollections,
+    init: init,
+    getColls: getColls,
     saveColl: saveColl,
     deleteColl: deleteColl,
     getCards: getCards,
     saveCard: saveCard,
     deleteCard: deleteCard,
-    search: search
+    search: searchCards
   };
 }());
+
+cards.fake.init();

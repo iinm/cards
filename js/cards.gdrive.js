@@ -938,3 +938,15 @@ cards.gdrive = (function() {
     avadakedavra: avadakedavra
   };
 }());
+
+__init = function() {
+  var state = document.readyState;
+  if (state === 'interactive' || state === 'complete') {
+    cards.gdrive.init();
+  }
+  else {
+    document.addEventListener('DOMContentLoaded', function(event) {
+      cards.gdrive.init();
+    });
+  }
+};

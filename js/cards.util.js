@@ -9,6 +9,7 @@
 cards.util = (function() {
   "use strict";
   var
+  loadJSfile,
   partitionPromiseAll,
   utf8_to_b64, b64_to_utf8, to_unicode,
   partition,
@@ -20,6 +21,13 @@ cards.util = (function() {
   $http,
   timestamp
   ;
+
+  loadJSfile = function(src) {
+    var el = document.createElement('script');
+    el.setAttribute('type', 'text/javascript');
+    el.setAttribute('src', src);
+    return document.getElementsByTagName('head')[0].appendChild(el);
+  };
 
   partitionPromiseAll = function(promise_generators, partition_size) {
     var promise_part;
@@ -237,6 +245,8 @@ cards.util = (function() {
   };  // $http
 
   return {
+    loadJSfile: loadJSfile,
+
     partitionPromiseAll: partitionPromiseAll,
     
     utf8_to_b64: utf8_to_b64,
