@@ -110,6 +110,9 @@ cards.gdrive = (function() {
       localStorage.google_oauth_token = JSON.stringify(authResult);
       // Hide auth UI, then load client library.
       dom.greeting.classList.add('hide');
+      setTimeout(function() {
+        dom.greeting.classList.add('cards-util-hide');
+      }, 500);
       gapi.client.load('drive', 'v3', function() {
         // init App
         initApp();
