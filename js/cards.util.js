@@ -35,7 +35,7 @@ cards.util = (function() {
     promise_part = function(parts, values) {
       var promise = new Promise(function(resolve, reject) {
         if (parts.length === 0) {
-          resolve(values)
+          resolve(values);
         }
         else {
           Promise.all(parts[0].map(function(generate) { return generate(); }))
