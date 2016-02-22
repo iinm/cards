@@ -13,7 +13,7 @@
   regexp : true, sloppy  : true, vars     : false,
   white  : true
 */
-/*global cards, Promise */
+/*global cards, Promise, gapi */
 
 cards.gdrive = (function() {
   "use strict";
@@ -100,7 +100,6 @@ cards.gdrive = (function() {
 
   handleAuthResult = function(authResult) {
     // Handle response from authorization server.
-    var authorizeDiv = document.getElementById('authorize-div');
     if (authResult && !authResult.error) {
       // save token to localstorage
       localStorage.google_oauth_token = JSON.stringify(authResult);
@@ -225,7 +224,7 @@ cards.gdrive = (function() {
           resolve(files);
         }
         else {
-          Promise.all(part[0].map(getFile))
+          Promise.all(parts[0].map(getFile))
             .then(function(files_) {
               get_part(parts.slice(1), files.concat(files_))
                 .then(resolve);
