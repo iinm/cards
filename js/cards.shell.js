@@ -130,6 +130,7 @@ cards.shell = (function() {
       data.index = cards.model.getIndex();
 
       cards.nav.configure({
+        demo: ((!cards.gdrive) ? true : false),
         set_nav_anchor: setNavAnchor,
         set_content_anchor: setContentAnchor,
         index: data.index,

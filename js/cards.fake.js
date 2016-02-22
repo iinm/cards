@@ -17,6 +17,11 @@ cards.fake = (function() {
 
   init = function() {
     var container, state = document.readyState;
+    // remove unused data for demo
+    card_ids = ['card_23', 'card_24', 'card_26', 'card_25', 'card_22'];
+    coll_ids = ['note_01'];
+
+    // init App
     if (state === 'interactive' || state === 'complete') {
       container = document.getElementById('cards');
       cards.init(container);
@@ -29,6 +34,7 @@ cards.fake = (function() {
     }
   };
 
+  // fake data for test
   card_ids = [
     'card_01', 'card_02', 'card_03', 'card_04', 'card_05', 'card_06', 'card_07',
     'card_08', 'card_09', 'card_10', 'card_11', 'card_12', 'card_13', 'card_14',
@@ -130,6 +136,7 @@ cards.fake = (function() {
     card_16: {
       title: 'note',
       body: "before chroot<br> mount -o bind /dev /mnt/debian/dev<br> mount -t proc none /mnt/debian/proc<br><br> apt-get install lvm2<br> tasksel  # gnome, laptop",
+      id: 'card_16',
       coll_ids: ['note_03']
     },
     card_17: {
@@ -164,7 +171,8 @@ cards.fake = (function() {
     },
     card_22: {
       title: 'Hello World!',
-      body: 'Cardsはモバイルデバイス用のノートアプリです．左上のメニューアイコンをタップして，Cards Helpを覗いてみましょう!',
+      //body: 'Cardsはモバイルデバイス用のノートアプリです．左上のメニューアイコンをタップして，Cards Helpを覗いてみましょう!',
+      body: 'ようこそ．Cardsはモバイルデバイス向けのノートアプリです．',
       id: 'card_22',
       coll_ids: ['note_01']
     },
@@ -176,7 +184,7 @@ cards.fake = (function() {
     },
     card_24: {
       title: 'Tag，Note',
-      body: 'Tag, Noteを使うことで，Cardをグループ化することが出来ます．<br>Tagはその名の通り，Cardをグループ化するだけですが，NoteはCardの順序を保存します．',
+      body: 'Tag, Noteを使うことで，Cardをグループ化することが出来ます．<br>Tagはその名の通り，Cardをグループ化するだけですが，NoteはCardの順序を保存して並べ替えることができます．',
       id: 'card_24',
       coll_ids: ['note_01']
     },
@@ -184,7 +192,7 @@ cards.fake = (function() {
       title: 'Warning!',
       body: 'これはCardsのデモ版です．ページをリロードすると，変更が破棄されます．',
       id: 'card_25',
-      coll_ids: []
+      coll_ids: ['note_01']
     },
     card_26: {
       title: 'ホーム画面に追加',
@@ -228,7 +236,7 @@ cards.fake = (function() {
     },
     note_01: {
       name: 'Cards Help', id: 'note_01', type: 'note',
-      card_ids: ['card_22', 'card_23', 'card_24', 'card_26']
+      card_ids: ['card_22', 'card_25', 'card_26', 'card_24', 'card_23']
     },
     note_02: {
       name: 'Rails cheat sheet', id: 'note_02', type: 'note',
@@ -270,7 +278,7 @@ cards.fake = (function() {
     var promise;
     promise = new Promise(function(resolve, reject) {
       if (!data_.id) {  // new coll
-        data_.id = '_coll_' + num_coll;
+        data_.id = 'new_coll_' + num_coll;
         num_coll += 1;
         coll_ids.push(data_.id);
         data_.card_ids = [];
@@ -308,7 +316,7 @@ cards.fake = (function() {
   getCards = function(coll_id, start_card_id) {
     var promise;
     promise = new Promise(function(resolve, reject) {
-      var card_id, card_array_ = [], start_idx = 0, next_card_id;
+      var card_array_ = [], start_idx = 0, next_card_id;
 
       if (coll_id === 'special:all') {
         card_ids.forEach(function(card_id) {
@@ -326,12 +334,15 @@ cards.fake = (function() {
         if (start_card_id) {
           start_idx = card_array_.indexOf(cards_[start_card_id]);
         }
+        next_card_id = (
+          (start_idx + 10 < card_array_.length)
+            ? card_array_[start_idx + 10].id : null
+        );
         card_array_ = card_array_.slice(start_idx, start_idx + 10);
-        next_card_id = card_array_[start_idx + 10];
       }
 
       setTimeout(
-        resolve, 700, { card_array: card_array_, next_page_token: next_card_id }
+        resolve, 700, { card_array: card_array_, nextPageToken: next_card_id }
       );
     });
     return promise;
@@ -340,19 +351,21 @@ cards.fake = (function() {
   saveCard = function(data_) {
     var promise;
     promise = new Promise(function(resolve, reject) {
-      // TODO: handle error
+      var changed = false;
       if (!data_.id) {  // new card
-        data_.id = '_card_' + num_card;
+        data_.id = 'new_card_' + num_card;
         num_card += 1;
         card_ids.push(data_.id);
+        changed = true;
       }
       else {  // update
-        // if title or body is changed -> change order
+        // if title or body is changed -> bring to top
         if (data_.title !== cards_[data_.id].title
             || data_.body !== cards_[data_.id].body
            ) {
           card_ids.splice(card_ids.indexOf(data_.id), 1);
           card_ids.push(data_.id);
+          changed = true;
         }
         // remove card from coll
         cards_[data_.id].coll_ids.forEach(function(coll_id) {
@@ -368,12 +381,13 @@ cards.fake = (function() {
 
       // add card to coll
       data_.coll_ids.forEach(function(coll_id) {
-        var coll = colls[coll_id];
+        var coll = colls[coll_id], idx;
         if (coll.type === 'note' && coll.card_ids.indexOf(data_.id) === -1) {
           coll.card_ids.push(data_.id);
         }
-        else if (coll.type === 'tag' && coll.card_ids.indexOf(data_.id) === -1 ) {
-          // TODO: bodyが更新された場合も先頭にするんじゃなかった？
+        else if (coll.type === 'tag' && changed) {
+          idx = coll.card_ids.indexOf(data_.id);
+          if (idx > -1) { coll.card_ids.splice(idx, 1); }
           coll.card_ids.splice(0, 0, data_.id);
         }
       });
@@ -421,11 +435,13 @@ cards.fake = (function() {
       if (start_card_id) {
         start_idx = result.indexOf(cards_[start_card_id]);
       }
+      next_card_id = (
+        (start_idx + 10 < result.length) ? result[start_idx + 10].id : null
+      );
       result = result.slice(start_idx, start_idx + 10);
-      next_card_id = result[start_idx + 10];
 
       setTimeout(
-        resolve, 700, { card_array: result, next_page_token: next_card_id }
+        resolve, 700, { card_array: result, nextPageToken: next_card_id }
       );
     });
     return promise;
@@ -439,7 +455,7 @@ cards.fake = (function() {
     getCards: getCards,
     saveCard: saveCard,
     deleteCard: deleteCard,
-    search: searchCards
+    searchCards: searchCards
   };
 }());
 

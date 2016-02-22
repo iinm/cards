@@ -216,9 +216,6 @@ cards.model = (function() {
         };
 
         promise = new Promise(function(resolve, reject) {
-          var last, last_card_id;
-          last = self.get('cards').last();
-          last_card_id = (last ? last.get('id') : null);
           if (self.get('fetched') === 'all') {
               resolve();
           }
@@ -355,10 +352,6 @@ cards.model = (function() {
       self.search = function(query) {
         var promise;
         promise = new Promise(function(resolve, reject) {
-          var last, last_card_id;
-          last = self.get('cards').last();
-          last_card_id = (last ? last.get('id') : null);
-
           if (query === null) {
             self.get('cards').reset();
             self.set({ query: query });

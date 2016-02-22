@@ -11,6 +11,7 @@ cards.nav = (function() {
   var
   config = {
     self_selector: '.cards-nav',
+    demo: false,
     set_nav_anchor: null,
     set_content_anchor: null,
     index: null,  // collection of cards.model/models.coll
@@ -66,6 +67,9 @@ cards.nav = (function() {
     // set dom map
     setDomMap(container);
 
+    // change sign_out_trigger to app link
+    dom.sign_out_trigger.querySelector('.title').textContent = 'Exit demo';
+
     // render index
     view.index = cards.view.index.create(config.index);
     view.index.configure({
@@ -110,12 +114,23 @@ cards.nav = (function() {
     dom.content_search.appendChild(view.search.render().el);
 
     // set event handlers
-
     dom.sign_out_trigger.addEventListener('click', function(event) {
-      // clear oauth token
-      if (window.confirm('Are you sure to sign out?')) {
-        window.localStorage.clear();
-        window.location.href = window.location.origin + window.location.pathname;
+      if (!config.demo) {
+        // clear oauth token
+        if (window.confirm('Are you sure to sign out?')) {
+          window.localStorage.clear();
+          window.location.href = (
+            window.location.origin + window.location.pathname
+          );
+        }
+      }
+      else {
+        if (window.confirm('Are you sure to exit?')) {
+          window.location.href = (
+            window.location.origin +
+              window.location.pathname.replace(/demo\/?$/, '')
+          );
+        }
       }
     });
     
