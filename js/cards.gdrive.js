@@ -13,7 +13,7 @@
   regexp : true, sloppy  : true, vars     : false,
   white  : true
 */
-/*global cards */
+/*global cards, Promise */
 
 cards.gdrive = (function() {
   "use strict";
@@ -33,7 +33,7 @@ cards.gdrive = (function() {
 
   init, initApp,
   checkAuth, handleAuthResult,
-  listFiles, listFilesAll, getFile, downloadFile, downloadFiles,
+  listFiles, listFilesAll, getFile, getFiles, downloadFile, downloadFiles,
   createFolder, saveFile, updateFile, trashFile, deleteFile,
   createAppFolders,
   // TODO
@@ -216,6 +216,27 @@ cards.gdrive = (function() {
     return promise;
   };
 
+  getFiles = function(file_ids, partition_size) {
+    var get_part;
+    partition_size = partition_size || config.paralle_download_size;
+    get_part = function(parts, files) {
+      var promise = new Promise(function(resolve, reject) {
+        if (parts.length === 0) {
+          resolve(files);
+        }
+        else {
+          Promise.all(part[0].map(getFile))
+            .then(function(files_) {
+              get_part(parts.slice(1), files.concat(files_))
+                .then(resolve);
+          });
+        }
+      });
+      return promise;
+    };
+    return get_part(cards.util.partition(file_ids, partition_size), []);
+  };
+
   downloadFile = function(file) {
     // Note: file obj must be retrieved before download
     // https://developers.google.com/drive/v3/web/manage-downloads
@@ -265,29 +286,24 @@ cards.gdrive = (function() {
   };
 
   downloadFiles = function(files, partition_size) {
-    var download_part, partition_size;
-
+    var download_part;
     partition_size = partition_size || config.paralle_download_size;
     download_part = function(parts, data_array) {
       var promise = new Promise(function(resolve, reject) {
-        var downloads = [];
         if (parts.length === 0) {
           resolve(data_array);
         }
         else {
           //console.log('parts', parts[0]);
-          parts[0].forEach(function(file) {
-            downloads.push(downloadFile(file));
-          });
-          Promise.all(downloads).then(function(data_array_) {
-            download_part(parts.slice(1), data_array.concat(data_array_))
-              .then(resolve);
-          });
+          Promise.all(parts[0].map(downloadFile))
+            .then(function(data_array_) {
+              download_part(parts.slice(1), data_array.concat(data_array_))
+                .then(resolve);
+            });
         }
       });
       return promise;
     };
-
     return download_part(cards.util.partition(files, partition_size), []);
   };
 
@@ -702,7 +718,7 @@ cards.gdrive = (function() {
       var
       p, preparations = [],
       timestamp, body_updated = false,
-      removed_coll_ids = [], added_coll_ids = []
+      removed_coll_ids = [], added_coll_ids = [], other_coll_ids = []
       ;
 
       p = new Promise (function(resolve, reject) {
@@ -729,6 +745,8 @@ cards.gdrive = (function() {
               card.coll_ids.forEach(function(coll_id) {
                 if (card_.coll_ids.indexOf(coll_id) === -1) {
                   added_coll_ids.push(coll_id);
+                } else {
+                  other_coll_ids.push(coll_id);
                 }
               });
               resolve();
@@ -838,7 +856,8 @@ cards.gdrive = (function() {
   return {
     init: init,
     // expose to test
-    listFiles: listFiles, listFilesAll: listFilesAll, getFile: getFile,
+    listFiles: listFiles, listFilesAll: listFilesAll,
+    getFile: getFile, getFiles: getFiles,
     downloadFile: downloadFile, downloadFiles: downloadFiles,
     createFolder: createFolder, saveFile: saveFile, trashFile: trashFile,
     deleteFile: deleteFile,
