@@ -596,7 +596,7 @@ cards.view = (function() {
           });
         }
         else if (coll.get('annot_check') === 'partial') {
-          //
+          state.checked_colls[coll.get('id')] = coll;
         }
         else {
           delete state.checked_colls[coll.get('id')];
