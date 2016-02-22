@@ -334,6 +334,7 @@ cards.model = (function() {
       return {
         searching: false,
         fetched: null,  // if result is fetched; 'partial' or 'all'
+        next_page_token: null,
         query: null,
         cards: cards.model_util.createCollection(models.card)
       };
@@ -363,23 +364,26 @@ cards.model = (function() {
               self.set({ fetched: null });
             }
             self.set({ searching: true });
-            cards.fake.search(query, last_card_id).then(function(data_array) {
-              self.set({
-                searching: false, query: query,
-                fetched: ((data_array.length === 0) ? 'all' : 'partial')
+            //cards.fake.search(query, last_card_id).then(function(data_array) {
+            cards.gdrive.searchCards(query, self.get('next_page_token'))
+              .then(function(resp) {
+                self.set({
+                  searching: false, query: query,
+                  next_page_token: resp.nextPageToken,
+                  fetched: ((!resp.nextPageToken) ? 'all' : 'partial')
+                });
+                resp.card_array.forEach(function(data_) {
+                  var card = data.cards.get(data_.id);
+                  if (!card) {
+                    card = data.cards.create(data_);
+                    data_.coll_ids.forEach(function(coll_id) {
+                      card.get('colls').add(data.index.get(coll_id));
+                    });
+                  }
+                  self.get('cards').add(card);
+                });
+                resolve();
               });
-              data_array.forEach(function(data_) {
-                var card = data.cards.get(data_.id);
-                if (!card) {
-                  card = data.cards.create(data_);
-                  data_.coll_ids.forEach(function(coll_id) {
-                    card.get('colls').add(data.index.get(coll_id));
-                  });
-                }
-                self.get('cards').add(card);
-              });
-              resolve();
-            });
           }
         });
         return promise;

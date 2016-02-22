@@ -858,8 +858,39 @@ cards.gdrive = (function() {
     });
     return promise;
   };
-  // TODO
-  //searchCards
+
+  searchCards = function(query, pageToken) {
+    var promise = new Promise(function(resolve, reject) {
+      var params;
+      params = {
+        q: cards.util.formatTmpl(
+          "'{{folder_id}}' in parents and fullText contains '{{query}}'" ,
+          {
+            folder_id: config.cards_folder_id,
+            query: query.replace("'", "\'")
+          }
+        )
+        //orderBy: 'name desc'  // sorting is not supported for query
+      };
+      if (pageToken) {
+        params.pageToken = pageToken;
+      }
+      listFiles(params).then(function(resp) {
+        downloadFiles(resp.files).then(function(data_array) {
+          var i, card, cards_ = [];
+          for (i = 0; i < resp.files.length; i++) {
+            card = JSON.parse(data_array[i]);
+            card.id = resp.files[i].id;
+            cards_.push(card);
+          }
+          resolve({
+            card_array: cards_, nextPageToken: resp.nextPageToken
+          });
+        });
+      });
+    });
+    return promise;
+  };
   // ----------------------------------------------------------------------
   // End cards storage
 
@@ -893,6 +924,7 @@ cards.gdrive = (function() {
     getColl: getColl, getColls: getColls, saveColl: saveColl,
     getCard: getCard, getCards: getCards, saveCard: saveCard,
     deleteCard: deleteCard, deleteColl: deleteColl,
+    searchCards: searchCards,
     avadakedavra: avadakedavra
   };
 }());

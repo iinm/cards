@@ -46,16 +46,16 @@ cards.test = (function () {
     card.set({ body: '内容' });
   };
 
-  createCards = function() {
+  createCards = function(title_prefix, num) {
     var i, generate_creator, creators = [], data;
     generate_creator = function(data) {
       return function() {
         return cards.gdrive.saveCard(data);
       };
     };
-    for (i = 0; i < 10; i++) {
+    for (i = 0; i < num; i++) {
       data = {
-        title: 'test_' + i,
+        title: title_prefix + '_' + i,
         body: 'てすと ' + i,
         coll_ids: []
       };
