@@ -33,7 +33,7 @@
     <!-- for test -->
     <script type="text/javascript" src="js/cards.test.js"></script>
     <script type="text/javascript">
-     document.addEventListener('DOMContentLoaded', function(event) {
+     cards.__init = function() {
        if ((/\/demo\/?$/).test(window.location.pathname)) {
          // load fake storage
          cards.util.loadJSfile('js/cards.fake.js');
@@ -48,11 +48,20 @@
          cards.util.loadJSfile('js/cards.gdrive.js');
          // load Google api client
          cards.util.loadJSfile(
-           // Note: __init is defined in cards.gdrive.js
-           'https://apis.google.com/js/client.js?onload=__init'
+           // Note: __init_storage is defined in cards.gdrive.js
+           'https://apis.google.com/js/client.js?onload=__init_storage'
          );
        }
-     });
+     };
+
+     if (document.readyState === 'interactive' || document.readyState === 'complete') {
+       cards.__init();
+     }
+     else {
+       document.addEventListener('DOMContentLoaded', function(event) {
+         cards.__init();
+       });
+     }
     </script>
     <!-- <script src="https://apis.google.com/js/client.js?onload=__init"></script> -->
   </head>

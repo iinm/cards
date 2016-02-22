@@ -949,7 +949,7 @@ cards.gdrive = (function() {
   };
 }());
 
-__init = function() {
+__init_storage = function() {
   var state = document.readyState;
   if (state === 'interactive' || state === 'complete') {
     cards.gdrive.init();
