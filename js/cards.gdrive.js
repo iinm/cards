@@ -5,6 +5,11 @@
     - https://developers.google.com/drive/v3/web/quickstart/js
     
   WARNING: The maximum rate limit is 1000requests/100sec/user
+  
+  Note:
+    - Maximum file name length = 32767
+      (http://www.aurelp.com/tag/maximum-file-name-google-drive/)
+    - file id length = 45
 */
 
 /*jslint         browser : true, continue : true,

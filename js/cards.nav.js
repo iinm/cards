@@ -68,7 +68,9 @@ cards.nav = (function() {
     setDomMap(container);
 
     // change sign_out_trigger to app link
-    dom.sign_out_trigger.querySelector('.title').textContent = 'Exit demo';
+    if (config.demo) {
+      dom.sign_out_trigger.querySelector('.title').textContent = 'Exit demo';
+    }
 
     // render index
     view.index = cards.view.index.create(config.index);
