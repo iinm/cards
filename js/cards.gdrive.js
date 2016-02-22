@@ -216,24 +216,14 @@ cards.gdrive = (function() {
   };
 
   getFiles = function(file_ids, partition_size) {
-    var get_part;
+    var generate;
     partition_size = partition_size || config.paralle_download_size;
-    get_part = function(parts, files) {
-      var promise = new Promise(function(resolve, reject) {
-        if (parts.length === 0) {
-          resolve(files);
-        }
-        else {
-          Promise.all(parts[0].map(getFile))
-            .then(function(files_) {
-              get_part(parts.slice(1), files.concat(files_))
-                .then(resolve);
-          });
-        }
-      });
-      return promise;
+    generate = function(file_id) {
+      return function() { return getFile(file_id); };
     };
-    return get_part(cards.util.partition(file_ids, partition_size), []);
+    return cards.util.partitionPromiseAll(
+      file_ids.map(generate), partition_size
+    );
   };
 
   downloadFile = function(file) {
@@ -285,25 +275,12 @@ cards.gdrive = (function() {
   };
 
   downloadFiles = function(files, partition_size) {
-    var download_part;
+    var generate;
     partition_size = partition_size || config.paralle_download_size;
-    download_part = function(parts, data_array) {
-      var promise = new Promise(function(resolve, reject) {
-        if (parts.length === 0) {
-          resolve(data_array);
-        }
-        else {
-          //console.log('parts', parts[0]);
-          Promise.all(parts[0].map(downloadFile))
-            .then(function(data_array_) {
-              download_part(parts.slice(1), data_array.concat(data_array_))
-                .then(resolve);
-            });
-        }
-      });
-      return promise;
+    generate = function(file) {
+      return function() { return downloadFile(file); };
     };
-    return download_part(cards.util.partition(files, partition_size), []);
+    return cards.util.partitionPromiseAll(files.map(generate), partition_size);
   };
 
   //downloadFile = function(file) {
