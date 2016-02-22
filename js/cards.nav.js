@@ -131,11 +131,13 @@ cards.nav = (function() {
       var promises = [];
       event.preventDefault();
       state.annot_targets.as_array().forEach(function(card_clone) {
-        promises.push(card_clone.save());
+        promises.push(function() { return card_clone.save(); });
       });
 
       dom.self.classList.add('annot-saving');
-      Promise.all(promises).then(function(card_array) {
+      //Promise.all(promises).then(function(card_array) {
+      // Note: Promise.allだと，collの保存も同時に起こりうる
+      cards.util.partitionPromiseAll(promises, 1).then(function(card_array) {
         dom.self.classList.remove('annot-saving');
         config.set_nav_anchor(
           cards.util.cloneUpdateObj(state, { self: state.before_annot })
@@ -160,10 +162,11 @@ cards.nav = (function() {
           return;
         }
         state.annot_targets.as_array().forEach(function(card_clone) {
-          promises.push(card_clone.destroy());
+          promises.push(function() { return card_clone.destroy(); });
         });
         dom.self.classList.add('annot-saving');
-        Promise.all(promises).then(function(card_array) {
+        //Promise.all(promises).then(function(card_array) {
+        cards.util.partitionPromiseAll(promises, 1).then(function(card_array) {
           dom.self.classList.remove('annot-saving');
         });
       },

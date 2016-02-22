@@ -31,10 +31,10 @@ cards.test = (function () {
   };
 
   onModelChange = function() {
-    var card = cards.model.models.card.create({ title: 'タイトル', _id: 'card_00' });
+    var card = cards.model.models.card.create({ title: 'タイトル', id: 'card_00' });
     console.log('-- model created');
     console.log('title: ' + card.get('title'));
-    console.log('id: ' + card.get('_id'));
+    console.log('id: ' + card.get('id'));
 
     card.on('change', function() { console.log('-- model changed!'); });
     card.set({ title: '新しいタイトル' });
@@ -47,14 +47,21 @@ cards.test = (function () {
   };
 
   createCards = function() {
-    var i;
-    for (i = 0; i < 20; i++) {
-      cards.gdrive.saveCard({
+    var i, generate_creator, creators = [], data;
+    generate_creator = function(data) {
+      return function() {
+        return cards.gdrive.saveCard(data);
+      };
+    };
+    for (i = 0; i < 10; i++) {
+      data = {
         title: 'test_' + i,
         body: 'てすと ' + i,
         coll_ids: []
-      });
+      };
+      creators.push(generate_creator(data));
     }
+    return cards.util.partitionPromiseAll(creators, 10);
   };
 
   testPartitionPromise = function() {

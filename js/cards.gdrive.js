@@ -26,8 +26,8 @@ cards.gdrive = (function() {
     ],
     cards_folder_id: null,
     colls_folder_id: null,
-    page_size: 10,
-    parallel_request_size: 10
+    page_size: 8,
+    parallel_request_size: 8 
   },
   dom = {},
 
@@ -426,14 +426,16 @@ cards.gdrive = (function() {
         method: 'DELETE',
       });
       request.execute(function(resp) {
-        if (!resp.error) {
-          console.log('deleteFile:', resp, file_id);
-          resolve(file_id);
-        }
-        else {  // resp.error
+        if (resp && resp.error) {
           // TODO
           console.log('deleteFile: error', resp);
           reject();
+        }
+        else {
+          console.log('deleteFile:', resp, file_id);
+          // delete from cache
+          delete localStorage[file_id];
+          resolve(file_id);
         }
       });
     });
@@ -547,9 +549,7 @@ cards.gdrive = (function() {
         // 2. delete coll
         //Promise.all(updates).then(function(card_files) {
         cards.util.partitionPromiseAll(updaters, config.parallel_request_size)
-          .then(function(card_files) {
-            deleteFile(coll.id).then(resolve);
-          });
+          .then(function(card_files) { deleteFile(coll.id).then(resolve); });
       });
     });
     return promise;
@@ -624,7 +624,7 @@ cards.gdrive = (function() {
             "'{{folder_id}}' in parents" ,
             { folder_id: config.cards_folder_id }
           ),
-          orderBy: 'name desc,modifiedTime desc'
+          orderBy: 'name desc,createdTime'
         };
         if (pageToken) {
           params.pageToken = pageToken;
@@ -692,7 +692,7 @@ cards.gdrive = (function() {
           return function() {
             return new Promise(function(resolve, reject) {
               getColl(coll_id).then(function(coll) {
-                var idx = coll.card_ids.indexOf(coll_id);
+                var idx = coll.card_ids.indexOf(card.id);
                 if (idx > -1) {
                   coll.card_ids.splice(idx, 1);
                 }
@@ -708,9 +708,7 @@ cards.gdrive = (function() {
         // 2. delete card
         //Promise.all(updates).then(function(coll_files) {
         cards.util.partitionPromiseAll(updaters, config.parallel_request_size)
-          .then(function(coll_files) {
-            deleteFile(card.id).then(resolve);
-          });
+          .then(function(coll_files) { deleteFile(card.id).then(resolve); });
       });
     });
     return promise;
@@ -768,6 +766,7 @@ cards.gdrive = (function() {
       
       // save card
       Promise.all(preparations).then(function() {
+        if (!card.id) { delete card.id; }
         saveFile(
           {
             name: timestamp + '_' + cards.util.unescape(card.title) + '.json',
@@ -780,34 +779,32 @@ cards.gdrive = (function() {
           JSON.stringify(card), card.id
         ).then(function(file) {
           card.id = file.id;
-          var update, updates = [];
-          if (skip_update_colls !== true) {
-            // update colls
-            if (body_updated) {
-              // bring to top of coll
-              card.coll_ids.forEach(function(coll_id) {
-                if (added_coll_ids.indexOf(coll_id) === -1) {
-                  update = new Promise(function(resolve, reject) {
-                    getColl(coll_id).then(function(coll) {
-                      if (coll.type === 'tag') {
-                        var idx = coll.card_ids.indexOf(card.id);
-                        if (idx > -1) {
-                          coll.card_ids.splice(idx, 1);
-                        }
-                        coll.card_ids.splice(0, 0, card.id);
-                        saveColl(coll, true).then(resolve);
-                      }
-                      else {
-                        resolve(coll);
-                      }
-                    });
-                  });
-                  updates.push(update);
-                }
+          var
+          generate_order_updater, generate_card_adder, generate_card_remover,
+          updaters = []
+          ;
+          generate_order_updater = function(coll_id) {
+            return function() {
+              return new Promise(function(resolve, reject) {
+                getColl(coll_id).then(function(coll) {
+                  if (coll.type === 'tag') {
+                    var idx = coll.card_ids.indexOf(card.id);
+                    if (idx > -1) {
+                      coll.card_ids.splice(idx, 1);
+                    }
+                    coll.card_ids.splice(0, 0, card.id);
+                    saveColl(coll, true).then(resolve);
+                  }
+                  else {
+                    resolve(coll);
+                  }
+                });
               });
-            }
-            removed_coll_ids.forEach(function(coll_id) {
-              update = new Promise(function(resolve, reject) {
+            };
+          };
+          generate_card_remover = function(coll_id) {
+            return function() {
+              return new Promise(function(resolve, reject) {
                 getColl(coll_id).then(function(coll) {
                   var idx = coll.card_ids.indexOf(card.id);
                   if (idx > -1) {
@@ -816,10 +813,11 @@ cards.gdrive = (function() {
                   saveColl(coll).then(resolve);
                 });
               });
-              updates.push(update);
-            });
-            added_coll_ids.forEach(function(coll_id) {
-              update = new Promise(function(resolve, reject) {
+            };
+          };
+          generate_card_adder = function(coll_id) {
+            return function() {
+              return new Promise(function(resolve, reject) {
                 getColl(coll_id).then(function(coll) {
                   if (coll.type === 'note') {
                     coll.card_ids.push(card.id);
@@ -829,10 +827,30 @@ cards.gdrive = (function() {
                   saveColl(coll, true).then(resolve);
                 });
               });
-              updates.push(update);
+            };
+          };
+
+          if (skip_update_colls !== true) {
+            // update colls
+            if (body_updated) {
+              // bring to top of coll
+              other_coll_ids.forEach(function(coll_id) {
+                updaters.push(generate_order_updater(coll_id));
+              });
+            }
+            // remove card from coll
+            removed_coll_ids.forEach(function(coll_id) {
+              updaters.push(generate_card_remover(coll_id));
+            });
+            // add card to coll
+            added_coll_ids.forEach(function(coll_id) {
+              updaters.push(generate_card_adder(coll_id));
             });
           }
-          return Promise.all(updates);
+
+          return cards.util.partitionPromiseAll(
+            updaters, config.parallel_request_size
+          );
         }).then(function(coll_files) {
           resolve(card);
         });
@@ -846,13 +864,19 @@ cards.gdrive = (function() {
   // End cards storage
 
   avadakedavra = function() {
-    var params = { spaces: ['appDataFolder'] };
+    var generate_deleter, deleters = [], params = { spaces: ['appDataFolder'] };
     // delete all data
-    localStorage.clear();
+    generate_deleter = function(file_id) {
+      return function() {
+        return deleteFile(file_id);
+      };
+    };
     listFilesAll(params).then(function(files) {
       files.forEach(function(file) {
-        deleteFile(file.id).then();
+        deleters.push(generate_deleter(file.id));
       });
+      cards.util.partitionPromiseAll(deleters, config.parallel_request_size)
+        .then(function() { localStorage.clear(); });
     });
   };
 
