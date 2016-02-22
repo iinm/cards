@@ -229,6 +229,9 @@ cards.view = (function() {
         // set event handler
         onClickAdd = function(event) {
           event.preventDefault();
+          if (dom.title.textContent.trim().length === 0) {
+            return;
+          }
           self.el.classList.add('syncing');
           config.create_coll(dom.title.innerHTML, coll_type)
             .then(function(coll) {

@@ -545,30 +545,45 @@ cards.gdrive = (function() {
     // cards.gdrive.saveColl({name: 'star wars', card_ids: [], type: 'tag'})
     var promise;
     promise = new Promise(function(resolve, reject) {
-      var timestamp;
-      // set timestamp
-      if (update_timestamp === true) {
-        timestamp = cards.util.timestamp();
-      }
-      else if (coll.id) {
-        name_parts = file.name.match(/^(\d+)_(.*)/);
-        timestamp = name_parts[1];
-      }
-      else {  // new coll
-        timestamp = '0000000000';
-        coll.card_ids = [];
-      }
+      var timestamp, prepare;
+      prepare = new Promise(function(resolve, reject) {
+        // set timestamp
+        if (update_timestamp === true) {
+          timestamp = cards.util.timestamp();
+        }
+        if (coll.id) {
+          getFile(coll.id).then(function(file) {
+            downloadFile(file).then(function(data) {
+              var coll_ = JSON.parse(data);
+              if (update_timestamp) {
+                timestamp = cards.util.timestamp();
+              } else {
+                timestamp = file.name.match(/^(\d+)_(.*)/)[1];
+              }
+              coll.card_ids = coll.card_ids || coll_.card_ids;
+              resolve();
+            });
+          });
+        }
+        else {  // new coll
+          timestamp = '0000000000';
+          coll.card_ids = [];
+          resolve();
+        }
+      });
 
-      saveFile({
-        name: timestamp + '_' + cards.util.unescape(coll.name) + '.json',
-        mimeType: 'application/json',
-        parents: ((!coll.id) ? [config.colls_folder_id] : null)
-      }, JSON.stringify(coll), coll.id)
-        .then(function(file) {
-          // downloadして，checkしたほうが良い?
-          coll.id = file.id;
-          resolve(coll);
-        });
+      prepare.then(function() {
+        saveFile({
+          name: timestamp + '_' + cards.util.unescape(coll.name) + '.json',
+          mimeType: 'application/json',
+          parents: ((!coll.id) ? [config.colls_folder_id] : null)
+        }, JSON.stringify(coll), coll.id)
+          .then(function(file) {
+            // downloadして，checkしたほうが良い?
+            coll.id = file.id;
+            resolve(coll);
+          });
+      });
     });
     return promise;
   };
@@ -627,7 +642,7 @@ cards.gdrive = (function() {
                   card = JSON.parse(data);
                   cards_.push(card);
                 });
-                resolve({ card_array: card_ });
+                resolve({ card_array: cards_ });
               });
           }
           else {
