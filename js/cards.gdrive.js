@@ -3,6 +3,8 @@
     - https://developers.google.com/drive/v2/reference/files
     - https://developers.google.com/drive/v3/reference/files
     - https://developers.google.com/drive/v3/web/quickstart/js
+    
+  WARNING: The maximum rate limit is 10 qps per IP address.
 */
 
 /*jslint         browser : true, continue : true,
@@ -23,7 +25,9 @@ cards.gdrive = (function() {
        'https://www.googleapis.com/auth/drive.appdata'
     ],
     cards_folder_id: null,
-    colls_folder_id: null
+    colls_folder_id: null,
+    page_size: 10,
+    paralle_download_size: 10
   },
   dom = {},
 
@@ -135,7 +139,7 @@ cards.gdrive = (function() {
             "files(id, name, createdTime, modifiedTime)"
         );
       }
-      if (!params.pageSize) params.pageSize = 20;
+      if (!params.pageSize) { params.pageSize = config.page_size; }
       //if (!params.pageSize) params.pageSize = 1;
 
       request = gapi.client.drive.files.list(params);
@@ -161,6 +165,7 @@ cards.gdrive = (function() {
   listFilesAll = function(params, files) {
     // list all files
     var promise = new Promise(function(resolve, reject) {
+      if (!params) { params = {}; }
       listFiles(params)
         .then(function(resp) {
           if (!files) {
@@ -262,7 +267,7 @@ cards.gdrive = (function() {
   downloadFiles = function(files, partition_size) {
     var download_part, partition_size;
 
-    partition_size = partition_size || 10;
+    partition_size = partition_size || config.paralle_download_size;
     download_part = function(parts, data_array) {
       var promise = new Promise(function(resolve, reject) {
         var downloads = [];
@@ -590,8 +595,11 @@ cards.gdrive = (function() {
             "'{{folder_id}}' in parents" ,
             { folder_id: config.cards_folder_id }
           ),
-          orderBy: 'name desc'
+          orderBy: 'name desc,modifiedTime desc'
         };
+        if (pageToken) {
+          params.pageToken = pageToken;
+        }
         listFiles(params).then(function(resp) {
           downloadFiles(resp.files).then(function(data_array) {
             var i, card, cards_ = [];
@@ -600,30 +608,51 @@ cards.gdrive = (function() {
               card.id = resp.files[i].id;
               cards_.push(card);
             }
-            resolve(cards_, resp.nextPageToken);
+            resolve({
+              card_array: cards_, nextPageToken: resp.nextPageToken
+            });
           });
         });
       }
       else {
         getColl(coll_id).then(function(coll) {
+          var start, card_ids, get_files = [], downloads = [];
           if (coll.type === 'note') {
-            var loads = [];
-            // load all cards
-            coll.card_ids.forEach(function(card_id) {
-              loads.push(getCard(card_id));
-            });
-            Promise.all(loads).then(function(card_) {
-              resolve(card_);
-            });
+            // get all cards
+            Promise.all(coll.card_ids.map(getFile))
+              .then(downloadFiles)
+              .then(function(data_array) {
+                var cards_ = [], card;
+                data_array.forEach(function(data) {
+                  card = JSON.parse(data);
+                  cards_.push(card);
+                });
+                resolve({ card_array: card_ });
+              });
           }
           else {
-            //coll.card_ids.slice
+            start = coll.card_ids.indexOf(pageToken);
+            start = ((start === -1) ? 0 : start);
+            card_ids = coll.card_ids.slice(start, start + config.page_size);
+            Promise.all(card_ids.map(getFile))
+              .then(downloadFiles)
+              .then(function(data_array) {
+                var cards_ = [], card;
+                data_array.forEach(function(data) {
+                  card = JSON.parse(data);
+                  cards_.push(card);
+                });
+                resolve({
+                  card_array: cards_,
+                  nextPageToken: coll.card_ids[start + config.page_size]
+                });
+              });
           }
         });
       }
     });
     return promise;
-  };
+  };  // getCards
 
   deleteCard = function(file_id) {
     var promise = new Promise(function(resolve, reject) {
@@ -783,6 +812,7 @@ cards.gdrive = (function() {
   avadakedavra = function() {
     var params = { spaces: ['appDataFolder'] };
     // delete all data
+    localStorage.clear();
     listFilesAll(params).then(function(files) {
       files.forEach(function(file) {
         deleteFile(file.id).then();

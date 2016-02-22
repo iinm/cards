@@ -8,7 +8,7 @@
 
 cards.test = (function () {
   "use strict";
-  var toggleAnnot, onModelChange;
+  var toggleAnnot, onModelChange, createCards;
 
   toggleAnnot = function(state) {
     var nav = document.querySelector('.cards-nav');
@@ -41,9 +41,21 @@ cards.test = (function () {
     console.log('body: ' + card.get('body'));
     card.set({ body: '内容' });
   };
- 
+
+  createCards = function() {
+    var i;
+    for (i = 0; i < 20; i++) {
+      cards.gdrive.saveCard({
+        title: 'test_' + i,
+        body: 'てすと ' + i,
+        coll_ids: []
+      });
+    }
+  };
+
   return {
     toggleAnnot: toggleAnnot,
-    onModelChange: onModelChange
+    onModelChange: onModelChange,
+    createCards: createCards
   };
 }());

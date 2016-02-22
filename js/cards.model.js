@@ -122,11 +122,11 @@ cards.model = (function() {
             coll_ids.push(coll.get('id'));
           });
           data_ = {
-            id: self.get('id'),
             title: self.get('title'),
             body: self.get('body'),
             coll_ids: coll_ids
           };
+          if (self.get('id')) { data_.id = self.get('id'); }
 
           if (is_changed(data_)) {
             //cards.fake.saveCard(data_).then(function(data_) {
@@ -184,6 +184,7 @@ cards.model = (function() {
         annot_check: null,  // used by annotator, 'checked' or 'partial'
         cards: cards.model_util.createCollection(models.card),
         fetched: null,  // save last fetched card id
+        next_page_token: null,
         match_search_input: null,
         match_annot_search_input: null
       };
@@ -218,17 +219,21 @@ cards.model = (function() {
           else {
             console.log('fetch: ' + self.get('name'), last_card_id);
             //cards.fake.getCards(self.get('id'), last_card_id).then(
-            cards.gdrive.getCards(self.get('id'), last_card_id).then(
-              function(card_array) {
-                add_cards(card_array);
-                if (card_array.length === 0 || self.get('type') === 'note') {
+            cards.gdrive.getCards(self.get('id'), self.get('next_page_token'))
+              //.then(function(card_array, next_page_token) {
+              .then(function(resp) {
+                add_cards(resp.card_array);
+                //if (card_array.length === 0 || self.get('type') === 'note') {
+                if (!resp.nextPageToken) {
                   self.set({ fetched: 'all' });
                 } else {
-                  self.set({ fetched: 'partial' });
+                  self.set({
+                    fetched: 'partial',
+                    next_page_token: resp.nextPageToken
+                  });
                 }
                 resolve();
-              }
-            );
+              });
           }
         });
 
