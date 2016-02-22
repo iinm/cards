@@ -129,7 +129,7 @@ cards.shell = (function() {
     // hide greeting card
     setTimeout(function() {
       document.querySelector('.cards-hello-world').classList
-        .add('.cards-util-hide');
+        .add('cards-util-hide');
     }, 500);
     cards.model.init().then(function() {
       data.index = cards.model.getIndex();
