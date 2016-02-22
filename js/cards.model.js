@@ -23,7 +23,8 @@ cards.model = (function() {
     base_model = cards.model_util.createModel(function () {
       return {
         id: null,
-        title: '', body: '', created_date: '01/01',
+        title: '', body: '',
+        created_date: new Date().toDateString().replace(/\s\d{4}/, ''),
         colls: cards.model_util.createCollection(models.coll),
         checked: false
       };
@@ -124,6 +125,7 @@ cards.model = (function() {
           data_ = {
             title: self.get('title'),
             body: self.get('body'),
+            created_date: self.get('created_date'),
             coll_ids: coll_ids
           };
           if (self.get('id')) { data_.id = self.get('id'); }

@@ -635,6 +635,8 @@ cards.gdrive = (function() {
             for (i = 0; i < resp.files.length; i++) {
               card = JSON.parse(data_array[i]);
               card.id = resp.files[i].id;
+              card.created_date = new Date(resp.files[i].createdTime)
+                .toDateString().replace(/\s\d{4}/, '');
               cards_.push(card);
             }
             resolve({
@@ -649,14 +651,17 @@ cards.gdrive = (function() {
           if (coll.type === 'note') {
             // get all cards
             Promise.all(coll.card_ids.map(getFile))
-              .then(downloadFiles)
-              .then(function(data_array) {
-                var cards_ = [], card;
-                data_array.forEach(function(data) {
-                  card = JSON.parse(data);
-                  cards_.push(card);
+              .then(function(files) {
+                downloadFiles(files).then(function(data_array) {
+                  var cards_ = [], card;
+                  data_array.forEach(function(data, i) {
+                    card = JSON.parse(data);
+                    card.created_date = new Date(files[i].createdTime)
+                      .toDateString().replace(/\s\d{4}/, '');
+                    cards_.push(card);
+                  });
+                  resolve({ card_array: cards_ });
                 });
-                resolve({ card_array: cards_ });
               });
           }
           else {
@@ -664,16 +669,19 @@ cards.gdrive = (function() {
             start = ((start === -1) ? 0 : start);
             card_ids = coll.card_ids.slice(start, start + config.page_size);
             Promise.all(card_ids.map(getFile))
-              .then(downloadFiles)
-              .then(function(data_array) {
-                var cards_ = [], card;
-                data_array.forEach(function(data) {
-                  card = JSON.parse(data);
-                  cards_.push(card);
-                });
-                resolve({
-                  card_array: cards_,
-                  nextPageToken: coll.card_ids[start + config.page_size]
+              .then(function(files) {
+                downloadFiles(files).then(function(data_array) {
+                  var cards_ = [], card;
+                  data_array.forEach(function(data, i) {
+                    card = JSON.parse(data);
+                    card.created_date = new Date(files[i].createdTime)
+                      .toDateString().replace(/\s\d{4}/, '');
+                    cards_.push(card);
+                  });
+                  resolve({
+                    card_array: cards_,
+                    nextPageToken: coll.card_ids[start + config.page_size]
+                  });
                 });
               });
           }
@@ -881,6 +889,8 @@ cards.gdrive = (function() {
           for (i = 0; i < resp.files.length; i++) {
             card = JSON.parse(data_array[i]);
             card.id = resp.files[i].id;
+            card.created_date = new Date(resp.files[i].createdTime)
+              .toDateString().replace(/\s\d{4}/, '');
             cards_.push(card);
           }
           resolve({
