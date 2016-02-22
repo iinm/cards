@@ -126,6 +126,11 @@ cards.shell = (function() {
 
     console.log(cards);
     cards.model.configure({ storage: cards.gdrive || cards.fake });
+    // hide greeting card
+    setTimeout(function() {
+      document.querySelector('.cards-hello-world').classList
+        .add('.cards-util-hide');
+    }, 500);
     cards.model.init().then(function() {
       data.index = cards.model.getIndex();
 
