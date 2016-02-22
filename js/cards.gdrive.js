@@ -392,16 +392,23 @@ cards.gdrive = (function() {
       });
 
       request.execute(function(file) {
-        if (file_id) {
-          console.log('updateFile:', file);
-        } else {
-          console.log('createFile:', file);
+        if (!file.error) {
+          if (file_id) {
+            console.log('updateFile:', file);
+          } else {
+            console.log('createFile:', file);
+          }
+          // cache
+          file.content = content;
+          //localStorage[file.id + '_content'] = content;
+          localStorage[file.id] = JSON.stringify(file);
+          resolve(file);
         }
-        // cache
-        file.content = content;
-        //localStorage[file.id + '_content'] = content;
-        localStorage[file.id] = JSON.stringify(file);
-        resolve(file);
+        else {  // file.error
+          // TODO
+          console.log('saveFile: error', file);
+          reject();
+        }
       });
     });
 
@@ -419,8 +426,15 @@ cards.gdrive = (function() {
         method: 'DELETE',
       });
       request.execute(function(resp) {
-        console.log('deleteFile:', resp, file_id);
-        resolve(file_id);
+        if (!resp.error) {
+          console.log('deleteFile:', resp, file_id);
+          resolve(file_id);
+        }
+        else {  // resp.error
+          // TODO
+          console.log('deleteFile: error', resp);
+          reject();
+        }
       });
     });
     return promise;
