@@ -198,7 +198,14 @@ strong {
   background: #F9F2E7;
   box-shadow: 0 0 .3em #777;
   /*   box-shadow: 0 0 .5em #40C0CB; */
-  overflow: hidden;
+  overflow: scroll;
+}
+
+.cards-hello-world .greeting-card .greeting-wrapper {
+  position: absolute;
+  top: calc(50% - 8.5em);
+  left: 0;
+  right: 0;
 }
 
 .cards-hello-world .greeting-card .greeting {
@@ -206,12 +213,13 @@ strong {
   font-size: 2em;
   font-weight: bold;
   width: 100%;
-  margin: 2em 0 1.5em;
+  margin: 1em 0 1.5em;
   text-align: center;
 }
 
 .cards-hello-world .greeting-card .start-menu {
   width: 100%;
+  margin-bottom: 1em;
   text-align: center;
 }
 
