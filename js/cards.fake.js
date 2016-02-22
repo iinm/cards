@@ -15,25 +15,6 @@ cards.fake = (function() {
   getCards, saveCard, deleteCard, searchCards
   ;
 
-  init = function() {
-    var container, state = document.readyState;
-    // remove unused data for demo
-    card_ids = ['card_23', 'card_24', 'card_26', 'card_25', 'card_22'];
-    coll_ids = ['note_01'];
-
-    // init App
-    if (state === 'interactive' || state === 'complete') {
-      container = document.getElementById('cards');
-      cards.init(container);
-    }
-    else {
-      document.addEventListener('DOMContentLoaded', function(event) {
-        container = document.getElementById('cards');
-        cards.init(container);
-      });
-    }
-  };
-
   // fake data for test
   card_ids = [
     'card_01', 'card_02', 'card_03', 'card_04', 'card_05', 'card_06', 'card_07',
@@ -256,6 +237,10 @@ cards.fake = (function() {
     }
   };
 
+  // remove unused data for demo
+  card_ids = ['card_23', 'card_24', 'card_26', 'card_25', 'card_22'];
+  coll_ids = ['note_01'];
+
   // TODO
   // tagging = [
   //   ['card_', 'coll_'], ...
@@ -458,5 +443,3 @@ cards.fake = (function() {
     searchCards: searchCards
   };
 }());
-
-cards.fake.init();

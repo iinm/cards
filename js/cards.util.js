@@ -23,10 +23,16 @@ cards.util = (function() {
   ;
 
   loadJSfile = function(src) {
-    var el = document.createElement('script');
-    el.setAttribute('type', 'text/javascript');
-    el.setAttribute('src', src);
-    return document.getElementsByTagName('head')[0].appendChild(el);
+    var promise = new Promise(function(resolve, reject) {
+      var el = document.createElement('script');
+      el.setAttribute('type', 'text/javascript');
+      el.setAttribute('src', src);
+      el.addEventListener('load', function(event) {
+        resolve(event);
+      });
+      document.getElementsByTagName('head')[0].appendChild(el);
+    });
+    return promise;
   };
 
   partitionPromiseAll = function(promise_generators, partition_size) {

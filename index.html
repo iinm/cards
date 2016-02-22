@@ -33,28 +33,27 @@
     <!-- for test -->
     <script type="text/javascript" src="js/cards.test.js"></script>
     <script type="text/javascript">
+     __init_storage = function() { cards.gdrive.init(); };
      cards.__init = function() {
        if ((/\/demo\/?$/).test(window.location.pathname)) {
          // load fake storage
-         cards.util.loadJSfile('js/cards.fake.js');
-         // Note: init App from cards.fake.js
-         //document.addEventListener('DOMContentLoaded', function(event) {
-         //  var container = document.getElementById('cards');
-         //  cards.init(container);
-         //});
+         cards.util.loadJSfile('js/cards.fake.js').then(function() {
+           var container = document.getElementById('cards');
+           cards.init(container);
+         });
        }
        else {
          // load module to use Google Drive
-         cards.util.loadJSfile('js/cards.gdrive.js');
-         // load Google api client
-         cards.util.loadJSfile(
-           // Note: __init_storage is defined in cards.gdrive.js
-           'https://apis.google.com/js/client.js?onload=__init_storage'
-         );
+         cards.util.loadJSfile('js/cards.gdrive.js').then(function() {
+           // load Google api client
+           cards.util.loadJSfile(
+             'https://apis.google.com/js/client.js?onload=__init_storage'
+           );
+         });
        }
      };
 
-     if (document.readyState === 'interactive' || document.readyState === 'complete') {
+     if (['interactive', 'complete'].indexOf(document.readyState) > -1) {
        cards.__init();
      }
      else {
