@@ -4,7 +4,7 @@
     - https://developers.google.com/drive/v3/reference/files
     - https://developers.google.com/drive/v3/web/quickstart/js
     
-  WARNING: The maximum rate limit is 10 qps per IP address.
+  WARNING: The maximum rate limit is 1000requests/100sec/user
 */
 
 /*jslint         browser : true, continue : true,
@@ -776,13 +776,12 @@ cards.gdrive = (function() {
           JSON.stringify(card), card.id
         ).then(function(file) {
           card.id = file.id;
-          var updates = [];
+          var update, updates = [];
           if (skip_update_colls !== true) {
             // update colls
             if (body_updated) {
               // bring to top of coll
               card.coll_ids.forEach(function(coll_id) {
-                var update;
                 if (added_coll_ids.indexOf(coll_id) === -1) {
                   update = new Promise(function(resolve, reject) {
                     getColl(coll_id).then(function(coll) {
@@ -804,7 +803,7 @@ cards.gdrive = (function() {
               });
             }
             removed_coll_ids.forEach(function(coll_id) {
-              var update = new Promise(function(resolve, reject) {
+              update = new Promise(function(resolve, reject) {
                 getColl(coll_id).then(function(coll) {
                   var idx = coll.card_ids.indexOf(card.id);
                   if (idx > -1) {
@@ -816,7 +815,7 @@ cards.gdrive = (function() {
               updates.push(update);
             });
             added_coll_ids.forEach(function(coll_id) {
-              var update = new Promise(function(resolve, reject) {
+              update = new Promise(function(resolve, reject) {
                 getColl(coll_id).then(function(coll) {
                   if (coll.type === 'note') {
                     coll.card_ids.push(card.id);
