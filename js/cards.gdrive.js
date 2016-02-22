@@ -351,10 +351,12 @@ cards.gdrive = (function() {
     //  parents: []
     //};
     //content = "{ 'msg': 'Hello!' }",
-    var promise;
-    const boundary = '-------314159265358979323846';
-    const delimiter = "\r\n--" + boundary + "\r\n";
-    const close_delim = "\r\n--" + boundary + "--";
+    var
+    boundary = '-------314159265358979323846'
+    delimiter = "\r\n--" + boundary + "\r\n",
+    close_delim = "\r\n--" + boundary + "--",
+    promise
+    ;
 
     promise = new Promise(function(resolve, reject) {
       var base64data, multipartRequestBody, request;

@@ -53,7 +53,7 @@ strong {
   overflow: hidden;
 }
 .cards-item.before-render {
-  //width: 0;
+  /*   width: 0; */
 }
 .cards-item.blink {
   box-shadow: 0 0 .6em #40C0CB;
