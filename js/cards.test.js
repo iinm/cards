@@ -4,7 +4,7 @@
   regexp : true, sloppy  : true, vars     : false,
   white  : true
 */
-/*global cards */
+/*global cards, Promise */
 
 cards.test = (function () {
   "use strict";
@@ -58,17 +58,17 @@ cards.test = (function () {
   };
 
   testPartitionPromise = function() {
-    var i, generator, generators = [];
-    for (i = 0; i < 20; i++) {
-      generator = function(i) {
-        return function() {
-          return new Promise(function(resolve, reject) {
-            console.log(i.toString());
-            setTimeout(resolve, 300, i.toString());
-          });
-        };
+    var i, generate, generators = [];
+    generate = function(i) {
+      return function() {
+        return new Promise(function(resolve, reject) {
+          console.log(i.toString());
+          setTimeout(resolve, 300, i.toString());
+        });
       };
-      generators.push(generator(i));
+    };
+    for (i = 0; i < 20; i++) {
+      generators.push(generate(i));
     }
     cards.util.partitionPromiseAll(generators, 2).then(function(values) {
       console.log(values);
