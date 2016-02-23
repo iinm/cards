@@ -760,7 +760,7 @@ cards.gdrive = (function() {
     return saveFile({
       name: name,
       parents: ((!rel.id) ? [config.folder_ids.rels] : null)
-    });
+    }, '', rel.id);
   };
 
   getRels = function(file_id, pageToken) {
