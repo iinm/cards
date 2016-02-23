@@ -74,11 +74,13 @@ cards.test = (function () {
     for (i = 0; i < num; i++) {
       data = {
         name: title_prefix + '_' + i,
-        type: ((i % 2) ? 'tag': 'coll'),
+        type: ((i % 2) ? 'tag': 'note'),
       };
       creators.push(generate_creator(data));
     }
-    return cards.util.partitionPromiseAll(creators, 10);
+    cards.util.partitionPromiseAll(creators, 10).then(function(vals) {
+      console.log(vals);
+    });
   };
 
   testPartitionPromise = function() {

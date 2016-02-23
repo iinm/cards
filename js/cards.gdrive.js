@@ -254,7 +254,7 @@ cards.gdrive = (function() {
       else {
         request = gapi.client.request({
           path: '/drive/v3/files/' + file.id + '?alt=media',
-          method: 'GET',
+          method: 'GET'
         });
         request.execute(function(jsonResp, rawResp) {
           //console.log('getFile resp:', arguments);
@@ -437,7 +437,7 @@ cards.gdrive = (function() {
     var promise = new Promise(function(resolve, reject) {
       var request = gapi.client.request({
         path: '/drive/v3/files/' + file_id,
-        method: 'DELETE',
+        method: 'DELETE'
       });
       request.execute(function(resp) {
         if (resp && resp.error) {
@@ -497,7 +497,7 @@ cards.gdrive = (function() {
   getColl = function(file_id) {
     var promise = new Promise(function(resolve, reject) {
       getFile(file_id).then(function(file) {
-        var parts = file.name.match(/$(\d+),(tag|note),(.+)/);
+        var parts = file.name.match(/^(\d+),(tag|note),(.+)/);
         resolve({
           id: file.id,
           type: parts[2],
@@ -514,22 +514,14 @@ cards.gdrive = (function() {
       var params;
       params = {
         q: cards.util.formatTmpl(
-          "'{{folder_id}}' in parents" , { folder_id: config.colls_folder_id }
+          "'{{folder_id}}' in parents" , { folder_id: config.folder_ids.colls }
         ),
         orderBy: 'name desc'
       };
-      listFilesAll(params)
-        .then(function(files) {
-          downloadFiles(files).then(function(data_array) {
-            var i, coll, colls = [];
-            for (i = 0; i < files.length; i++) {
-              coll = JSON.parse(data_array[i]);
-              coll.id = files[i].id;
-              colls.push(coll);
-            }
-            resolve(colls);
-          });
-        });
+      listFilesAll(params).then(function(files) {
+        var colls = files.map(function(file) { return getColl(file.id); });
+        Promise.all(colls).then(resolve);
+      });
     });
     return promise;
   };
@@ -598,7 +590,7 @@ cards.gdrive = (function() {
         return saveFile({
           name: [timestamp, coll.type, coll.name].join(','),
           parents: ((!coll.id) ? [config.folder_ids.colls] : null)
-        }, '', coll.id);
+       }, '', coll.id);
       };
 
       update_order = function(file) {
