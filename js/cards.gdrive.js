@@ -105,6 +105,7 @@ cards.gdrive = (function() {
 
   handleAuthResult = function(authResult) {
     console.log(authResult);
+    delete authResult['g-oauth-window'];
     // Handle response from authorization server.
     if (authResult && !authResult.error) {
       // save token to localstorage
