@@ -31,7 +31,7 @@ cards.gdrive = (function() {
     ],
     folder_ids: { cards: null, colls: null, rels: null },
     page_size: 8,
-    parallel_request_size: 8,
+    parallel_request_size: 4,
     cache_key_prefix: '__cards__'
   },
   dom = {},
@@ -547,7 +547,7 @@ cards.gdrive = (function() {
           };
           getters.push(getter);
         });
-        cards.util.partitionPromiseAll(getters, config.parallel_request_size / 2)
+        cards.util.partitionPromiseAll(getters, config.parallel_request_size)
           .then(function(vals) {
             var colls;
             vals.sort(function(a, b) {
