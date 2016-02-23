@@ -308,7 +308,7 @@ cards.model = (function() {
           // delete from fake storage
           //cards.fake.deleteColl(self.get('id')).then(function(coll_id) {
           //cards.gdrive.deleteColl(self.get('id')).then(function(coll_id) {
-          config.storage.cards.gdrive.deleteColl(self.get('id')).then(function(coll_id) {
+          config.storage.deleteColl(self.get('id')).then(function(coll_id) {
             self.destroy_();
             // update models
             // Note: fetchされていないと，special:allが更新されないので，
