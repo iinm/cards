@@ -177,11 +177,10 @@ cards.nav = (function() {
           return;
         }
         state.annot_targets.as_array().forEach(function(card_clone) {
-          promises.push(function() { return card_clone.destroy(); });
+          promises.push(card_clone.destroy());
         });
         dom.self.classList.add('annot-saving');
-        //Promise.all(promises).then(function(card_array) {
-        cards.util.partitionPromiseAll(promises, 1).then(function(card_array) {
+        Promise.all(promises).then(function(card_array) {
           dom.self.classList.remove('annot-saving');
         });
       },
