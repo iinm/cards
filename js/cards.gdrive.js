@@ -684,13 +684,24 @@ cards.gdrive = (function() {
       }
       else {  // tag or note
         getRelsAll(coll_id).then(function(rels) {
-          var start, card_ids, items;
+          var start, card_ids, items, card_ids_map, card_ids_;
           if (rels.length === 0) {  // empty coll
             resolve({ card_array: [] });
           }
           else if (rels[0].type.indexOf('note') > -1) {  // note or note_order
             if (rels[0].type === 'note_order') {
-              items = getItems(rels[0].card_ids);
+              // check relations
+              card_ids_map = {};
+              rels.slice(1).forEach(function(rel) {
+                card_ids_map[rel.card_id] = true;
+              });
+              card_ids_ = [];
+              rels[0].card_ids.forEach(function(card_id) {
+                if (card_ids_map[card_id]) {
+                  card_ids_.push(card_id);
+                }
+              });
+              items = getItems(card_ids_);
             }
             else {
               items = getItems(rels.map(function(r) { return r.card_id; }));
