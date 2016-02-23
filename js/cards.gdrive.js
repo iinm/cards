@@ -750,17 +750,28 @@ cards.gdrive = (function() {
   };
 
   saveRel = function(rel) {
-    console.log('###',  rel);
-    var name = [
-      ((rel.type === 'note_order') ? '0000000000000' : rel.timestamp),  // 0
-      rel.type,       // 1
-      ((rel.type === 'note_order') ? rel.card_ids.join(',') : rel.card_id),
-      rel.coll_id
-    ].join(',');
-    return saveFile({
-      name: name,
-      parents: ((!rel.id) ? [config.folder_ids.rels] : null)
-    }, '', rel.id);
+    var promise = new Promise(function(resolve, reject) {
+      console.log('###',  rel);
+      var name = [
+        ((rel.type === 'note_order') ? '0000000000000' : rel.timestamp),  // 0
+        rel.type,       // 1
+        ((rel.type === 'note_order') ? rel.card_ids.join(',') : rel.card_id),
+        rel.coll_id
+      ].join(',');
+
+      saveFile({
+        name: name,
+        parents: ((!rel.id) ? [config.folder_ids.rels] : null)
+      }, '', rel.id)
+        .then(function(file) {
+          getColl(rel.coll_id).then(function(coll) {
+            saveColl(coll, true).then(function() {
+              resolve(file);
+            });
+          });
+        });
+    });
+    return promise;
   };
 
   getRels = function(file_id, pageToken) {
