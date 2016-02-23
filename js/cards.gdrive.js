@@ -581,6 +581,7 @@ cards.gdrive = (function() {
       };
 
       update_order = function(file) {
+        coll.id = file.id;
         return new Promise(function(resolve, reject) {
           // if coll.card_ids -> modify order
           if (coll.card_ids && coll.card_ids.length >= 2) {
