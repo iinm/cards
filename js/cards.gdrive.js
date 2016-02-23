@@ -106,6 +106,7 @@ cards.gdrive = (function() {
   handleAuthResult = function(authResult) {
     console.log(authResult);
     // IMPORTANT!! これを消さないと，モバイルでの認証に失敗する．
+    // http://stackoverflow.com/questions/25065194/google-sign-in-uncaught-securityerror
     delete authResult['g-oauth-window'];
 
     // Handle response from authorization server.
