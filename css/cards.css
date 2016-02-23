@@ -236,3 +236,7 @@ strong {
   border: .15em solid #bbb;
   cursor: pointer;
 }
+
+.greeting-card .start-menu a .cards-try-demo {
+  border: .15em solid #bbb;
+}
