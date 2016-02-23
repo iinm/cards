@@ -128,6 +128,7 @@ cards.nav = (function() {
       }
       else {
         if (window.confirm('Are you sure to exit?')) {
+          dom.self.classList.add('annot-saving');
           window.location.href = (
             window.location.origin +
               window.location.pathname.replace(/demo\/?$/, '')
