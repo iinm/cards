@@ -985,7 +985,7 @@ cards.gdrive = (function() {
         q: cards.util.formatTmpl(
           "'{{folder_id}}' in parents and fullText contains '{{query}}'" ,
           {
-            folder_id: config.cards_folder_id,
+            folder_id: config.folder_ids.cards,
             query: query.replace("'", "\'")
           }
         )
