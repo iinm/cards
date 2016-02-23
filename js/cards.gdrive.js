@@ -497,10 +497,11 @@ cards.gdrive = (function() {
   getColl = function(file_id) {
     var promise = new Promise(function(resolve, reject) {
       getFile(file_id).then(function(file) {
-        downloadFile(file).then(function(data) {
-          var coll = JSON.parse(data);
-          coll.id = file_id;
-          resolve(coll);
+        var parts = file.name.match(/$(\d+),(tag|note),(.+)/);
+        resolve({
+          id: file.id,
+          type: parts[2],
+          name: parts[3]
         });
       });
     });
@@ -566,47 +567,65 @@ cards.gdrive = (function() {
 
   saveColl = function(coll, update_timestamp) {
     // cards.gdrive.saveColl({name: 'star wars', card_ids: [], type: 'tag'})
-    var promise;
-    promise = new Promise(function(resolve, reject) {
-      var timestamp, prepare;
-      prepare = new Promise(function(resolve, reject) {
-        // set timestamp
-        if (update_timestamp === true) {
-          timestamp = cards.util.timestamp();
-        }
-        if (coll.id) {
-          getFile(coll.id).then(function(file) {
-            downloadFile(file).then(function(data) {
-              var coll_ = JSON.parse(data);
+    var promise = new Promise(function(resolve, reject) {
+      var set_timestamp, save_coll, update_order;
+
+      set_timestamp = function() {
+        return new Promise(function(resolve, reject) {
+          var timestamp;
+          // set timestamp
+          if (update_timestamp === true) {
+            timestamp = Date.now();
+          }
+          if (coll.id) {
+            getFile(coll.id).then(function(file) {
               if (update_timestamp) {
-                timestamp = cards.util.timestamp();
+                timestamp = Date.now();
               } else {
-                timestamp = file.name.match(/^(\d+)_(.*)/)[1];
+                timestamp = file.name.match(/^(\d+),.*/)[1];
               }
-              coll.card_ids = coll.card_ids || coll_.card_ids;
-              resolve();
+              resolve(timestamp);
             });
-          });
-        }
-        else {  // new coll
-          timestamp = '0000000000';
-          coll.card_ids = [];
-          resolve();
-        }
+          }
+          else {  // new coll
+            timestamp = '0000000000000';
+            resolve(timestamp);
+          }
+        });
+      };
+
+      save_coll = function(timestamp) {
+        return saveFile({
+          name: [timestamp, coll.type, coll.name].join(','),
+          parents: ((!coll.id) ? [config.folder_ids.colls] : null)
+        }, '', coll.id);
+      };
+
+      update_order = function(file) {
+        return new Promise(function(resolve, reject) {
+          // if coll.card_ids -> modify order
+          if (coll.card_ids && coll.card_ids.length >= 2) {
+            getRels(file.id).then(function(rels) {
+              if (rels[0].type === 'note_order') {
+                rels[0].card_ids = coll.card_ids;
+                saveRel(rels[0]).then(resolve);
+              } else {
+                saveRel({
+                  type: 'note_order', card_ids: coll.card_ids, coll_id: coll.id
+                }).then(resolve);
+              }
+            });
+          }
+          else {
+            resolve(null);
+          }
+        });
+      };
+
+      set_timestamp().then(save_coll).then(update_order).then(function() {
+        resolve(coll);
       });
 
-      prepare.then(function() {
-        saveFile({
-          name: timestamp + '_' + cards.util.unescape(coll.name) + '.json',
-          mimeType: 'application/json',
-          parents: ((!coll.id) ? [config.colls_folder_id] : null)
-        }, JSON.stringify(coll), coll.id)
-          .then(function(file) {
-            // downloadして，checkしたほうが良い?
-            coll.id = file.id;
-            resolve(coll);
-          });
-      });
     });
     return promise;
   };
@@ -733,7 +752,7 @@ cards.gdrive = (function() {
 
   saveRel = function(rel) {
     var name = [
-      rel.timestamp,  // 0
+      ((rel.type === 'note_order') ? '0000000000000' : rel.timestamp),  // 0
       rel.type,       // 1
       ((rel.type === 'note_order') ? rel.card_ids.join(',') : rel.card_id),
       rel.coll_id
@@ -755,13 +774,9 @@ cards.gdrive = (function() {
         .then(function(files) {
           var rels = [];
           files.sort(function(a, b) {
-            if (a.name < b.name) {
-              return -1;
-            } else if (a.name > b.name) {
-              return 1;
-            } else {
-              return 0;
-            }
+            if (a.name < b.name) { return -1; }
+            else if (a.name > b.name) { return 1; }
+            else { return 0; }
           });
           files.forEach(function(file) {
             var xs = file.name.split(/,/);
@@ -783,6 +798,7 @@ cards.gdrive = (function() {
   getItem = function(file_id) {  // <- card_id or coll_id
     var promise = new Promise(function(resolve, reject) {
       getFile(file_id).then(function(file) {
+        // Note: cost 2 connections
         Promise.all([ downloadFile(file_id), getRels(file_id) ])
           .then(function(vals) {
             resolve({
@@ -801,6 +817,7 @@ cards.gdrive = (function() {
         return new Promise(function(resolve, reject) {
           var timestamp, removed_rels = [], added_rels = [], updated_rels = [];
           if (card.id) {
+            // Note: cost 1 connection, because card and coll may cached
             Promise.all([ getItem(card.id), card.coll_ids.map(getColl)])
               .then(function(vals) {
                 var item = vals[0], colls = vals[1], coll_ids_, body_updated;

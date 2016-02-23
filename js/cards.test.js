@@ -10,7 +10,7 @@ cards.test = (function () {
   "use strict";
   var
   toggleAnnot, onModelChange,
-  createCards,
+  createCards, createColls,
   testPartitionPromise
   ;
 
@@ -64,6 +64,23 @@ cards.test = (function () {
     return cards.util.partitionPromiseAll(creators, 10);
   };
 
+  createColls = function(title_prefix, num) {
+    var i, generate_creator, creators = [], data;
+    generate_creator = function(data) {
+      return function() {
+        return cards.gdrive.saveColl(data);
+      };
+    };
+    for (i = 0; i < num; i++) {
+      data = {
+        name: title_prefix + '_' + i,
+        type: ((i % 2) ? 'tag': 'coll'),
+      };
+      creators.push(generate_creator(data));
+    }
+    return cards.util.partitionPromiseAll(creators, 10);
+  };
+
   testPartitionPromise = function() {
     var i, generate, generators = [];
     generate = function(i) {
@@ -86,6 +103,6 @@ cards.test = (function () {
     testPartitionPromise: testPartitionPromise,
     toggleAnnot: toggleAnnot,
     onModelChange: onModelChange,
-    createCards: createCards
+    createCards: createCards, createColls: createColls
   };
 }());
