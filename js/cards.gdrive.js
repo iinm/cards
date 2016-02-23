@@ -95,18 +95,21 @@ cards.gdrive = (function() {
       handleAuthResult(token);
     }
     else {
-      gapi.auth.authorize({
-        client_id: config.client_id,
-        scope: config.scopes.join(' '),
-        immediate: true
-      }, handleAuthResult);
+      handleAuthResult(null);
+      //gapi.auth.authorize({
+      //  client_id: config.client_id,
+      //  scope: config.scopes.join(' '),
+      //  immediate: true
+      //}, handleAuthResult);
     }
   };
 
   handleAuthResult = function(authResult) {
     // IMPORTANT!! これを消さないと，モバイルでの認証に失敗する．
     // http://stackoverflow.com/questions/25065194/google-sign-in-uncaught-securityerror
-    delete authResult['g-oauth-window'];
+    if (authResult && authResult['g-oauth-window']) {
+      delete authResult['g-oauth-window'];
+    }
 
     // Handle response from authorization server.
     if (authResult && !authResult.error) {
@@ -596,6 +599,7 @@ cards.gdrive = (function() {
           // if coll.card_ids -> modify order
           if (coll.card_ids && coll.card_ids.length >= 2) {
             getRelsAll(file.id).then(function(rels) {
+              console.log(rels);
               if (rels[0].type === 'note_order') {
                 rels[0].card_ids = coll.card_ids;
                 saveRel(rels[0]).then(resolve);
