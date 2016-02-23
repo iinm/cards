@@ -584,7 +584,6 @@ cards.gdrive = (function() {
           // if coll.card_ids -> modify order
           if (coll.card_ids && coll.card_ids.length >= 2) {
             getRelsAll(file.id).then(function(rels) {
-              console.log(rels);
               if (rels[0].type === 'note_order') {
                 rels[0].card_ids = coll.card_ids;
                 saveRel(rels[0]).then(resolve);
@@ -734,7 +733,6 @@ cards.gdrive = (function() {
 
   saveRel = function(rel) {
     var promise = new Promise(function(resolve, reject) {
-      console.log('###',  rel);
       var name = [
         ((rel.type === 'note_order') ? '0000000000000' : rel.timestamp),  // 0
         rel.type,       // 1
