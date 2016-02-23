@@ -9,7 +9,6 @@
 cards.fake = (function() {
   "use strict";
   var
-  init,
   cards_ = {}, colls = {}, card_ids, coll_ids, num_card, num_coll,
   getColls, saveColl, deleteColl,
   getCards, saveCard, deleteCard, searchCards
@@ -433,7 +432,6 @@ cards.fake = (function() {
   };
 
   return {
-    init: init,
     getColls: getColls,
     saveColl: saveColl,
     deleteColl: deleteColl,

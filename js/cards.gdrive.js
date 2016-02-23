@@ -39,7 +39,7 @@ cards.gdrive = (function() {
   init, initApp,
   checkAuth, handleAuthResult,
   listFiles, listFilesAll, getFile, getFiles, downloadFile, downloadFiles,
-  createFolder, saveFile, updateFile, trashFile, deleteFile,
+  createFolder, saveFile, trashFile, deleteFile,
   createAppFolders,
   // TODO
   getColl, getColls, getCard, getCards, saveColl, saveCard,
@@ -105,7 +105,9 @@ cards.gdrive = (function() {
 
   handleAuthResult = function(authResult) {
     console.log(authResult);
+    // IMPORTANT!! これを消さないと，モバイルでの認証に失敗する．
     delete authResult['g-oauth-window'];
+
     // Handle response from authorization server.
     if (authResult && !authResult.error) {
       // save token to localstorage
@@ -357,7 +359,7 @@ cards.gdrive = (function() {
     //};
     //content = "{ 'msg': 'Hello!' }",
     var
-    boundary = '-------314159265358979323846'
+    boundary = '-------314159265358979323846',
     delimiter = "\r\n--" + boundary + "\r\n",
     close_delim = "\r\n--" + boundary + "--",
     promise
@@ -513,7 +515,7 @@ cards.gdrive = (function() {
   getColls = function() {
     // get all collections
     var promise = new Promise(function(resolve, reject) {
-      var params, downloads;
+      var params;
       params = {
         q: cards.util.formatTmpl(
           "'{{folder_id}}' in parents" , { folder_id: config.colls_folder_id }
@@ -659,7 +661,7 @@ cards.gdrive = (function() {
       }
       else {
         getColl(coll_id).then(function(coll) {
-          var start, card_ids, get_files = [], downloads = [];
+          var start, card_ids;
           if (coll.type === 'note') {
             // get all cards
             Promise.all(coll.card_ids.map(getFile))
