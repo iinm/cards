@@ -554,7 +554,7 @@ cards.gdrive = (function() {
         // 2. delete coll
         //Promise.all(updates).then(function(card_files) {
         cards.util.partitionPromiseAll(updaters, config.parallel_request_size)
-          .then(function(card_files) { deleteFile(coll.id).then(resolve); });
+          .then(function() { deleteFile(coll.id).then(resolve); });
       });
     });
     return promise;
@@ -731,30 +731,19 @@ cards.gdrive = (function() {
 
   deleteCard = function(file_id) {
     var promise = new Promise(function(resolve, reject) {
-      // 1. remove card from colls
-      getCard(file_id).then(function(card) {
-        var generate_updater, updaters = [];
-        generate_updater = function(coll_id) {
-          return function() {
-            return new Promise(function(resolve, reject) {
-              getColl(coll_id).then(function(coll) {
-                var idx = coll.card_ids.indexOf(card.id);
-                if (idx > -1) {
-                  coll.card_ids.splice(idx, 1);
-                }
-                saveColl(coll).then(resolve);
-              });
-            });
-          };
-        };
-        card.coll_ids.forEach(function(coll_id) {
-          updaters.push(generate_updater(coll_id));
+      // 1 remove relations
+      getRelsAll(file_id).then(function(rels) {
+        var removers = [];
+        rels.forEach(function(rel) {
+          if (rel.type !== 'note_order') {
+            removers.push(function() { return deleteFile(rel.id); });
+          }
         });
-
-        // 2. delete card
-        //Promise.all(updates).then(function(coll_files) {
-        cards.util.partitionPromiseAll(updaters, config.parallel_request_size)
-          .then(function(coll_files) { deleteFile(card.id).then(resolve); });
+        cards.util.partitionPromiseAll(removers, config.parallel_request_size)
+          .then(function() {
+            // 2. delete card
+            deleteFile(file_id).then(resolve);
+          });
       });
     });
     return promise;
@@ -1002,7 +991,7 @@ cards.gdrive = (function() {
       };
 
       check_changes().then(save_card).then(update_relations)
-        .then(function(changes) { resolve(card); });
+        .then(function() { resolve(card); });
     });
     return promise;
   };  // saveCard
