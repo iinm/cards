@@ -61,7 +61,9 @@ cards.test = (function () {
       };
       creators.push(generate_creator(data));
     }
-    return cards.util.partitionPromiseAll(creators, 10);
+    cards.util.partitionPromiseAll(creators, 10).then(function(cards_) {
+      console.log(cards_);
+    });
   };
 
   createColls = function(title_prefix, num) {
