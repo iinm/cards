@@ -41,8 +41,8 @@ cards.gdrive = (function() {
   listFiles, listFilesAll, getFile, getFiles, downloadFile, downloadFiles,
   createFolder, saveFile, trashFile, deleteFile,
   createAppFolders,
-  // TODO
   getColl, getColls, getCard, getCards, saveColl, saveCard,
+  getRels, saveRel, getItem,
   deleteColl, deleteCard,
   searchCards,
   avadakedavra
@@ -246,7 +246,7 @@ cards.gdrive = (function() {
       if (localStorage[config.cache_key_prefix + file.id]) {
         file_ = JSON.parse(localStorage[config.cache_key_prefix + file.id]);
       }
-      if (file_.content) {
+      if (file_ && file_.content) {
         data = file_.content;
         //console.log('downloadFile: from cache', data);
         resolve(data);
@@ -463,8 +463,6 @@ cards.gdrive = (function() {
   createAppFolders = function() {
     // create or check app folders and set folder ids
     var promise = new Promise(function(resolve, reject) {
-      var promises = [], p;
-
       listFilesAll({
         q: "(name = 'cards' or name = 'colls' or name = 'rels')" +
           " and mimeType = 'application/vnd.google-apps.folder'"
@@ -733,150 +731,190 @@ cards.gdrive = (function() {
     return promise;
   };
 
-  saveCard = function(card, skip_update_colls) {
-    var promise;
-    promise = new Promise(function(resolve, reject) {
-      var
-      p, preparations = [],
-      timestamp, body_updated = false,
-      removed_coll_ids = [], added_coll_ids = [], other_coll_ids = []
-      ;
+  saveRel = function(rel) {
+    var name = [
+      rel.timestamp,  // 0
+      rel.type,       // 1
+      ((rel.type === 'note_order') ? rel.card_ids.join(',') : rel.card_id),
+      rel.coll_id
+    ].join(',');
+    return saveFile({
+      name: name,
+      parents: ((!rel.id) ? [config.folder_ids.rels] : null)
+    });
+  };
 
-      p = new Promise (function(resolve, reject) {
-        // set timestamp and check coll changes
-        var name_parts;
-        if (card.id) {
-          getFile(card.id).then(function(file) {
-            downloadFile(file).then(function(data) {
-              var card_ = JSON.parse(data);
-              if (card.title !== card_.title || card.body !== card_.body) {
-                // if changed -> update timestamp
-                body_updated = true;
-                timestamp = cards.util.timestamp();
-              } else {
-                name_parts = file.name.match(/^(\d+)_(.*)/);
-                timestamp = name_parts[1];
-              }
-              // check coll changes
-              card_.coll_ids.forEach(function(coll_id) {
-                if (card.coll_ids.indexOf(coll_id) === -1) {
-                  removed_coll_ids.push(coll_id);
-                }
-              });
-              card.coll_ids.forEach(function(coll_id) {
-                if (card_.coll_ids.indexOf(coll_id) === -1) {
-                  added_coll_ids.push(coll_id);
-                } else {
-                  other_coll_ids.push(coll_id);
-                }
-              });
-              resolve();
+  getRels = function(file_id) {
+    var promise = new Promise(function(resolve, reject) {
+      listFilesAll({
+        q: cards.util.formatTmpl(
+          "name contains '{{file_id}}'", { file_id: file_id }
+        ),
+        parents: [config.folder_ids.rels]
+      })
+        .then(function(files) {
+          var rels = [];
+          files.sort(function(a, b) {
+            if (a.name < b.name) {
+              return -1;
+            } else if (a.name > b.name) {
+              return 1;
+            } else {
+              return 0;
+            }
+          });
+          files.forEach(function(file) {
+            var xs = file.name.split(/,/);
+            rels.push({
+              id: file.id,
+              timestamp: xs[0],
+              type: xs[1],  // tag | note | note_order
+              card_id: xs[2],
+              card_ids: xs.slice(2, xs.length - 1),
+              coll_id: xs[xs.length - 1]
             });
           });
-        }
-        else {  // new card
-          timestamp = cards.util.timestamp();
-          removed_coll_ids = [];
-          added_coll_ids = card.coll_ids;
-          resolve();
-        }
-      });
-      preparations.push(p);
-      
-      // save card
-      Promise.all(preparations).then(function() {
-        if (!card.id) { delete card.id; }
-        saveFile(
-          {
-            name: timestamp + '_' + cards.util.unescape(card.title) + '.json',
-            //mimeType: 'application/json',
-            parents: ((!card.id) ? [config.cards_folder_id] : null),
-            indexable_text: [
-              card.title, card.body // coll names
-            ].map(cards.util.unescape).join('\n\n')
-          },
-          JSON.stringify(card), card.id
-        ).then(function(file) {
-          card.id = file.id;
-          var
-          generate_order_updater, generate_card_adder, generate_card_remover,
-          updaters = []
-          ;
-          generate_order_updater = function(coll_id) {
-            return function() {
-              return new Promise(function(resolve, reject) {
-                getColl(coll_id).then(function(coll) {
-                  if (coll.type === 'tag') {
-                    var idx = coll.card_ids.indexOf(card.id);
-                    if (idx > -1) {
-                      coll.card_ids.splice(idx, 1);
-                    }
-                    coll.card_ids.splice(0, 0, card.id);
-                    saveColl(coll, true).then(resolve);
-                  }
-                  else {
-                    resolve(coll);
-                  }
-                });
-              });
-            };
-          };
-          generate_card_remover = function(coll_id) {
-            return function() {
-              return new Promise(function(resolve, reject) {
-                getColl(coll_id).then(function(coll) {
-                  var idx = coll.card_ids.indexOf(card.id);
-                  if (idx > -1) {
-                    coll.card_ids.splice(idx, 1);
-                  }
-                  saveColl(coll).then(resolve);
-                });
-              });
-            };
-          };
-          generate_card_adder = function(coll_id) {
-            return function() {
-              return new Promise(function(resolve, reject) {
-                getColl(coll_id).then(function(coll) {
-                  if (coll.type === 'note') {
-                    coll.card_ids.push(card.id);
-                  } else {  // tag
-                    coll.card_ids.splice(0, 0, card.id);
-                  }
-                  saveColl(coll, true).then(resolve);
-                });
-              });
-            };
-          };
-
-          if (skip_update_colls !== true) {
-            // update colls
-            if (body_updated) {
-              // bring to top of coll
-              other_coll_ids.forEach(function(coll_id) {
-                updaters.push(generate_order_updater(coll_id));
-              });
-            }
-            // remove card from coll
-            removed_coll_ids.forEach(function(coll_id) {
-              updaters.push(generate_card_remover(coll_id));
-            });
-            // add card to coll
-            added_coll_ids.forEach(function(coll_id) {
-              updaters.push(generate_card_adder(coll_id));
-            });
-          }
-
-          return cards.util.partitionPromiseAll(
-            updaters, config.parallel_request_size
-          );
-        }).then(function(coll_files) {
-          resolve(card);
+          resolve(rels);
         });
+    });
+      return promise;
+  };
+
+  getItem = function(file_id) {  // <- card_id or coll_id
+    var promise = new Promise(function(resolve, reject) {
+      getFile(file_id).then(function(file) {
+        Promise.all([ downloadFile(file_id), getRels(file_id) ])
+          .then(function(vals) {
+            resolve({
+              file: file, content: JSON.parse(vals[0]), rels: vals[1]
+            });
+          });
       });
     });
     return promise;
   };
+
+  saveCard = function(card) {
+    var promise = new Promise(function(resolve, reject) {
+      var check_changes, save_card, update_relations;
+      check_changes = function() {
+        return new Promise(function(resolve, reject) {
+          var timestamp, removed_rels = [], added_rels = [], updated_rels = [];
+          if (card.id) {
+            Promise.all([ getItem(card.id), card.coll_ids.map(getColl)])
+              .then(function(vals) {
+                var item = vals[0], colls = vals[1], coll_ids_, body_updated;
+                // Note: don't update note_order
+                item.rels = item.rels.filter(function(rel) {
+                  return (rel.type !== 'note_order');
+                });
+                // old coll ids
+                coll_ids_ = item.rels.map(function(rel) {
+                  return rel.coll_id;
+                });
+
+                // set timestamp
+                if (card.title !== item.card.title
+                    || card.body !== item.card.body
+                   ) {
+                  // if changed -> update timestamp
+                  body_updated = true;
+                  timestamp = Date.now();
+                } else {
+                  timestamp = item.file.name.match(/^(\d+),(.*)/)[1];
+                }
+                // check relation change
+                item.rels.forEach(function(rel) {
+                  if (card.coll_ids.indexOf(rel.coll_id) === -1) {
+                    removed_rels.push(rel);
+                  }
+                });
+                colls.forEach(function(coll) {
+                  var rel = {
+                    timestamp: Date.now(),
+                    type: coll.type, card_id: card.id, coll_id: coll.id
+                  };
+                  if (coll_ids_.indexOf(coll.id) === -1) {
+                    added_rels.push(rel);
+                  } else if (body_updated && coll.type === 'tag') {
+                    updated_rels.push(rel);
+                  }
+                });
+              });
+          }
+          else {  // !cards.id -> new card
+            // no id -> can't update relations here
+            timestamp = Date.now();
+          }
+          resolve({
+            timestamp: timestamp,
+            removed_rels: removed_rels, added_rels: added_rels,
+            updated_rels: updated_rels
+          });
+        });
+      };  // check_changes
+
+      save_card = function(changes) {
+        return new Promise(function(resolve, reject) {
+          if (!card.id) { delete card.id; }
+          saveFile({
+            name: changes.timestamp +
+              ',' + cards.util.unescape(card.title) + '.json',
+            parents: ((!card.id) ? [config.folder_ids.cards] : null),
+            indexable_text: [
+              card.title, card.body // coll names
+            ].map(cards.util.unescape).join('\n\n')
+          }, JSON.stringify(card), card.id)
+            .then(function(file) {
+              //
+              changes.card_file = file;
+              resolve(changes);
+            });
+        });
+      };
+
+      update_relations = function(changes) {
+        var prepare = new Promise(function(resolve, reject) {
+          if (!card.id) {  // new
+            card.id = changes.card_file.id;
+            Promise.all(card.coll_ids.map(getColl)).then(function(colls) {
+              changes.added_rels = colls.map(function(coll) {
+                return {
+                  timestamp: changes.timestamp,
+                  type: coll.type, card_id: card.id, coll_id: coll.id
+                };
+              });
+              resolve(changes);
+            });
+          }
+          else {
+            resolve(changes);
+          }
+        });
+
+        prepare.then(function(changes) {
+          var updaters = [];
+          changes.removed_rels.forEach(function(rel) {
+            updaters.push(function() { deleteFile(rel.id); });
+          });
+          changes.added_rels.forEach(function(rel) {
+            updaters.push(function() { saveRel(rel); });
+          });
+          changes.updated_rels.forEach(function(rel) {
+            updaters.push(function() { saveRel(rel); });
+          });
+          cards.util.partitionPromiseAll(updaters, config.parallel_request_size)
+            .then(function(rels_updates) {
+              changes.rels_updates = rels_updates;
+              resolve(changes);
+            });
+        });
+      };  // update_relations
+
+      check_changes().then(save_card).then(update_relations).then(resolve);
+    });
+    return promise;
+  };  // saveCard
 
   searchCards = function(query, pageToken) {
     var promise = new Promise(function(resolve, reject) {
@@ -942,8 +980,9 @@ cards.gdrive = (function() {
     deleteFile: deleteFile,
     // cards storage
     createAppFolders: createAppFolders,
-    getColl: getColl, getColls: getColls, saveColl: saveColl,
     getCard: getCard, getCards: getCards, saveCard: saveCard,
+    getColl: getColl, getColls: getColls, saveColl: saveColl,
+    getRels: getRels, saveRel: saveRel, getItem: getItem,
     deleteCard: deleteCard, deleteColl: deleteColl,
     searchCards: searchCards,
     avadakedavra: avadakedavra
