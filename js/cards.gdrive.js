@@ -45,6 +45,7 @@ cards.gdrive = (function() {
   getRels, getRelsAll, saveRel, getItem, getItems,
   deleteColl, deleteCard,
   searchCards,
+  items2cards,
   avadakedavra
   ;
 
@@ -621,27 +622,27 @@ cards.gdrive = (function() {
     return promise;
   };
 
-  getCards = function(coll_id, pageToken) {
-    var promise, items2cards;
-
-    items2cards = function(items) {
-      var cards_ = [];
-      items.forEach(function(item) {
-        var card = item.content;
-        card.id = item.file.id;
-        card.coll_ids = [];
-        item.rels.reverse();
-        item.rels.forEach(function(rel) {
-          if (rel.type !== 'note_order') {
-            card.coll_ids.push(rel.coll_id);
-          }
-        });
-        card.created_date = new Date(item.file.createdTime)
-          .toDateString().replace(/\s\d{4}/, '');
-        cards_.push(card);
+  items2cards = function(items) {
+    var cards_ = [];
+    items.forEach(function(item) {
+      var card = item.content;
+      card.id = item.file.id;
+      card.coll_ids = [];
+      item.rels.reverse();
+      item.rels.forEach(function(rel) {
+        if (rel.type !== 'note_order') {
+          card.coll_ids.push(rel.coll_id);
+        }
       });
-      return cards_;
-    };
+      card.created_date = new Date(item.file.createdTime)
+        .toDateString().replace(/\s\d{4}/, '');
+      cards_.push(card);
+    });
+    return cards_;
+  };
+
+  getCards = function(coll_id, pageToken) {
+    var promise;
 
     promise = new Promise(function(resolve, reject) {
       var params;
@@ -994,17 +995,10 @@ cards.gdrive = (function() {
         params.pageToken = pageToken;
       }
       listFiles(params).then(function(resp) {
-        downloadFiles(resp.files).then(function(data_array) {
-          var i, card, cards_ = [];
-          for (i = 0; i < resp.files.length; i++) {
-            card = JSON.parse(data_array[i]);
-            card.id = resp.files[i].id;
-            card.created_date = new Date(resp.files[i].createdTime)
-              .toDateString().replace(/\s\d{4}/, '');
-            cards_.push(card);
-          }
+        var file_ids = resp.files.map(function(f) { return f.id; });
+        getItems(file_ids).then(function(items) {
           resolve({
-            card_array: cards_, nextPageToken: resp.nextPageToken
+            card_array: items2cards(items), nextPageToken: resp.nextPageToken
           });
         });
       });
@@ -1047,6 +1041,7 @@ cards.gdrive = (function() {
     saveRel: saveRel, getItem: getItem, getItems: getItems,
     deleteCard: deleteCard, deleteColl: deleteColl,
     searchCards: searchCards,
+    items2cards: items2cards,
     avadakedavra: avadakedavra
   };
 }());
