@@ -519,12 +519,45 @@ cards.gdrive = (function() {
       params = {
         q: cards.util.formatTmpl(
           "'{{folder_id}}' in parents" , { folder_id: config.folder_ids.colls }
-        ),
-        orderBy: 'name desc,createdTime'
+        )
+        //orderBy: 'name desc,createdTime'
       };
       listFilesAll(params).then(function(files) {
-        var colls = files.map(function(file) { return getColl(file.id); });
-        Promise.all(colls).then(resolve);
+        var getters = [];
+        files.forEach(function(file) {
+          var getter = function() {
+            return new Promise(function(resolve, reject) {
+              getColl(file.id).then(function(coll) {
+                // use relations to sort
+                getRels(coll.id, null, 10).then(function(resp) {
+                  var timestamp;
+                  if (resp.rels.length === 0) {
+                    timestamp = '0000000000000';
+                  } else if (resp.rels[0].type === 'note_order'
+                             && resp.rels[1]
+                            ) {
+                    timestamp = resp.rels[1].timestamp;
+                  } else {
+                    timestamp = resp.rels[0].timestamp;
+                  }
+                  resolve({ coll: coll, timestamp: timestamp }); 
+                });
+              });
+            });
+          };
+          getters.push(getter);
+        });
+        cards.util.partitionPromiseAll(getters, config.parallel_request_size / 2)
+          .then(function(vals) {
+            var colls;
+            vals.sort(function(a, b) {
+              if (a.timestamp > b.timestamp) { return -1; }
+              else if (a.timestamp < b.timestamp) { return 1; }
+              else { return 0; }
+            });
+            colls = vals.map(function(v) { return v.coll; });
+            resolve(colls);
+          });
       });
     });
     return promise;
@@ -629,7 +662,7 @@ cards.gdrive = (function() {
       var card = item.content;
       card.id = item.file.id;
       card.coll_ids = [];
-      item.rels.reverse();
+      //item.rels.reverse();
       item.rels.forEach(function(rel) {
         if (rel.type !== 'note_order') {
           card.coll_ids.push(rel.coll_id);
@@ -690,6 +723,7 @@ cards.gdrive = (function() {
               items = getItems(card_ids_);
             }
             else {
+              rels.reverse();
               items = getItems(rels.map(function(r) { return r.card_id; }));
             }
             items.then(function(items) {
@@ -697,7 +731,7 @@ cards.gdrive = (function() {
             });
           }
           else {  // tag
-            rels.reverse();
+            //rels.reverse();
             card_ids = rels.map(function(r) { return r.card_id; });
             start = card_ids.indexOf(pageToken);
             start = ((start === -1) ? 0 : start);
@@ -736,7 +770,7 @@ cards.gdrive = (function() {
   saveRel = function(rel) {
     var promise = new Promise(function(resolve, reject) {
       var name = [
-        ((rel.type === 'note_order') ? '0000000000000' : rel.timestamp),  // 0
+        ((rel.type === 'note_order') ? '9999999999999' : rel.timestamp),  // 0
         rel.type,       // 1
         ((rel.type === 'note_order') ? rel.card_ids.join(',') : rel.card_id),
         rel.coll_id
@@ -747,33 +781,34 @@ cards.gdrive = (function() {
         parents: ((!rel.id) ? [config.folder_ids.rels] : null)
       }, '', rel.id)
         .then(function(file) {
-          getColl(rel.coll_id).then(function(coll) {
-            saveColl(coll, true).then(function() {
-              resolve(file);
-            });
-          });
+          //getColl(rel.coll_id).then(function(coll) {
+          //  saveColl(coll, true).then(function() {
+          resolve(file);
+          //  });
+          //});
         });
     });
     return promise;
   };
 
-  getRels = function(file_id, pageToken) {
+  getRels = function(file_id, pageToken, pageSize) {
     var promise = new Promise(function(resolve, reject) {
       var params = {
         q: cards.util.formatTmpl(
           "name contains '{{file_id}}'", { file_id: file_id }
         ),
+        orderBy: 'name desc',
         parents: [config.folder_ids.rels],
-        pageSize: 100
+        pageSize: pageSize || 100
       };
       if (pageToken) { params.pageToken = pageToken; }
       listFiles(params).then(function(resp) {
         var rels = [];
-        resp.files.sort(function(a, b) {
-          if (a.name < b.name) { return -1; }
-          else if (a.name > b.name) { return 1; }
-          else { return 0; }
-        });
+        //resp.files.sort(function(a, b) {
+        //  if (a.name < b.name) { return -1; }
+        //  else if (a.name > b.name) { return 1; }
+        //  else { return 0; }
+        //});
         resp.files.forEach(function(file) {
           var xs = file.name.split(/,/);
           rels.push({
@@ -803,6 +838,7 @@ cards.gdrive = (function() {
           if (resp.nextPageToken) {
             getRelsAll(file_id, rels, resp.nextPageToken).then(resolve);
           } else {
+            // TODO: sort?
             resolve(rels);
           }
         });
