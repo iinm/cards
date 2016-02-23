@@ -104,6 +104,7 @@ cards.gdrive = (function() {
   };
 
   handleAuthResult = function(authResult) {
+    console.log(authResult);
     // Handle response from authorization server.
     if (authResult && !authResult.error) {
       // save token to localstorage
