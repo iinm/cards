@@ -29,10 +29,10 @@ cards.gdrive = (function() {
        //'https://www.googleapis.com/auth/drive'
        'https://www.googleapis.com/auth/drive.appdata'
     ],
-    cards_folder_id: null,
-    colls_folder_id: null,
+    folder_ids: { cards: null, colls: null, rels: null },
     page_size: 8,
-    parallel_request_size: 8 
+    parallel_request_size: 8,
+    cache_key_prefix: '__cards__'
   },
   dom = {},
 
@@ -104,7 +104,6 @@ cards.gdrive = (function() {
   };
 
   handleAuthResult = function(authResult) {
-    console.log(authResult);
     // IMPORTANT!! これを消さないと，モバイルでの認証に失敗する．
     // http://stackoverflow.com/questions/25065194/google-sign-in-uncaught-securityerror
     delete authResult['g-oauth-window'];
@@ -161,11 +160,11 @@ cards.gdrive = (function() {
           var file_;
           console.log('found:', file);
           // cache
-          if (localStorage[file.id]) {
-            file_ = JSON.parse(localStorage[file.id]);
+          if (localStorage[config.cache_key_prefix + file.id]) {
+            file_ = JSON.parse(localStorage[config.cache_key_prefix + file.id]);
           }
           if (!file_ || (file_ && file_.modifiedTime !== file.modifiedTime)) {
-            localStorage[file.id] = JSON.stringify(file);
+            localStorage[config.cache_key_prefix + file.id] = JSON.stringify(file);
           }
         });
         resolve(resp);
@@ -199,8 +198,8 @@ cards.gdrive = (function() {
   getFile = function(file_id) {
     var promise = new Promise(function(resolve, reject) {
       var request, file, file_;
-      if (localStorage[file_id]) {
-        file = JSON.parse(localStorage[file_id]);
+      if (localStorage[config.cache_key_prefix + file_id]) {
+        file = JSON.parse(localStorage[config.cache_key_prefix + file_id]);
         //console.log('getFile: from cache', file);
         resolve(file);
       }
@@ -215,11 +214,11 @@ cards.gdrive = (function() {
         request.execute(function(file) {
           console.log('getFile:', file);
           // cache
-          if (localStorage[file.id]) {
-            file_ = JSON.parse(localStorage[file.id]);
+          if (localStorage[config.cache_key_prefix + file.id]) {
+            file_ = JSON.parse(localStorage[config.cache_key_prefix + file.id]);
           }
           if (!file_ || (file_ && file_.modifiedTime !== file.modifiedTime)) {
-            localStorage[file.id] = JSON.stringify(file);
+            localStorage[config.cache_key_prefix + file.id] = JSON.stringify(file);
           }
           resolve(file);
         });
@@ -244,8 +243,8 @@ cards.gdrive = (function() {
     // https://developers.google.com/drive/v3/web/manage-downloads
     var promise = new Promise(function(resolve, reject) {
       var request, data, file_;
-      if (localStorage[file.id]) {
-        file_ = JSON.parse(localStorage[file.id]);
+      if (localStorage[config.cache_key_prefix + file.id]) {
+        file_ = JSON.parse(localStorage[config.cache_key_prefix + file.id]);
       }
       if (file_.content) {
         data = file_.content;
@@ -266,9 +265,9 @@ cards.gdrive = (function() {
             data = decodeURIComponent(data);
             console.log('downloadFile:', data);
             // cache
-            //localStorage[file.id + '_content'] = data;
+            //localStorage[config.cache_key_prefix + file.id + '_content'] = data;
             file.content = data;
-            localStorage[file.id] = JSON.stringify(file);
+            localStorage[config.cache_key_prefix + file.id] = JSON.stringify(file);
             resolve(data);
           }
           //else if (!jsonResp.error) {
@@ -466,36 +465,33 @@ cards.gdrive = (function() {
     var promise = new Promise(function(resolve, reject) {
       var promises = [], p;
 
-      p = listFiles({
-        q: "name = 'colls' and mimeType = 'application/vnd.google-apps.folder'"
-      }).then(function(resp) {
-        if (resp.files.length > 0) {
-          return Promise.resolve(resp.files[0]);
-        } else {
-          return createFolder('colls');
-        } 
-      }).then(function(file) {
-        config.colls_folder_id = file.id;
-      });
-      promises.push(p);
-
-      p = listFiles({
-        q: "name = 'cards' and mimeType = 'application/vnd.google-apps.folder'"
-      }).then(function(resp) {
-        if (resp.files.length > 0) {
-          return Promise.resolve(resp.files[0]);
-        } else {
-          return createFolder('cards');
-        } 
-      }).then(function(file) {
-        config.cards_folder_id = file.id;
-      });
-      promises.push(p);
-
-      Promise.all(promises).then(function() {
-        //console.log('createAppFolder:', config);
-        resolve();
-      });
+      listFilesAll({
+        q: "(name = 'cards' or name = 'colls' or name = 'rels')" +
+          " and mimeType = 'application/vnd.google-apps.folder'"
+      })
+        .then(function(files) {
+          var create_fnames = { cards: true, colls: true, rels: true };
+          files.forEach(function(file) {
+            if (create_fnames[file.name]) {
+              config.folder_ids[file.name] = file.id;
+              delete create_fnames[file.name];
+            }
+          });
+          return Promise.resolve(Object.keys(create_fnames));
+        })
+        .then(function(fnames) {
+          //Promise.all(fnames.map(createFolder)).then(function(files) {
+          var creators = [];
+          fnames.forEach(function(fname) {
+            creators.push(function() { return createFolder(fname); });
+          });
+          cards.util.partitionPromiseAll(creators, 1).then(function(files) {
+            files.forEach(function(file) {
+              config.folder_ids[file.name] = file.id;
+            });
+            resolve(files);
+          });
+        });
     });
     return promise;
   };
