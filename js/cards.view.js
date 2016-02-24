@@ -889,7 +889,8 @@ cards.view = (function() {
           self.el.classList.add('searching');
         } else {
           self.el.classList.remove('searching');
-          config.load_more();
+          // after rendering results
+          setTimeout(config.load_more, 100);
         }
       };
 
