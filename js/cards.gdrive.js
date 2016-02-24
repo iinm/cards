@@ -31,7 +31,7 @@ cards.gdrive = (function() {
     ],
     folder_ids: { cards: null, colls: null, rels: null },
     page_size: 8,
-    parallel_request_size: 4,
+    parallel_request_size: 8,
     cache_key_prefix: '__cards__'
   },
   state = { app_initialized: false },
@@ -756,7 +756,8 @@ cards.gdrive = (function() {
             removers.push(function() { return deleteFile(rel.id); });
           }
         });
-        cards.util.partitionPromiseAll(removers, config.parallel_request_size)
+        cards.util.partitionPromiseAll(
+          removers, config.parallel_request_size / 2)
             // 2. delete card
           .then(function() { deleteFile(file_id).then(resolve); });
       });
@@ -864,7 +865,7 @@ cards.gdrive = (function() {
       getters.push(function() { return getItem(file_id); });
     });
     return cards.util.partitionPromiseAll(
-      getters, config.parallel_request_size
+      getters, (parallel_request_size || config.parallel_request_size / 2)
     );
   };
 

@@ -93,6 +93,7 @@ cards.content = (function() {
       if (scroll_top) {
         dom.self.scrollTop = 0;
       }
+      onScroll();
     }
     else {
       state.loading = true;
@@ -101,14 +102,15 @@ cards.content = (function() {
         dom.self.scrollTop = 0;
         state.loading = false;
         dom.self.classList.remove('init-loading');
+        onScroll();
       });
     }
   };
 
   onScroll = function(event) {
-    //console.log(dom.self.scrollTop);
-    //console.log(dom.self.scrollHeight - dom.self.clientHeight);
-    if ((dom.self.scrollHeight - dom.self.clientHeight) - dom.self.scrollTop < 20) {
+    var hidden_height = dom.self.scrollHeight - dom.self.clientHeight;
+    //console.log(dom.self.scrollTop, hidden_height);
+    if ((hidden_height - dom.self.scrollTop) < 20 || hidden_height === 0) {
       if (state.loading || state.coll.get('fetched') === 'all') {
         return;
       }
@@ -118,6 +120,7 @@ cards.content = (function() {
       state.coll.fetch_cards().then(function() {
         state.loading = false;
         dom.self.classList.remove('loading');
+        onScroll();
       });
     }
   };

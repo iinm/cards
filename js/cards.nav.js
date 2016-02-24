@@ -113,7 +113,8 @@ cards.nav = (function() {
           );
         }, 100);
       },
-      set_annot_target: setAnnotTarget
+      set_annot_target: setAnnotTarget,
+      load_more: onScroll
     });
     dom.content_search.innerHTML = null;
     dom.content_search.appendChild(view.search.render().el);
@@ -320,9 +321,9 @@ cards.nav = (function() {
   };  // init
 
   onScroll = function(event) {
-    //console.log(dom.content.scrollTop);
-    //console.log(dom.content.scrollHeight - dom.content.clientHeight);
-    if ((dom.content.scrollHeight - dom.content.clientHeight) - dom.content.scrollTop < 20) {
+    var hidden_height = dom.content.scrollHeight - dom.content.clientHeight;
+    //console.log(dom.content.scrollTop, hidden_height);
+    if ((hidden_height - dom.content.scrollTop) < 20 || hidden_height === 0) {
       if (config.search_model.get('searching')
           || config.search_model.get('fetched') !== 'partial'
           || state.search_input !== config.search_model.get('query')
@@ -333,6 +334,7 @@ cards.nav = (function() {
       dom.content.classList.add('loading-more');
       config.search_model.search(state.search_input).then(function() {
         dom.content.classList.remove('loading-more');
+        onScroll();
       });
     }
   };

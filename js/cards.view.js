@@ -856,7 +856,9 @@ cards.view = (function() {
     create = function(model) {  // cards.models/search
       var
       self = { el: null, render: null, configure: null },
-      config = { set_edit_target: null, set_annot_target: null },
+      config = {
+        set_edit_target: null, set_annot_target: null, load_more: null
+      },
       state = { card_id2view: {} },
       onAddItem, onRemoveItem, onChangeState
       ;
@@ -887,6 +889,7 @@ cards.view = (function() {
           self.el.classList.add('searching');
         } else {
           self.el.classList.remove('searching');
+          config.load_more();
         }
       };
 
