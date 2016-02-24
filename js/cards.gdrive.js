@@ -748,13 +748,14 @@ cards.gdrive = (function() {
   };  // getCards
 
   deleteCard = function(file_id) {
+    // Note: connection cost = 1 + min(rels.length, 8) + 1
     var promise = new Promise(function(resolve, reject) {
       // 1 remove relations
-      getRelsAll(file_id, null, null, 1000).then(function(rels) {
+      getRelsAll(file_id).then(function(rels) {
         var removers = [];
         rels.forEach(function(rel) {
           if (rel.type !== 'note_order') {
-            removers.push(function() { return deleteFile(rel.id, 1000); });
+            removers.push(function() { return deleteFile(rel.id); });
           }
         });
         cards.util.partitionPromiseAll(removers, config.parallel_request_size)
@@ -834,9 +835,9 @@ cards.gdrive = (function() {
             rels = rels.concat(resp.rels);
           }
           if (resp.nextPageToken) {
+            // TODO: count request stack and set proper deley_ms
             getRelsAll(file_id, rels, resp.nextPageToken, 1000).then(resolve);
           } else {
-            // TODO: sort?
             if (deley_ms) {
               setTimeout(resolve, deley_ms, rels);
             } else {
@@ -874,6 +875,7 @@ cards.gdrive = (function() {
   };
 
   saveCard = function(card) {
+    // Note: connection cost = 1 + 1 + min(8, card.coll_ids.length)
     var promise = new Promise(function(resolve, reject) {
       var check_changes, save_card, update_relations;
       check_changes = function() {
@@ -999,7 +1001,6 @@ cards.gdrive = (function() {
             changes.updated_rels.forEach(function(rel) {
               updaters.push(function() { return saveRel(rel); });
             });
-            console.log(updaters);
             cards.util.partitionPromiseAll(
               updaters, config.parallel_request_size
             )

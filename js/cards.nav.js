@@ -150,30 +150,36 @@ cards.nav = (function() {
     }, false);
 
     dom.annot_closer.addEventListener('click', function(event) {
-      var promises = [];
+      var promises = [], num_conn = 2;  // see gdrive.saveCard
       event.preventDefault();
+
+      state.annot_targets_.each(function(card) {
+        num_conn = Math.max(num_conn, card.get('colls').len() + 2);
+      });
       state.annot_targets.as_array().forEach(function(card_clone) {
         promises.push(function() { return card_clone.save(); });
+        num_conn = Math.max(num_conn, card_clone.get('colls').len() + 2);
       });
 
       dom.self.classList.add('annot-saving');
       //Promise.all(promises).then(function(card_array) {
-      cards.util.partitionPromiseAll(promises, 8).then(function(card_array) {
-        dom.self.classList.remove('annot-saving');
-        config.set_nav_anchor(
-          cards.util.cloneUpdateObj(state, { self: state.before_annot })
-        );
-        // clear annot search input
-        dom.annot_search_input.value = '';
-        dom.annot_search_input.classList.remove('not-empty');
-        filterAnnotIndex(null);
-      });
+      cards.util.partitionPromiseAll(promises, Math.max(1, 8 / num_conn))
+        .then(function(card_array) {
+          dom.self.classList.remove('annot-saving');
+          config.set_nav_anchor(
+            cards.util.cloneUpdateObj(state, { self: state.before_annot })
+          );
+          // clear annot search input
+          dom.annot_search_input.value = '';
+          dom.annot_search_input.classList.remove('not-empty');
+          filterAnnotIndex(null);
+        });
     }, false);
 
     dom.annot_trigger.querySelector('.delete').addEventListener(
       'click',
       function(event) {
-        var yn, promises = [];
+        var yn, promises = [], num_conn = 2;  // see gdrive/deleteCard
         event.preventDefault();
         yn = window.confirm(
           'Delete ' + state.annot_targets.len() + ' card'
@@ -182,15 +188,21 @@ cards.nav = (function() {
         if (yn !== true) {
           return;
         }
+
+        state.annot_targets_.each(function(card) {
+          num_conn = Math.max(num_conn, card.get('colls').len() + 2);
+        });
         state.annot_targets.as_array().forEach(function(card_clone) {
           // Note: name is promises but it's not promises
           promises.push(function() { return card_clone.destroy(); });
+          num_conn = Math.max(num_conn, card_clone.get('colls').len() + 2);
         });
         dom.self.classList.add('annot-saving');
         //Promise.all(promises).then(function(card_array) {
-        cards.util.partitionPromiseAll(promises, 8).then(function(card_array) {
-          dom.self.classList.remove('annot-saving');
-        });
+        cards.util.partitionPromiseAll(promises, Math.max(1, 8 / num_conn))
+          .then(function(card_array) {
+            dom.self.classList.remove('annot-saving');
+          });
       },
       false
     );
