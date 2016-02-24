@@ -81,27 +81,16 @@ cards.gdrive = (function() {
   // ----------------------------------------------------------------------
   checkAuth = function() {
     // Check if current user has authorized this application.
-    var token, now = cards.util.timestamp();
-
-    if (localStorage[config.cache_key_prefix + 'google_oauth_token']) {
-      token = JSON.parse(localStorage[config.cache_key_prefix + 'google_oauth_token']);
-      //console.log(token);
-      // modify token
-      token.expires_in = token.expires_at - now;
-      if (token.expires_in > 0) {
-        gapi.auth.setToken(token);
-      } else {
-        token.error = 'expired!';
-      }
-      handleAuthResult(token);
+    if (!localStorage[config.cache_key_prefix + 'google_oauth_token']) {
+      handleAuthResult({ error: 'signed out' });
     }
     else {
-      handleAuthResult(null);
-      //gapi.auth.authorize({
-      //  client_id: config.client_id,
-      //  scope: config.scopes.join(' '),
-      //  immediate: true
-      //}, handleAuthResult);
+      // Note: immediate=true is failed if browser blocks third-party cookies
+      gapi.auth.authorize({
+        client_id: config.client_id,
+        scope: config.scopes.join(' '),
+        immediate: true
+      }, handleAuthResult);
     }
   };
 
@@ -128,6 +117,11 @@ cards.gdrive = (function() {
     } else {
       // Show auth UI, allowing the user to initiate authorization by
       dom.greeting.classList.remove('hide');
+      if (authResult.error === 'immediate_failed'
+          && authResult.error_subtype === 'access_denied'
+         ) {
+        window.alert('Please do not block third-party cookies.');
+      }
     }
   };
   // ----------------------------------------------------------------------
