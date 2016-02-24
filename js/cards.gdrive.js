@@ -168,7 +168,12 @@ cards.gdrive = (function() {
             localStorage[config.cache_key_prefix + file.id] = JSON.stringify(file);
           }
         });
-        resolve(resp);
+        if (!resp.error) {
+          resolve(resp);
+        } else {
+          window.alert(resp.error.code + ' ' + resp.error.message);
+          reject();
+        }
       });
     });
     return promise;
@@ -221,7 +226,13 @@ cards.gdrive = (function() {
           if (!file_ || (file_ && file_.modifiedTime !== file.modifiedTime)) {
             localStorage[config.cache_key_prefix + file.id] = JSON.stringify(file);
           }
-          resolve(file);
+          if (!file.error) {
+            resolve(file);
+          }
+          else {
+            window.alert(file.error.code + ' ' + file.error.message);
+            reject();
+          }
         });
       }
     });
@@ -279,6 +290,7 @@ cards.gdrive = (function() {
           //}
           else {
             console.log('getFile: error', jsonResp);
+            window.alert(jsonResp.error.code + ' ' + jsonResp.error.message);
             reject();
           }
         });
@@ -340,7 +352,12 @@ cards.gdrive = (function() {
         console.log('create folder:', file);
         // cache
         localStorage[config.cache_key_prefix + file.id] = JSON.stringify(file);
-        resolve(file);
+        if (!file.error) {
+          resolve(file);
+        } else {
+          window.alert(file.error.code + ' ' + file.error.message);
+          reject();
+        }
       });
     });
     return promise;
@@ -420,8 +437,8 @@ cards.gdrive = (function() {
           resolve(file);
         }
         else {  // file.error
-          // TODO
           console.log('saveFile: error', file);
+          window.alert(file.error.code + ' ' + file.error.message);
           reject();
         }
       });
@@ -442,8 +459,8 @@ cards.gdrive = (function() {
       });
       request.execute(function(resp) {
         if (resp && resp.error) {
-          // TODO
           console.log('deleteFile: error', resp);
+          window.alert(resp.error.code + ' ' + resp.error.message);
           reject();
         }
         else {
