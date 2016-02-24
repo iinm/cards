@@ -434,7 +434,7 @@ cards.gdrive = (function() {
     return saveFile({ trashed: true }, content, file_id);
   };
 
-  deleteFile = function(file_id) {
+  deleteFile = function(file_id, deley_ms) {
     var promise = new Promise(function(resolve, reject) {
       var request = gapi.client.request({
         path: '/drive/v3/files/' + file_id,
@@ -450,7 +450,8 @@ cards.gdrive = (function() {
           console.log('deleteFile:', resp, file_id);
           // delete from cache
           delete localStorage[config.cache_key_prefix + file_id];
-          resolve(file_id);
+          if (deley_ms) { setTimeout(resolve, deley_ms, file_id); }
+          else { resolve(file_id); }
         }
       });
     });
@@ -749,16 +750,15 @@ cards.gdrive = (function() {
   deleteCard = function(file_id) {
     var promise = new Promise(function(resolve, reject) {
       // 1 remove relations
-      getRelsAll(file_id).then(function(rels) {
+      getRelsAll(file_id, null, null, 1000).then(function(rels) {
         var removers = [];
         rels.forEach(function(rel) {
           if (rel.type !== 'note_order') {
-            removers.push(function() { return deleteFile(rel.id); });
+            removers.push(function() { return deleteFile(rel.id, 1000); });
           }
         });
-        cards.util.partitionPromiseAll(
-          removers, config.parallel_request_size / 2)
-            // 2. delete card
+        cards.util.partitionPromiseAll(removers, config.parallel_request_size)
+        // 2. delete card
           .then(function() { deleteFile(file_id).then(resolve); });
       });
     });
@@ -824,7 +824,7 @@ cards.gdrive = (function() {
     return promise;
   };
 
-  getRelsAll = function(file_id, rels, pageToken) {
+  getRelsAll = function(file_id, rels, pageToken, deley_ms) {
     var promise = new Promise(function(resolve, reject) {
       getRels(file_id, pageToken)
         .then(function(resp) {
@@ -834,10 +834,14 @@ cards.gdrive = (function() {
             rels = rels.concat(resp.rels);
           }
           if (resp.nextPageToken) {
-            getRelsAll(file_id, rels, resp.nextPageToken).then(resolve);
+            getRelsAll(file_id, rels, resp.nextPageToken, 1000).then(resolve);
           } else {
             // TODO: sort?
-            resolve(rels);
+            if (deley_ms) {
+              setTimeout(resolve, deley_ms, rels);
+            } else {
+              resolve(rels);
+            }
           }
         });
     });
