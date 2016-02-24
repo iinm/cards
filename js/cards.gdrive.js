@@ -34,6 +34,7 @@ cards.gdrive = (function() {
     parallel_request_size: 4,
     cache_key_prefix: '__cards__'
   },
+  state = { app_initialized: false },
   dom = {},
 
   init, initApp,
@@ -50,9 +51,10 @@ cards.gdrive = (function() {
   ;
 
   initApp = function() {
+    if (state.app_initialized) { return; }
     createAppFolders().then(function() {
-      // TODO: load colls
       cards.init(dom.app);
+      state.app_initialized = true;
     });
   };
 

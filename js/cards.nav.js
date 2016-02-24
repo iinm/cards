@@ -79,11 +79,13 @@ cards.nav = (function() {
       create_coll: config.create_coll,
       remove_editor_coll: config.remove_editor_coll
     });
+    dom.content_index.innerHTML = null;
     dom.content_index.appendChild(view.index.render().el);
 
     // render annotator's index
     view.annot_index = cards.view.annot_index.create(config.index);
     view.annot_index.configure({ create_coll: config.create_coll });
+    dom.annotator.innerHTML = null;
     dom.annotator.appendChild(view.annot_index.render().el);
 
     // init annot targets (clone)
@@ -113,6 +115,7 @@ cards.nav = (function() {
       },
       set_annot_target: setAnnotTarget
     });
+    dom.content_search.innerHTML = null;
     dom.content_search.appendChild(view.search.render().el);
 
     // set event handlers
