@@ -103,8 +103,9 @@ cards.gdrive = (function() {
 
     // Handle response from authorization server.
     if (authResult && !authResult.error) {
-      // save token to localstorage
+      // save token to localstorage and refresh after 45 minutes
       localStorage[config.cache_key_prefix + 'google_oauth_token'] = JSON.stringify(authResult);
+      setTimeout(checkAuth, 45*60*1000);
       // Hide auth UI, then load client library.
       dom.greeting.classList.add('hide');
       //setTimeout(function() {
