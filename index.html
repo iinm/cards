@@ -33,32 +33,32 @@
     <!-- for test -->
     <script type="text/javascript" src="js/cards.test.js"></script>
     <script type="text/javascript">
-     __init_storage = function() { cards.gdrive.init(); };
      cards.__init = function() {
-       if ((/\/demo\/?$/).test(window.location.pathname)) {
-         // load fake storage
-         cards.util.loadJSfile('js/cards.fake.js').then(function() {
-           var container = document.getElementById('cards');
+       var container;
+       if (['interactive', 'complete'].indexOf(document.readyState) > -1) {
+         container = document.getElementById('cards');
+         cards.init(container);
+       }
+       else {
+         document.addEventListener('DOMContentLoaded', function(event) {
+           container = document.getElementById('cards');
            cards.init(container);
          });
        }
-       else {
-         // load module to use Google Drive
-         cards.util.loadJSfile('js/cards.gdrive.js').then(function() {
-           // load Google api client
-           cards.util.loadJSfile(
-             'https://apis.google.com/js/client.js?onload=__init_storage'
-           );
-         });
-       }
      };
+     __init_storage = function() { cards.gdrive.init(); };
 
-     if (['interactive', 'complete'].indexOf(document.readyState) > -1) {
-       cards.__init();
+     if ((/\/demo\/?$/).test(window.location.pathname)) {
+       // load fake storage
+       cards.util.loadJSfile('js/cards.fake.js').then(cards.__init);
      }
      else {
-       document.addEventListener('DOMContentLoaded', function(event) {
-         cards.__init();
+       // load module to use Google Drive
+       cards.util.loadJSfile('js/cards.gdrive.js').then(function() {
+         // load Google api client
+         cards.util.loadJSfile(
+           'https://apis.google.com/js/client.js?onload=__init_storage'
+         );
        });
      }
     </script>
