@@ -864,7 +864,7 @@ cards.gdrive = (function() {
       getters.push(function() { return getItem(file_id); });
     });
     return cards.util.partitionPromiseAll(
-      getters, (parallel_request_size || config.parallel_request_size / 2)
+      getters, config.parallel_request_size
     );
   };
 
