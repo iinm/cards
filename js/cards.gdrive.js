@@ -882,7 +882,7 @@ cards.gdrive = (function() {
         return new Promise(function(resolve, reject) {
           var
           timestamp, body_updated = false,
-          removed_rels = [], added_rels = [], updated_rels = []
+          removed_rels = [], added_rels = [], updated_rels = [], coll_names = []
           ;
           if (card.id) {
             // Note: cost 1 connection, because card and coll may cached
@@ -895,9 +895,7 @@ cards.gdrive = (function() {
                 return (rel.type !== 'note_order');
               });
               // old coll ids
-              coll_ids_ = item.rels.map(function(rel) {
-                return rel.coll_id;
-              });
+              coll_ids_ = item.rels.map(function(rel) { return rel.coll_id; });
 
               // set timestamp
               if (card.title !== item.content.title
@@ -909,7 +907,8 @@ cards.gdrive = (function() {
               } else {
                 timestamp = item.file.name.match(/^(\d+),(.*)/)[1];
               }
-              // check relation change
+
+              // check relation change and get coll names
               item.rels.forEach(function(rel) {
                 if (card.coll_ids.indexOf(rel.coll_id) === -1) {
                   removed_rels.push(rel);
@@ -925,12 +924,14 @@ cards.gdrive = (function() {
                 } else if (body_updated && coll.type === 'tag') {
                   updated_rels.push(rel);
                 }
+                coll_names.push(coll.name);
               });
 
               resolve({
                 timestamp: timestamp, body_updated: body_updated,
                 removed_rels: removed_rels, added_rels: added_rels,
-                updated_rels: updated_rels
+                updated_rels: updated_rels,
+                coll_names: coll_names
               });
             });
           }
@@ -940,7 +941,8 @@ cards.gdrive = (function() {
             resolve({
               timestamp: Date.now(), body_updated: true,
               removed_rels: removed_rels, added_rels: added_rels,
-              updated_rels: updated_rels
+              updated_rels: updated_rels,
+              coll_names: coll_names
             });
           }
         });
@@ -955,7 +957,7 @@ cards.gdrive = (function() {
                 ',' + cards.util.unescape(card.title) + '.json',
               parents: ((!card.id) ? [config.folder_ids.cards] : null),
               indexable_text: [
-                card.title, card.body // coll names
+                card.title, card.body, changes.coll_names.join('\n')
               ].map(cards.util.unescape).join('\n\n')
             }, JSON.stringify(card), card.id)
               .then(function(file) {
