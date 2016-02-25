@@ -18,6 +18,12 @@
     <link rel="stylesheet" href="css/cards.content.css" type="text/css">
     <link rel="stylesheet" href="css/cards.editor.css" type="text/css">
 
+    <script class="javascript">
+     if (!Promise) {
+       window.alert('Sorry, your browser is too old or not supported.');
+       document.querySelector('.cards-content').classList.remove('init-loading');
+     }
+    </script>
     <script type="text/javascript" src="js/cards.js"></script>
     <script type="text/javascript" src="js/cards.util.js"></script>
     <script type="text/javascript" src="js/cards.model_util.js"></script>
