@@ -176,7 +176,8 @@ strong {
 .cards-hello-world {
   position: absolute;
   bottom: 3em;
-  height: calc(100vh - 6em);
+  /*   height: calc(100vh - 6em); */
+  height: calc(100% - 6em);
   left: 0;
   right: 0;
   transition: bottom 500ms ease;
@@ -184,7 +185,8 @@ strong {
   /*   z-index: 1; */
 }
 .cards-hello-world.hide {
-  bottom: 100vh;
+  /*   bottom: 100vh; */
+  bottom: 100%;
 }
 
 .cards-hello-world .greeting-card {

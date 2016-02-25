@@ -14,7 +14,7 @@
 }
 
 .cards-editor.opened {
-  height: calc(100vh - 3.5em);  /* .cards-nav/height + a */
+  height: calc(100% - 3.5em);  /* .cards-nav/height + a */
 }
 
 .cards-editor-head,
