@@ -375,7 +375,7 @@ cards.fake = (function() {
         if (coll.type === 'note' && coll.card_ids.indexOf(data_.id) === -1) {
           coll.card_ids.push(data_.id);
         }
-        else if (coll.type === 'tag' && changed) {
+        else if (coll.type === 'tag' && (coll.card_ids.indexOf(data_.id) === -1 || changed)) {
           idx = coll.card_ids.indexOf(data_.id);
           if (idx > -1) { coll.card_ids.splice(idx, 1); }
           coll.card_ids.splice(0, 0, data_.id);
