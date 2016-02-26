@@ -200,7 +200,7 @@ strong {
   background: #F9F2E7;
   box-shadow: 0 0 .3em #777;
   /*   box-shadow: 0 0 .5em #40C0CB; */
-  overflow: scroll;
+  overflow: hidden;
 }
 
 .cards-hello-world .greeting-card .greeting-wrapper {
