@@ -19,7 +19,7 @@ cards.fake = (function() {
     'card_01', 'card_02', 'card_03', 'card_04', 'card_05', 'card_06', 'card_07',
     'card_08', 'card_09', 'card_10', 'card_11', 'card_12', 'card_13', 'card_14',
     'card_15', 'card_16', 'card_17', 'card_18', 'card_19', 'card_20', 'card_21',
-    'card_23', 'card_24', 'card_26', 'card_25', 'card_22'
+    'card_23', 'card_24', 'card_26', 'card_25', 'card_27', 'card_22'
   ];
   num_card = card_ids.length;
   cards_ = {
@@ -179,6 +179,12 @@ cards.fake = (function() {
       body: 'ブラウザのメニューから「ホーム画面に追加」すると，画面を広く使えます．',
       id: 'card_26',
       coll_ids: ['note_01']
+    },
+    card_27: {
+      title: 'iPhoneをお使いの方へ!',
+      body: '現在，スクロールがうまく出来ないバグがあります．画面の右端の方を持つとスクロールできます．',
+      id: 'card_27',
+      coll_ids: ['note_01']
     }
   };
 
@@ -216,7 +222,7 @@ cards.fake = (function() {
     },
     note_01: {
       name: 'Cards Help', id: 'note_01', type: 'note',
-      card_ids: ['card_22', 'card_25', 'card_26', 'card_24', 'card_23']
+      card_ids: ['card_22', 'card_27', 'card_25', 'card_26', 'card_24', 'card_23']
     },
     note_02: {
       name: 'Rails cheat sheet', id: 'note_02', type: 'note',
@@ -237,7 +243,7 @@ cards.fake = (function() {
   };
 
   // remove unused data for demo
-  card_ids = ['card_23', 'card_24', 'card_26', 'card_25', 'card_22'];
+  card_ids = ['card_23', 'card_24', 'card_26', 'card_25', 'card_27', 'card_22'];
   coll_ids = ['note_01'];
 
   // TODO
