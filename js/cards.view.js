@@ -755,22 +755,20 @@ cards.view = (function() {
           dom.edit_trigger = self.el.querySelector('.item-edit-trigger');
 
           // set event handlers
-
-          //self.el.querySelector('.item-content').addEventListener(
-          // WARNING: これがあると，iPhoneでスクロールできないので，最初からopenedにしておく．
-          //  'click',
-          //  function(event) {
-          //    if (state.opened) {
-          //      self.el.classList.remove('opened');
-          //      state.opened = false;
-          //    }
-          //    else {
-          //      self.el.classList.add('opened');
-          //      state.opened = true;
-          //    }
-          //  },
-          //  false
-          //);
+          self.el.querySelector('.item-content').addEventListener(
+            'click',
+            function(event) {
+              if (state.opened) {
+                self.el.classList.remove('opened');
+                state.opened = false;
+              }
+              else {
+                self.el.classList.add('opened');
+                state.opened = true;
+              }
+            },
+            false
+          );
           self.el.querySelector('.item-check-trigger').addEventListener(
             'click', function(event) {
               event.preventDefault();
