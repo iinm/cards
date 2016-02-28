@@ -97,7 +97,7 @@ cards.gdrive = (function() {
   };
 
   handleAuthResult = function(authResult) {
-    // IMPORTANT!! これを消さないと，モバイルでの認証に失敗する．
+    // IMPORTANT!
     // http://stackoverflow.com/questions/25065194/google-sign-in-uncaught-securityerror
     if (authResult && authResult['g-oauth-window']) {
       delete authResult['g-oauth-window'];
